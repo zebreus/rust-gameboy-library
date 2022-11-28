@@ -1,3 +1,8 @@
+mod clock;
+mod cpu;
+mod debug_memory;
+mod memory_device;
+
 pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
