@@ -21,3 +21,4 @@ A gameboy emulation library
 - CPU instructions test roms: [blargg](https://github.com/retrio/gb-test-roms/tree/master/cpu_instrs)
 - Some test roms: [Gameboy Test Roms](https://github.com/c-sp/gameboy-test-roms)
 - Collection of gameboy resources and documentation: [Awesome gbdev](https://github.com/gbdev/awesome-gbdev)
+- Some clock measurements: [Game Boy research status](https://gekkio.fi/blog/2017/game-boy-research-status/)
