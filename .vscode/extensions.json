@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "vadimcn.vscode-lldb",
+        "rust-lang.rust-analyzer",
+        "serayuzgur.crates",
+        "swellaby.vscode-rust-test-adapter",
+        "bungcip.better-toml",
+        "belfz.search-crates-io"
+    ]
+}
