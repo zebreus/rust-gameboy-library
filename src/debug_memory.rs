@@ -7,7 +7,7 @@ pub struct DebugMemory {
 }
 
 impl DebugMemory {
-    fn new() -> DebugMemory {
+    pub fn new() -> DebugMemory {
         DebugMemory {
             memory: arr![0; 65536],
         }
