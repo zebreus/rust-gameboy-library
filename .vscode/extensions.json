@@ -5,6 +5,8 @@
         "serayuzgur.crates",
         "swellaby.vscode-rust-test-adapter",
         "bungcip.better-toml",
-        "belfz.search-crates-io"
+        "belfz.search-crates-io",
+        "hbenl.vscode-test-explorer",
+        "hbenl.test-adapter-converter"
     ]
 }
