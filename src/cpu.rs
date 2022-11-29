@@ -8,7 +8,6 @@ struct CpuState {
     program_counter: u16,
     stack_pointer: u16,
     registers: [u8; 8],
-    flags: u8,
 }
 
 impl CpuState {
@@ -18,7 +17,6 @@ impl CpuState {
             program_counter: 0,
             stack_pointer: 300,
             registers: [0, 0, 0, 0, 0, 0, 0, 0],
-            flags: 0,
         }
     }
 }
@@ -64,8 +62,8 @@ enum Register {
     D = 3,
     E = 4,
     F = 5,
-    G = 6,
-    H = 7,
+    H = 6,
+    L = 7,
 }
 
 impl Register {
