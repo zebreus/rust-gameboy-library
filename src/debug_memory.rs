@@ -12,6 +12,16 @@ impl DebugMemory {
             memory: arr![0; 65536],
         }
     }
+
+    pub fn new_with_init(init: &[u8]) -> DebugMemory {
+        let mut memory = DebugMemory {
+            memory: arr![0; 65536],
+        };
+        for (dst, src) in memory.memory.iter_mut().zip(init) {
+            *dst = *src;
+        }
+        return memory;
+    }
 }
 
 impl MemoryDevice for DebugMemory {
@@ -46,5 +56,15 @@ mod tests {
         assert_eq!(debug_memory.read(10), 0);
         assert_eq!(debug_memory.read(65000), 0);
         assert_eq!(debug_memory.read(30000), 0);
+    }
+
+    #[test]
+    fn initializing_memory_works() {
+        let debug_memory = DebugMemory::new_with_init(&[7, 5, 0, 255]);
+        assert_eq!(debug_memory.read(0), 7);
+        assert_eq!(debug_memory.read(1), 5);
+        assert_eq!(debug_memory.read(2), 0);
+        assert_eq!(debug_memory.read(3), 255);
+        assert_eq!(debug_memory.read(4), 0);
     }
 }

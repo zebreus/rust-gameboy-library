@@ -25,6 +25,7 @@ impl CpuState {
 
 trait Cpu {
     fn process_cycle(&mut self, memory: &mut dyn MemoryDevice) -> ();
+    fn read_program_counter(&mut self, memory: &mut dyn MemoryDevice) -> u8;
     fn load_instruction(&mut self, memory: &mut dyn MemoryDevice) -> Instruction;
     fn read_register(&self, register: Register) -> u8;
     fn write_register(&mut self, register: Register, value: u8) -> ();
@@ -33,6 +34,11 @@ trait Cpu {
 impl Cpu for CpuState {
     fn process_cycle(&mut self, memory: &mut dyn MemoryDevice) -> () {
         memory.read(7);
+    }
+    fn read_program_counter(&mut self, memory: &mut dyn MemoryDevice) -> u8 {
+        let opcode = memory.read(self.program_counter);
+        self.program_counter = self.program_counter + 1;
+        return opcode;
     }
     fn load_instruction(&mut self, memory: &mut dyn MemoryDevice) -> Instruction {
         let opcode = memory.read(self.program_counter);
@@ -68,19 +74,45 @@ enum Instruction {
         source: Register,
         destination: Register,
     },
+    LoadImmediateToRegister {
+        destination: Register,
+        value: u8,
+        phase: u8,
+    },
     None,
 }
 
 impl Instruction {
-    fn execute(&self, cpu: &mut CpuState, memory: &mut dyn MemoryDevice) -> () {
+    fn execute(&self, cpu: &mut CpuState, memory: &mut dyn MemoryDevice) -> Instruction {
         match self {
             Instruction::LoadFromRegisterToRegister {
                 source,
                 destination,
             } => {
                 cpu.registers[*destination as usize] = cpu.registers[*source as usize];
+                return cpu.load_instruction(memory);
             }
-            _ => (),
+            Instruction::LoadImmediateToRegister {
+                destination,
+                value: _,
+                phase: 0,
+            } => {
+                let value = cpu.read_program_counter(memory);
+                return Instruction::LoadImmediateToRegister {
+                    destination: *destination,
+                    value: value,
+                    phase: 1,
+                };
+            }
+            Instruction::LoadImmediateToRegister {
+                destination,
+                value,
+                phase: 1,
+            } => {
+                cpu.write_register(*destination, *value);
+                return cpu.load_instruction(memory);
+            }
+            _ => Instruction::None,
         }
     }
 }
@@ -88,6 +120,7 @@ impl Instruction {
 #[bitmatch]
 fn decode(byte: u8) -> Instruction {
     #[bitmatch]
+    // TODO: How can we get rid of this (soon) massive match clause
     match byte {
         "01aaabbb" => Instruction::LoadFromRegisterToRegister {
             source: Register::try_from(a)
@@ -95,13 +128,18 @@ fn decode(byte: u8) -> Instruction {
             destination: Register::try_from(b)
                 .expect("3 bit value should always correspont to a register"),
         },
+        "00aaa110" => Instruction::LoadImmediateToRegister {
+            destination: Register::try_from(a)
+                .expect("3 bit value should always correspont to a register"),
+            value: 0,
+            phase: 0,
+        },
         _ => Instruction::None {},
     }
 }
 
 #[cfg(test)]
 mod tests {
-
     use super::{decode, CpuState};
     use super::{Cpu, Instruction};
     use crate::cpu::Register;
@@ -114,9 +152,9 @@ mod tests {
         assert!(matches!(
             instruction,
             Instruction::LoadFromRegisterToRegister {
-                source,
-                destination
-            } if matches!(source, Register::A) && matches!(destination, Register::C)
+                source: Register::A,
+                destination: Register::C
+            }
         ))
     }
 
@@ -136,5 +174,67 @@ mod tests {
         let value_c_after = cpu.read_register(Register::C);
 
         assert_eq!(value_c_after, 100);
+    }
+
+    #[test]
+    fn cpu_read_program_counter_works() {
+        let mut cpu = CpuState::new();
+
+        let mut memory = DebugMemory::new_with_init(&[0b01000010u8, 8]);
+        let opcode = cpu.read_program_counter(&mut memory);
+        assert_eq!(opcode, 0b01000010u8);
+
+        let opcode = cpu.read_program_counter(&mut memory);
+        assert_eq!(opcode, 8);
+    }
+
+    #[test]
+    fn cpu_can_fetch_and_decode_instructions() {
+        let mut cpu = CpuState::new();
+        cpu.write_register(Register::A, 100);
+
+        let mut memory = DebugMemory::new_with_init(&[0b01000010u8]);
+        let instruction = cpu.load_instruction(&mut memory);
+        assert!(matches!(
+            instruction,
+            Instruction::LoadFromRegisterToRegister {
+                source: Register::A,
+                destination: Register::C
+            }
+        ))
+    }
+
+    // #[test]
+    // fn load_instruction_integration() {
+    //     let mut cpu = CpuState::new();
+    //     cpu.write_register(Register::A, 100);
+
+    //     let mut memory = DebugMemory::new_with_init(&[0b01000010u8]);
+
+    //     let value_c_before = cpu.read_register(Register::C);
+    //     assert_eq!(value_c_before, 0);
+
+    //     instruction.execute(&mut cpu, &mut memory);
+    //     let value_c_after = cpu.read_register(Register::C);
+
+    //     assert_eq!(value_c_after, 100);
+    // }
+
+    #[test]
+    fn load_instruction_integration() {
+        // Write 42 to A and then copy A to C
+        let mut cpu = CpuState::new();
+
+        let mut memory = DebugMemory::new_with_init(&[0b00000110, 42, 0b01000010u8]);
+
+        let instruction = cpu.load_instruction(&mut memory);
+
+        let instruction = instruction.execute(&mut cpu, &mut memory);
+        let instruction = instruction.execute(&mut cpu, &mut memory);
+        instruction.execute(&mut cpu, &mut memory);
+
+        assert_eq!(cpu.read_register(Register::A), 42);
+        assert_eq!(cpu.read_register(Register::B), 0);
+        assert_eq!(cpu.read_register(Register::C), 42);
     }
 }
