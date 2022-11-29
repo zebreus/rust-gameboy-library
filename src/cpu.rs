@@ -62,7 +62,7 @@ impl Cpu for CpuState {
         let registers = register.id();
         let low: u16 = self.read_register(registers.low).into();
         let high: u16 = self.read_register(registers.high).into();
-        let value: u16 = high << 8 & low;
+        let value: u16 = high << 8 | low;
         return value;
     }
     fn write_double_register(&mut self, register: DoubleRegister, value: u16) -> () {
@@ -142,6 +142,10 @@ enum Instruction {
         value: u8,
         phase: u8,
     },
+    LoadFromHlToRegister {
+        destination: Register,
+        phase: u8,
+    },
     None,
 }
 
@@ -170,12 +174,29 @@ impl Instruction {
             Instruction::LoadImmediateToRegister {
                 destination,
                 value,
-                phase: 1,
+                phase: 1_u8..=u8::MAX,
             } => {
                 cpu.write_register(*destination, *value);
                 return cpu.load_instruction(memory);
             }
-            _ => Instruction::None,
+            Instruction::LoadFromHlToRegister {
+                destination,
+                phase: 0,
+            } => {
+                let address = cpu.read_double_register(DoubleRegister::HL);
+                let data = memory.read(address);
+                // This should probably happen in the next phase of this instruction
+                cpu.write_register(*destination, data);
+                Instruction::LoadFromHlToRegister {
+                    destination: *destination,
+                    phase: 1,
+                }
+            }
+            Instruction::LoadFromHlToRegister {
+                destination: _,
+                phase: 1_u8..=u8::MAX,
+            } => cpu.load_instruction(memory),
+            Instruction::None => Instruction::None,
         }
     }
 }
@@ -185,6 +206,11 @@ fn decode(byte: u8) -> Instruction {
     #[bitmatch]
     // TODO: How can we get rid of this (soon) massive match clause
     match byte {
+        "01aaa110" => Instruction::LoadFromHlToRegister {
+            destination: Register::try_from(a)
+                .expect("3 bit value should always correspont to a register"),
+            phase: 0,
+        },
         "01aaabbb" => Instruction::LoadFromRegisterToRegister {
             source: Register::try_from(a)
                 .expect("3 bit value should always correspont to a register"),
@@ -207,10 +233,10 @@ fn encode(instruction: Instruction) -> Vec<u8> {
             source,
             destination,
         } => {
-            let baseCode = 0b01000000 & 0b11000000u8;
-            let sourceCode = (source.id() << 3) & 0b00111000u8;
-            let destinationCode = destination.id() & 0b00000111u8;
-            let opcode = baseCode | sourceCode | destinationCode;
+            let base_code = 0b01000000 & 0b11000000u8;
+            let source_code = (source.id() << 3) & 0b00111000u8;
+            let destination_code = destination.id() & 0b00000111u8;
+            let opcode = base_code | source_code | destination_code;
             Vec::from([opcode])
         }
         Instruction::LoadImmediateToRegister {
@@ -218,14 +244,23 @@ fn encode(instruction: Instruction) -> Vec<u8> {
             value,
             phase,
         } => {
-            let baseCode = 0b00000110 & 0b11000111u8;
-            let destinationCode = (destination.id() << 3) & 0b00111000u8;
-            let opcode = baseCode | destinationCode;
+            let base_code = 0b00000110 & 0b11000111u8;
+            let destination_code = (destination.id() << 3) & 0b00111000u8;
+            let opcode = base_code | destination_code;
             match phase {
                 0 => Vec::from([opcode]),
                 1 => Vec::from([opcode, value]),
                 _ => Vec::new(),
             }
+        }
+        Instruction::LoadFromHlToRegister {
+            destination,
+            phase: _,
+        } => {
+            let base_code = 0b01000110 & 0b11000111u8;
+            let destination_code = (destination.id() << 3) & 0b00111000u8;
+            let opcode = base_code | destination_code;
+            Vec::from([opcode])
         }
         Instruction::None => Vec::new(),
     }
@@ -233,10 +268,34 @@ fn encode(instruction: Instruction) -> Vec<u8> {
 
 #[cfg(test)]
 mod tests {
-    use super::{decode, encode, CpuState};
+    use super::{decode, encode, CpuState, DoubleRegister};
     use super::{Cpu, Instruction};
     use crate::cpu::Register;
     use crate::debug_memory::DebugMemory;
+
+    #[test]
+    fn read_double_register() {
+        let mut cpu = CpuState::new();
+        cpu.write_register(Register::B, 1);
+        cpu.write_register(Register::C, 3);
+        let double_value = cpu.read_double_register(DoubleRegister::BC);
+        assert_eq!(double_value, 259)
+    }
+
+    #[test]
+    fn write_double_register() {
+        let mut cpu = CpuState::new();
+        cpu.write_double_register(DoubleRegister::BC, 259);
+        assert_eq!(cpu.read_register(Register::B), 1);
+        assert_eq!(cpu.read_register(Register::C), 3);
+    }
+
+    #[test]
+    fn write_read_double_register() {
+        let mut cpu = CpuState::new();
+        cpu.write_double_register(DoubleRegister::BC, 9874);
+        assert_eq!(cpu.read_double_register(DoubleRegister::BC), 9874);
+    }
 
     #[test]
     fn encode_load_instruction() {
@@ -341,5 +400,37 @@ mod tests {
         assert_eq!(cpu.read_register(Register::A), 42);
         assert_eq!(cpu.read_register(Register::B), 0);
         assert_eq!(cpu.read_register(Register::C), 42);
+    }
+
+    #[test]
+    fn load_from_hl_works() {
+        // Write 42 to A and then copy A to C
+        let mut cpu = CpuState::new();
+
+        let mut memory = DebugMemory::new_with_init(&[
+            0b00110110,
+            0,
+            0b00111110,
+            9,
+            0b01000110u8,
+            0,
+            0,
+            0,
+            0,
+            42,
+        ]);
+
+        let instruction = cpu.load_instruction(&mut memory);
+
+        let instruction = instruction.execute(&mut cpu, &mut memory);
+        let instruction = instruction.execute(&mut cpu, &mut memory);
+        let instruction = instruction.execute(&mut cpu, &mut memory);
+        let instruction = instruction.execute(&mut cpu, &mut memory);
+        let instruction = instruction.execute(&mut cpu, &mut memory);
+        instruction.execute(&mut cpu, &mut memory);
+
+        assert_eq!(cpu.read_register(Register::A), 42);
+        assert_eq!(cpu.read_register(Register::B), 0);
+        assert_eq!(cpu.read_register(Register::C), 0);
     }
 }
