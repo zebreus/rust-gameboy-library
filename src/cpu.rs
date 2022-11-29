@@ -68,6 +68,12 @@ enum Register {
     H = 7,
 }
 
+impl Register {
+    fn id(&self) -> u8 {
+        return *self as u8;
+    }
+}
+
 #[derive(Debug)]
 enum Instruction {
     LoadFromRegisterToRegister {
@@ -138,12 +144,54 @@ fn decode(byte: u8) -> Instruction {
     }
 }
 
+fn encode(instruction: Instruction) -> Vec<u8> {
+    match instruction {
+        Instruction::LoadFromRegisterToRegister {
+            source,
+            destination,
+        } => {
+            let baseCode = 0b01000000 & 0b11000000u8;
+            let sourceCode = (source.id() << 3) & 0b00111000u8;
+            let destinationCode = destination.id() & 0b00000111u8;
+            let opcode = baseCode | sourceCode | destinationCode;
+            Vec::from([opcode])
+        }
+        Instruction::LoadImmediateToRegister {
+            destination,
+            value,
+            phase,
+        } => {
+            let baseCode = 0b00000110 & 0b11000111u8;
+            let destinationCode = (destination.id() << 3) & 0b00111000u8;
+            let opcode = baseCode | destinationCode;
+            match phase {
+                0 => Vec::from([opcode]),
+                1 => Vec::from([opcode, value]),
+                _ => Vec::new(),
+            }
+        }
+        Instruction::None => Vec::new(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{decode, CpuState};
+    use super::{decode, encode, CpuState};
     use super::{Cpu, Instruction};
     use crate::cpu::Register;
     use crate::debug_memory::DebugMemory;
+
+    #[test]
+    fn encode_load_instruction() {
+        let load_a_to_c_instruction = Instruction::LoadFromRegisterToRegister {
+            source: Register::A,
+            destination: Register::C,
+        };
+
+        let encoded_instruction = encode(load_a_to_c_instruction);
+
+        assert_eq!(encoded_instruction[0], 0b01000010u8);
+    }
 
     #[test]
     fn decodes_load_instruction() {
