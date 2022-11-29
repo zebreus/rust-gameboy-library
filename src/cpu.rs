@@ -49,6 +49,11 @@ impl Cpu for CpuState {
     }
     fn write_register(&mut self, register: Register, value: u8) -> () {
         let index = register as usize;
+
+        if let Register::F = register {
+            // You cannot write bit 0-3 on the flags register
+            self.registers[index] = value & 0b11110000;
+        }
         self.registers[index] = value;
     }
 }
