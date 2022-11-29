@@ -27,6 +27,8 @@ trait Cpu {
     fn load_instruction(&mut self, memory: &mut dyn MemoryDevice) -> Instruction;
     fn read_register(&self, register: Register) -> u8;
     fn write_register(&mut self, register: Register, value: u8) -> ();
+    fn read_double_register(&self, register: DoubleRegister) -> u16;
+    fn write_double_register(&mut self, register: DoubleRegister, value: u16) -> ();
 }
 
 impl Cpu for CpuState {
@@ -56,6 +58,19 @@ impl Cpu for CpuState {
         }
         self.registers[index] = value;
     }
+    fn read_double_register(&self, register: DoubleRegister) -> u16 {
+        let registers = register.id();
+        let low: u16 = self.read_register(registers.low).into();
+        let high: u16 = self.read_register(registers.high).into();
+        let value: u16 = high << 8 & low;
+        return value;
+    }
+    fn write_double_register(&mut self, register: DoubleRegister, value: u16) -> () {
+        let registers = register.id();
+        let [high, low] = u16::to_be_bytes(value);
+        self.write_register(registers.high, high);
+        self.write_register(registers.low, low);
+    }
 }
 
 #[derive(TryFromPrimitive, Debug, IntoPrimitive, Clone, Copy)]
@@ -66,6 +81,8 @@ enum Register {
     C = 2,
     D = 3,
     E = 4,
+    /** The flags register. Bits 0-3 are write protected
+     */
     F = 5,
     H = 6,
     L = 7,
@@ -73,7 +90,44 @@ enum Register {
 
 impl Register {
     fn id(&self) -> u8 {
-        return *self as u8;
+        *self as u8
+    }
+}
+
+struct RegisterCombination {
+    low: Register,
+    high: Register,
+}
+
+#[derive(Debug, Clone, Copy)]
+#[repr(u8)]
+enum DoubleRegister {
+    AF,
+    BC,
+    DE,
+    HL,
+}
+
+impl DoubleRegister {
+    fn id(&self) -> RegisterCombination {
+        match self {
+            DoubleRegister::AF => RegisterCombination {
+                high: Register::A,
+                low: Register::F,
+            },
+            DoubleRegister::BC => RegisterCombination {
+                high: Register::B,
+                low: Register::C,
+            },
+            DoubleRegister::DE => RegisterCombination {
+                high: Register::D,
+                low: Register::E,
+            },
+            DoubleRegister::HL => RegisterCombination {
+                high: Register::H,
+                low: Register::L,
+            },
+        }
     }
 }
 
