@@ -36,7 +36,7 @@ mod tests {
     use crate::cpu::Register;
 
     #[test]
-    fn decodes_load_instruction() {
+    fn decode_load_from_register_to_register() {
         let load_a_to_c = 0b01000010u8;
         let instruction = decode(load_a_to_c);
         assert!(matches!(
@@ -44,6 +44,33 @@ mod tests {
             Instruction::LoadFromRegisterToRegister {
                 source: Register::A,
                 destination: Register::C
+            }
+        ))
+    }
+
+    #[test]
+    fn decode_load_from_hl_to_register() {
+        let load_a_to_c = 0b01000110u8;
+        let instruction = decode(load_a_to_c);
+        assert!(matches!(
+            instruction,
+            Instruction::LoadFromHlToRegister {
+                destination: Register::A,
+                phase: _
+            }
+        ))
+    }
+
+    #[test]
+    fn decode_load_immediate_to_register() {
+        let load_a_to_c = 0b00000110u8;
+        let instruction = decode(load_a_to_c);
+        assert!(matches!(
+            instruction,
+            Instruction::LoadImmediateToRegister {
+                destination: Register::A,
+                value: _,
+                phase: _
             }
         ))
     }
