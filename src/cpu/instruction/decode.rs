@@ -2,6 +2,7 @@ use bitmatch::bitmatch;
 
 use super::Instruction;
 use super::Register;
+use super::TwoPhases;
 
 #[bitmatch]
 pub fn decode(byte: u8) -> Instruction {
@@ -24,6 +25,9 @@ pub fn decode(byte: u8) -> Instruction {
                 .expect("3 bit value should always correspond to a register"),
             value: 0,
             phase: 0,
+        },
+        "00100010" => Instruction::LoadAccumulatorToHlAndIncrement {
+            phase: TwoPhases::One,
         },
         _ => Instruction::None {},
     }
@@ -72,6 +76,16 @@ mod tests {
                 value: _,
                 phase: _
             }
+        ))
+    }
+
+    #[test]
+    fn decode_load_accumulator_to_hl_and_increment() {
+        let opcode = 0b00100010u8;
+        let instruction = decode(opcode);
+        assert!(matches!(
+            instruction,
+            Instruction::LoadAccumulatorToHlAndIncrement { phase: _ }
         ))
     }
 }

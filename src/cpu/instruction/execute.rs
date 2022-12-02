@@ -1,3 +1,4 @@
+use crate::cpu::Register;
 use crate::memory_device::MemoryDevice;
 
 use super::Cpu;
@@ -6,6 +7,7 @@ use super::CpuState;
 use super::load_instruction;
 use super::DoubleRegister;
 use super::Instruction;
+use super::TwoPhases;
 
 impl Instruction {
     pub fn execute(&self, cpu: &mut CpuState, memory: &mut dyn MemoryDevice) -> Instruction {
@@ -55,6 +57,21 @@ impl Instruction {
                 destination: _,
                 phase: 1_u8..=u8::MAX,
             } => load_instruction(cpu, memory),
+            Instruction::LoadAccumulatorToHlAndIncrement {
+                phase: TwoPhases::One,
+            } => {
+                let address = cpu.read_double_register(DoubleRegister::HL);
+                let data = cpu.read_register(Register::A);
+                memory.write(address, data);
+                cpu.write_double_register(DoubleRegister::HL, address + 1);
+
+                Instruction::LoadAccumulatorToHlAndIncrement {
+                    phase: TwoPhases::Two,
+                }
+            }
+            Instruction::LoadAccumulatorToHlAndIncrement {
+                phase: TwoPhases::Two,
+            } => load_instruction(cpu, memory),
             Instruction::None => Instruction::None,
         }
     }
@@ -65,6 +82,7 @@ mod tests {
     use super::CpuState;
     use super::{Cpu, Instruction};
     use crate::cpu::instruction::decode::decode;
+    use crate::cpu::instruction::TwoPhases;
     use crate::cpu::{DoubleRegister, Register};
     use crate::debug_memory::DebugMemory;
 
@@ -161,5 +179,33 @@ mod tests {
 
         assert_eq!(cpu.read_register(Register::B), 42);
         assert_eq!(cpu.read_register(Register::A), 0);
+    }
+
+    #[test]
+    fn load_accumulator_to_hl_and_increment() {
+        // Write 42 to A and then copy A to C
+        let mut cpu = CpuState::new();
+        let mut memory = DebugMemory::new_with_init(&[]);
+
+        let instruction = Instruction::LoadAccumulatorToHlAndIncrement {
+            phase: TwoPhases::One,
+        };
+
+        cpu.write_register(Register::A, 42);
+        cpu.write_double_register(DoubleRegister::HL, 3);
+
+        let instruction = instruction.execute(&mut cpu, &mut memory);
+
+        assert!(matches!(
+            instruction,
+            Instruction::LoadAccumulatorToHlAndIncrement {
+                phase: TwoPhases::Two,
+            }
+        ));
+
+        instruction.execute(&mut cpu, &mut memory);
+
+        assert_eq!(cpu.read_double_register(DoubleRegister::HL), 4);
+        assert_eq!(cpu.read_register(Register::A), 42);
     }
 }

@@ -13,6 +13,12 @@ pub mod execute;
 use decode::decode;
 
 #[derive(Debug)]
+pub enum TwoPhases {
+    One,
+    Two,
+}
+
+#[derive(Debug)]
 pub enum Instruction {
     LoadFromRegisterToRegister {
         source: Register,
@@ -26,6 +32,9 @@ pub enum Instruction {
     LoadFromHlToRegister {
         destination: Register,
         phase: u8,
+    },
+    LoadAccumulatorToHlAndIncrement {
+        phase: TwoPhases,
     },
     None,
 }
