@@ -1,0 +1,50 @@
+use bitmatch::bitmatch;
+
+use super::Instruction;
+use super::Register;
+
+#[bitmatch]
+pub fn decode(byte: u8) -> Instruction {
+    #[bitmatch]
+    // TODO: How can we get rid of this (soon) massive match clause
+    match byte {
+        "01aaa110" => Instruction::LoadFromHlToRegister {
+            destination: Register::try_from(a)
+                .expect("3 bit value should always correspond to a register"),
+            phase: 0,
+        },
+        "01aaabbb" => Instruction::LoadFromRegisterToRegister {
+            source: Register::try_from(a)
+                .expect("3 bit value should always correspond to a register"),
+            destination: Register::try_from(b)
+                .expect("3 bit value should always correspond to a register"),
+        },
+        "00aaa110" => Instruction::LoadImmediateToRegister {
+            destination: Register::try_from(a)
+                .expect("3 bit value should always correspond to a register"),
+            value: 0,
+            phase: 0,
+        },
+        _ => Instruction::None {},
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::decode;
+    use super::Instruction;
+    use crate::cpu::Register;
+
+    #[test]
+    fn decodes_load_instruction() {
+        let load_a_to_c = 0b01000010u8;
+        let instruction = decode(load_a_to_c);
+        assert!(matches!(
+            instruction,
+            Instruction::LoadFromRegisterToRegister {
+                source: Register::A,
+                destination: Register::C
+            }
+        ))
+    }
+}

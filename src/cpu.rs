@@ -1,9 +1,9 @@
-mod instruction;
+pub mod instruction;
 
 use crate::memory_device::MemoryDevice;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
-struct CpuState {
+pub struct CpuState {
     acc: u8, // Not sure if this is a register
     program_counter: u16,
     stack_pointer: u16,
@@ -11,7 +11,7 @@ struct CpuState {
 }
 
 impl CpuState {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             acc: 0, // Not sure if this is a register
             program_counter: 0,
