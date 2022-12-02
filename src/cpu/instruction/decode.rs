@@ -27,7 +27,7 @@ pub fn decode(byte: u8) -> Instruction {
             phase: 0,
         },
         "00100010" => Instruction::LoadAccumulatorToHlAndIncrement {
-            phase: TwoPhases::One,
+            phase: TwoPhases::First,
         },
         _ => Instruction::None {},
     }

@@ -58,7 +58,7 @@ impl Instruction {
                 phase: 1_u8..=u8::MAX,
             } => load_instruction(cpu, memory),
             Instruction::LoadAccumulatorToHlAndIncrement {
-                phase: TwoPhases::One,
+                phase: TwoPhases::First,
             } => {
                 let address = cpu.read_double_register(DoubleRegister::HL);
                 let data = cpu.read_register(Register::A);
@@ -66,11 +66,11 @@ impl Instruction {
                 cpu.write_double_register(DoubleRegister::HL, address + 1);
 
                 Instruction::LoadAccumulatorToHlAndIncrement {
-                    phase: TwoPhases::Two,
+                    phase: TwoPhases::Second,
                 }
             }
             Instruction::LoadAccumulatorToHlAndIncrement {
-                phase: TwoPhases::Two,
+                phase: TwoPhases::Second,
             } => load_instruction(cpu, memory),
             Instruction::None => Instruction::None,
         }
@@ -188,7 +188,7 @@ mod tests {
         let mut memory = DebugMemory::new_with_init(&[]);
 
         let instruction = Instruction::LoadAccumulatorToHlAndIncrement {
-            phase: TwoPhases::One,
+            phase: TwoPhases::First,
         };
 
         cpu.write_register(Register::A, 42);
@@ -199,7 +199,7 @@ mod tests {
         assert!(matches!(
             instruction,
             Instruction::LoadAccumulatorToHlAndIncrement {
-                phase: TwoPhases::Two,
+                phase: TwoPhases::Second,
             }
         ));
 

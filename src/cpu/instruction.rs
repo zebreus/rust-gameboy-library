@@ -14,8 +14,23 @@ use decode::decode;
 
 #[derive(Debug)]
 pub enum TwoPhases {
-    One,
-    Two,
+    First,
+    Second,
+}
+
+#[derive(Debug)]
+pub enum ThreePhases {
+    First,
+    Second,
+    Third,
+}
+
+#[derive(Debug)]
+pub enum FourPhases {
+    First,
+    Second,
+    Third,
+    Fourth,
 }
 
 #[derive(Debug)]
