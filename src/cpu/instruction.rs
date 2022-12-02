@@ -48,6 +48,19 @@ pub enum Instruction {
         destination: Register,
         phase: u8,
     },
+    LoadHlToAccumulatorAndDecrement {
+        phase: TwoPhases,
+    },
+    LoadAccumulatorToHlAndDecrement {
+        phase: TwoPhases,
+    },
+    /** Basically identical with the decrement version. Maybe join and add a flag for inc/dec
+     */
+    LoadHlToAccumulatorAndIncrement {
+        phase: TwoPhases,
+    },
+    /** Basically identical with the decrement version. Maybe join and add a flag for inc/dec
+     */
     LoadAccumulatorToHlAndIncrement {
         phase: TwoPhases,
     },

@@ -26,6 +26,15 @@ pub fn decode(byte: u8) -> Instruction {
             value: 0,
             phase: 0,
         },
+        "00111010" => Instruction::LoadHlToAccumulatorAndDecrement {
+            phase: TwoPhases::First,
+        },
+        "00110010" => Instruction::LoadAccumulatorToHlAndDecrement {
+            phase: TwoPhases::First,
+        },
+        "00101010" => Instruction::LoadHlToAccumulatorAndIncrement {
+            phase: TwoPhases::First,
+        },
         "00100010" => Instruction::LoadAccumulatorToHlAndIncrement {
             phase: TwoPhases::First,
         },
@@ -79,6 +88,35 @@ mod tests {
         ))
     }
 
+    #[test]
+    fn decode_load_hl_to_accumulator_and_decrement() {
+        let opcode = 0b00111010u8;
+        let instruction = decode(opcode);
+        assert!(matches!(
+            instruction,
+            Instruction::LoadHlToAccumulatorAndDecrement { phase: _ }
+        ))
+    }
+
+    #[test]
+    fn decode_load_accumulator_to_hl_and_decrement() {
+        let opcode = 0b00110010u8;
+        let instruction = decode(opcode);
+        assert!(matches!(
+            instruction,
+            Instruction::LoadAccumulatorToHlAndDecrement { phase: _ }
+        ))
+    }
+
+    #[test]
+    fn decode_load_hl_to_accumulator_and_increment() {
+        let opcode = 0b00101010u8;
+        let instruction = decode(opcode);
+        assert!(matches!(
+            instruction,
+            Instruction::LoadHlToAccumulatorAndIncrement { phase: _ }
+        ))
+    }
     #[test]
     fn decode_load_accumulator_to_hl_and_increment() {
         let opcode = 0b00100010u8;

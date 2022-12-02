@@ -35,7 +35,12 @@ pub fn encode(instruction: Instruction) -> Vec<u8> {
             let opcode = base_code | destination_code;
             Vec::from([opcode])
         }
-        Instruction::LoadAccumulatorToHlAndIncrement { phase: _ } => Vec::from([]),
+
+        Instruction::LoadHlToAccumulatorAndDecrement { phase: _ } => Vec::from([0b00111010]),
+        Instruction::LoadAccumulatorToHlAndDecrement { phase: _ } => Vec::from([0b00110010]),
+        Instruction::LoadHlToAccumulatorAndIncrement { phase: _ } => Vec::from([0b00101010]),
+        Instruction::LoadAccumulatorToHlAndIncrement { phase: _ } => Vec::from([0b00100010]),
+
         Instruction::None => Vec::new(),
     }
 }
