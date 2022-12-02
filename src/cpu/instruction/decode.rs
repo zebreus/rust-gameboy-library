@@ -2,6 +2,7 @@ use bitmatch::bitmatch;
 
 use super::Instruction;
 use super::Register;
+use super::ThreePhases;
 use super::TwoPhases;
 
 #[bitmatch]
@@ -25,6 +26,14 @@ pub fn decode(byte: u8) -> Instruction {
                 .expect("3 bit value should always correspond to a register"),
             value: 0,
             phase: 0,
+        },
+        "11110000" => Instruction::LoadFromImmediateOffsetToAccumulator {
+            offset: 0,
+            phase: ThreePhases::First,
+        },
+        "11100000" => Instruction::LoadAccumulatorToImmediateOffset {
+            offset: 0,
+            phase: ThreePhases::First,
         },
         "00111010" => Instruction::LoadHlToAccumulatorAndDecrement {
             phase: TwoPhases::First,
@@ -84,6 +93,32 @@ mod tests {
                 destination: Register::A,
                 value: _,
                 phase: _
+            }
+        ))
+    }
+
+    #[test]
+    fn decode_load_from_immediate_offset_to_accumulator() {
+        let opcode = 0b11110000u8;
+        let instruction = decode(opcode);
+        assert!(matches!(
+            instruction,
+            Instruction::LoadFromImmediateOffsetToAccumulator {
+                phase: _,
+                offset: _
+            }
+        ))
+    }
+
+    #[test]
+    fn decode_load_accumulator_to_immediate_offset() {
+        let opcode = 0b11100000u8;
+        let instruction = decode(opcode);
+        assert!(matches!(
+            instruction,
+            Instruction::LoadAccumulatorToImmediateOffset {
+                phase: _,
+                offset: _
             }
         ))
     }

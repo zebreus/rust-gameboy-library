@@ -1,4 +1,4 @@
-use super::Instruction;
+use super::{Instruction, ThreePhases};
 
 pub fn encode(instruction: Instruction) -> Vec<u8> {
     match instruction {
@@ -35,6 +35,23 @@ pub fn encode(instruction: Instruction) -> Vec<u8> {
             let opcode = base_code | destination_code;
             Vec::from([opcode])
         }
+
+        Instruction::LoadAccumulatorToImmediateOffset {
+            offset: _,
+            phase: ThreePhases::First,
+        } => Vec::from([0b11110000]),
+        Instruction::LoadAccumulatorToImmediateOffset {
+            offset: offset,
+            phase: _,
+        } => Vec::from([0b11110000, offset]),
+        Instruction::LoadFromImmediateOffsetToAccumulator {
+            offset: _,
+            phase: ThreePhases::First,
+        } => Vec::from([0b11100000]),
+        Instruction::LoadFromImmediateOffsetToAccumulator {
+            offset: offset,
+            phase: _,
+        } => Vec::from([0b11100000, offset]),
 
         Instruction::LoadHlToAccumulatorAndDecrement { phase: _ } => Vec::from([0b00111010]),
         Instruction::LoadAccumulatorToHlAndDecrement { phase: _ } => Vec::from([0b00110010]),

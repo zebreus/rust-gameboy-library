@@ -48,6 +48,14 @@ pub enum Instruction {
         destination: Register,
         phase: u8,
     },
+    LoadAccumulatorToImmediateOffset {
+        offset: u8,
+        phase: ThreePhases,
+    },
+    LoadFromImmediateOffsetToAccumulator {
+        offset: u8,
+        phase: ThreePhases,
+    },
     LoadHlToAccumulatorAndDecrement {
         phase: TwoPhases,
     },

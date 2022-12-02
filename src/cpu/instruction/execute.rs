@@ -7,6 +7,7 @@ use super::CpuState;
 use super::load_instruction;
 use super::DoubleRegister;
 use super::Instruction;
+use super::ThreePhases;
 use super::TwoPhases;
 
 impl Instruction {
@@ -57,6 +58,55 @@ impl Instruction {
                 destination: _,
                 phase: 1_u8..=u8::MAX,
             } => load_instruction(cpu, memory),
+
+            Instruction::LoadAccumulatorToImmediateOffset { phase, offset } => match phase {
+                ThreePhases::First => {
+                    let next_address = cpu.read_program_counter();
+                    let offset = memory.read(next_address);
+
+                    Instruction::LoadAccumulatorToImmediateOffset {
+                        phase: ThreePhases::Second,
+                        offset: offset,
+                    }
+                }
+                ThreePhases::Second => {
+                    let offset_16: u16 = (*offset).into();
+                    let address: u16 = 0xff00u16 | offset_16;
+                    let data = cpu.read_register(Register::A);
+                    memory.write(address, data);
+
+                    Instruction::LoadAccumulatorToImmediateOffset {
+                        phase: ThreePhases::Third,
+                        offset: *offset,
+                    }
+                }
+                ThreePhases::Third => load_instruction(cpu, memory),
+            },
+            Instruction::LoadFromImmediateOffsetToAccumulator { phase, offset } => match phase {
+                ThreePhases::First => {
+                    let next_address = cpu.read_program_counter();
+                    let offset = memory.read(next_address);
+
+                    Instruction::LoadFromImmediateOffsetToAccumulator {
+                        phase: ThreePhases::Second,
+                        offset: offset,
+                    }
+                }
+                ThreePhases::Second => {
+                    let offset_16: u16 = (*offset).into();
+                    let address: u16 = 0xff00u16 | offset_16;
+                    let data = memory.read(address);
+
+                    cpu.write_register(Register::A, data);
+
+                    Instruction::LoadFromImmediateOffsetToAccumulator {
+                        phase: ThreePhases::Third,
+                        offset: *offset,
+                    }
+                }
+                ThreePhases::Third => load_instruction(cpu, memory),
+            },
+
             Instruction::LoadHlToAccumulatorAndDecrement {
                 phase: TwoPhases::First,
             } => {
@@ -129,9 +179,10 @@ mod tests {
     use super::CpuState;
     use super::{Cpu, Instruction};
     use crate::cpu::instruction::decode::decode;
-    use crate::cpu::instruction::TwoPhases;
+    use crate::cpu::instruction::{ThreePhases, TwoPhases};
     use crate::cpu::{DoubleRegister, Register};
     use crate::debug_memory::DebugMemory;
+    use crate::memory_device::MemoryDevice;
 
     #[test]
     fn load_instruction_works() {
@@ -226,6 +277,78 @@ mod tests {
 
         assert_eq!(cpu.read_register(Register::B), 42);
         assert_eq!(cpu.read_register(Register::A), 0);
+    }
+
+    #[test]
+    fn load_accumulator_to_immediate_offset_works() {
+        // Write 42 to A and then copy A to C
+        let mut cpu = CpuState::new();
+        let mut memory = DebugMemory::new_with_init(&[03]);
+        cpu.write_register(Register::A, 42);
+
+        let instruction = Instruction::LoadAccumulatorToImmediateOffset {
+            offset: 0,
+            phase: ThreePhases::First,
+        };
+
+        let instruction = instruction.execute(&mut cpu, &mut memory);
+
+        assert!(matches!(
+            instruction,
+            Instruction::LoadAccumulatorToImmediateOffset {
+                offset: 3,
+                phase: ThreePhases::Second,
+            }
+        ));
+        let instruction = instruction.execute(&mut cpu, &mut memory);
+
+        assert!(matches!(
+            instruction,
+            Instruction::LoadAccumulatorToImmediateOffset {
+                offset: _,
+                phase: ThreePhases::Third,
+            }
+        ));
+
+        instruction.execute(&mut cpu, &mut memory);
+
+        assert_eq!(memory.read(0xFF03), 42);
+    }
+
+    #[test]
+    fn load_from_immediate_offset_to_accumulator_works() {
+        // Write 42 to A and then copy A to C
+        let mut cpu = CpuState::new();
+        let mut memory = DebugMemory::new_with_init(&[03]);
+        memory.write(0xFF03, 42);
+
+        let instruction = Instruction::LoadFromImmediateOffsetToAccumulator {
+            offset: 0,
+            phase: ThreePhases::First,
+        };
+
+        let instruction = instruction.execute(&mut cpu, &mut memory);
+
+        assert!(matches!(
+            instruction,
+            Instruction::LoadFromImmediateOffsetToAccumulator {
+                offset: 3,
+                phase: ThreePhases::Second,
+            }
+        ));
+        let instruction = instruction.execute(&mut cpu, &mut memory);
+
+        assert!(matches!(
+            instruction,
+            Instruction::LoadFromImmediateOffsetToAccumulator {
+                offset: _,
+                phase: ThreePhases::Third,
+            }
+        ));
+
+        instruction.execute(&mut cpu, &mut memory);
+
+        assert_eq!(cpu.read_register(Register::A), 42);
     }
 
     #[test]
