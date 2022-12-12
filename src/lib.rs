@@ -1,19 +1,11 @@
-mod clock;
+#![warn(missing_docs)]
+//! This crate will be a gameboy emulation library
+//!
+
+// TODO: Figure out how to idiomatically structure a rust project
+/// Contains [CpuState] and more.
 pub mod cpu;
-mod debug_memory;
-mod memory_device;
-
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+/// Contains [DebugMemory].
+pub mod debug_memory;
+/// Contains the [MemoryDevice] trait.
+pub mod memory_device;

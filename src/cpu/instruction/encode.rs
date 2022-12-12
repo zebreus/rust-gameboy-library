@@ -1,63 +1,81 @@
 use super::{Instruction, ThreePhases, TwoPhases};
 
-pub fn encode(instruction: Instruction) -> Vec<u8> {
-    match instruction {
-        Instruction::LoadFromRegisterToRegister {
-            source,
-            destination,
-        } => {
-            let base_code = 0b01000000 & 0b11000000u8;
-            let source_code = (source.id() << 3) & 0b00111000u8;
-            let destination_code = destination.id() & 0b00000111u8;
-            let opcode = base_code | source_code | destination_code;
-            Vec::from([opcode])
-        }
-        Instruction::LoadImmediateToRegister {
-            destination,
-            value,
-            phase,
-        } => {
-            let base_code = 0b00000110 & 0b11000111u8;
-            let destination_code = (destination.id() << 3) & 0b00111000u8;
-            let opcode = base_code | destination_code;
-            match phase {
-                TwoPhases::First => Vec::from([opcode]),
-                TwoPhases::Second => Vec::from([opcode, value]),
+impl Instruction {
+    /// Encode a instruction back into it's binary representation
+    ///
+    /// If the instruction is longer than 1 byte and has not yet read all relevant bytes, only the known bytes are returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rust_gameboy_library::cpu::Register;
+    /// # use rust_gameboy_library::cpu::instruction::Instruction;
+    ///
+    /// let instruction = Instruction::LoadFromRegisterToRegister {
+    ///     source: Register::A,
+    ///     destination: Register::C,
+    /// };
+    ///
+    /// let encoded: Vec<u8> = instruction.encode();
+    /// assert_eq!(encoded, Vec::from([0b01000010u8]));
+    /// ```
+    pub fn encode(&self) -> Vec<u8> {
+        match self {
+            Instruction::LoadFromRegisterToRegister {
+                source,
+                destination,
+            } => {
+                let base_code = 0b01000000 & 0b11000000u8;
+                let source_code = (source.id() << 3) & 0b00111000u8;
+                let destination_code = destination.id() & 0b00000111u8;
+                let opcode = base_code | source_code | destination_code;
+                Vec::from([opcode])
             }
+            Instruction::LoadImmediateToRegister {
+                destination,
+                value,
+                phase,
+            } => {
+                let base_code = 0b00000110 & 0b11000111u8;
+                let destination_code = (destination.id() << 3) & 0b00111000u8;
+                let opcode = base_code | destination_code;
+                match phase {
+                    TwoPhases::First => Vec::from([opcode]),
+                    TwoPhases::Second => Vec::from([opcode, *value]),
+                }
+            }
+            Instruction::LoadFromHlToRegister {
+                destination,
+                phase: _,
+            } => {
+                let base_code = 0b01000110 & 0b11000111u8;
+                let destination_code = (destination.id() << 3) & 0b00111000u8;
+                let opcode = base_code | destination_code;
+                Vec::from([opcode])
+            }
+
+            Instruction::LoadAccumulatorToImmediateOffset {
+                offset: _,
+                phase: ThreePhases::First,
+            } => Vec::from([0b11110000]),
+            Instruction::LoadAccumulatorToImmediateOffset { offset, phase: _ } => {
+                Vec::from([0b11110000, *offset])
+            }
+            Instruction::LoadFromImmediateOffsetToAccumulator {
+                offset: _,
+                phase: ThreePhases::First,
+            } => Vec::from([0b11100000]),
+            Instruction::LoadFromImmediateOffsetToAccumulator { offset, phase: _ } => {
+                Vec::from([0b11100000, *offset])
+            }
+
+            Instruction::LoadHlToAccumulatorAndDecrement { phase: _ } => Vec::from([0b00111010]),
+            Instruction::LoadAccumulatorToHlAndDecrement { phase: _ } => Vec::from([0b00110010]),
+            Instruction::LoadHlToAccumulatorAndIncrement { phase: _ } => Vec::from([0b00101010]),
+            Instruction::LoadAccumulatorToHlAndIncrement { phase: _ } => Vec::from([0b00100010]),
+
+            Instruction::None => Vec::new(),
         }
-        Instruction::LoadFromHlToRegister {
-            destination,
-            phase: _,
-        } => {
-            let base_code = 0b01000110 & 0b11000111u8;
-            let destination_code = (destination.id() << 3) & 0b00111000u8;
-            let opcode = base_code | destination_code;
-            Vec::from([opcode])
-        }
-
-        Instruction::LoadAccumulatorToImmediateOffset {
-            offset: _,
-            phase: ThreePhases::First,
-        } => Vec::from([0b11110000]),
-        Instruction::LoadAccumulatorToImmediateOffset {
-            offset: offset,
-            phase: _,
-        } => Vec::from([0b11110000, offset]),
-        Instruction::LoadFromImmediateOffsetToAccumulator {
-            offset: _,
-            phase: ThreePhases::First,
-        } => Vec::from([0b11100000]),
-        Instruction::LoadFromImmediateOffsetToAccumulator {
-            offset: offset,
-            phase: _,
-        } => Vec::from([0b11100000, offset]),
-
-        Instruction::LoadHlToAccumulatorAndDecrement { phase: _ } => Vec::from([0b00111010]),
-        Instruction::LoadAccumulatorToHlAndDecrement { phase: _ } => Vec::from([0b00110010]),
-        Instruction::LoadHlToAccumulatorAndIncrement { phase: _ } => Vec::from([0b00101010]),
-        Instruction::LoadAccumulatorToHlAndIncrement { phase: _ } => Vec::from([0b00100010]),
-
-        Instruction::None => Vec::new(),
     }
 }
 

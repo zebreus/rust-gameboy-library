@@ -1,3 +1,4 @@
+/// Modulef
 use bitmatch::bitmatch;
 
 use super::Instruction;
@@ -5,6 +6,27 @@ use super::Register;
 use super::ThreePhases;
 use super::TwoPhases;
 
+/// Create a instruction from an opcode.
+///
+/// Some instructions are longer than one byte because they have immediate arguments. The additional arguments are loaded here. Instead they are loaded in the appropriate cycles when executing the instructions.
+///
+/// # Examples
+///
+/// ```
+/// # use rust_gameboy_library::cpu::Register;
+/// # use rust_gameboy_library::cpu::instruction::Instruction;
+/// # use rust_gameboy_library::cpu::instruction::decode;
+/// #
+/// let load_a_to_c = 0b01000010u8;
+/// let instruction = decode(load_a_to_c);
+/// assert!(matches!(
+///     instruction,
+///     Instruction::LoadFromRegisterToRegister {
+///         source: Register::A,
+///         destination: Register::C
+///     }
+/// ))
+/// ```
 #[bitmatch]
 pub fn decode(byte: u8) -> Instruction {
     #[bitmatch]

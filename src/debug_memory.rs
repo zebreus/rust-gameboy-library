@@ -1,18 +1,20 @@
 use crate::memory_device::MemoryDevice;
 use arr_macro::arr;
 
-/* Debug memory does simple reads and writes to 64kb of memory. It also prints every read or write */
+/// Debug memory does simple reads and writes to 64kb of memory. It also prints every read or write
 pub struct DebugMemory {
     memory: [u8; 65536],
 }
 
 impl DebugMemory {
+    /// Create a new DebugMemory filled with `0`.
     pub fn new() -> DebugMemory {
         DebugMemory {
             memory: arr![0; 65536],
         }
     }
 
+    /// Create a new DebugMemory. `init` will be placed at memory address 0. The remaining memory will be filled with `0`.
     pub fn new_with_init(init: &[u8]) -> DebugMemory {
         let mut memory = DebugMemory {
             memory: arr![0; 65536],

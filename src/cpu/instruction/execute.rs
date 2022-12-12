@@ -11,6 +11,27 @@ use super::ThreePhases;
 use super::TwoPhases;
 
 impl Instruction {
+    /// Execute the instruction on the cpu and memory. Returns the next instruction.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rust_gameboy_library::cpu::{CpuState, Cpu, Register};
+    /// # use rust_gameboy_library::cpu::instruction::Instruction;
+    /// # use rust_gameboy_library::debug_memory::DebugMemory;
+    /// #
+    /// let mut cpu = CpuState::new();
+    /// let mut memory = DebugMemory::new();
+    /// cpu.write_register(Register::A, 100);
+    ///
+    /// let instruction = Instruction::LoadFromRegisterToRegister {
+    ///     source: Register::A,
+    ///     destination: Register::C,
+    /// };
+    ///
+    /// instruction.execute(&mut cpu, &mut memory);
+    /// assert_eq!(cpu.read_register(Register::C), 100);
+    /// ```
     pub fn execute(&self, cpu: &mut CpuState, memory: &mut dyn MemoryDevice) -> Instruction {
         match self {
             Instruction::LoadFromRegisterToRegister {
