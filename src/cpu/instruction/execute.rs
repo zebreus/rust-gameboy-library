@@ -43,43 +43,36 @@ impl Instruction {
             }
             Instruction::LoadImmediateToRegister {
                 destination,
-                value: _,
-                phase: TwoPhases::First,
-            } => {
-                let address = cpu.read_program_counter();
-                let value = memory.read(address);
-                return Instruction::LoadImmediateToRegister {
-                    destination: *destination,
-                    value,
-                    phase: TwoPhases::Second,
-                };
-            }
-            Instruction::LoadImmediateToRegister {
-                destination,
                 value,
-                phase: TwoPhases::Second,
-            } => {
-                cpu.write_register(*destination, *value);
-                return load_instruction(cpu, memory);
-            }
-            Instruction::LoadFromHlToRegister {
-                destination,
-                phase: TwoPhases::First,
-            } => {
-                let address = cpu.read_double_register(DoubleRegister::HL);
-                let data = memory.read(address);
-                // This should probably happen in the next phase of this instruction
-                cpu.write_register(*destination, data);
-                Instruction::LoadFromHlToRegister {
-                    destination: *destination,
-                    phase: TwoPhases::Second,
+                phase,
+            } => match phase {
+                TwoPhases::First => {
+                    let address = cpu.read_program_counter();
+                    let value = memory.read(address);
+                    return Instruction::LoadImmediateToRegister {
+                        destination: *destination,
+                        value,
+                        phase: TwoPhases::Second,
+                    };
                 }
-            }
-            Instruction::LoadFromHlToRegister {
-                destination: _,
-                phase: TwoPhases::Second,
-            } => load_instruction(cpu, memory),
-
+                TwoPhases::Second => {
+                    cpu.write_register(*destination, *value);
+                    return load_instruction(cpu, memory);
+                }
+            },
+            Instruction::LoadFromHlToRegister { destination, phase } => match phase {
+                TwoPhases::First => {
+                    let address = cpu.read_double_register(DoubleRegister::HL);
+                    let data = memory.read(address);
+                    // This should probably happen in the next phase of this instruction
+                    cpu.write_register(*destination, data);
+                    Instruction::LoadFromHlToRegister {
+                        destination: *destination,
+                        phase: TwoPhases::Second,
+                    }
+                }
+                TwoPhases::Second => load_instruction(cpu, memory),
+            },
             Instruction::LoadAccumulatorToImmediateOffset { phase, offset } => match phase {
                 ThreePhases::First => {
                     let next_address = cpu.read_program_counter();
@@ -128,68 +121,60 @@ impl Instruction {
                 ThreePhases::Third => load_instruction(cpu, memory),
             },
 
-            Instruction::LoadHlToAccumulatorAndDecrement {
-                phase: TwoPhases::First,
-            } => {
-                let address = cpu.read_double_register(DoubleRegister::HL);
-                let data = memory.read(address);
+            Instruction::LoadHlToAccumulatorAndDecrement { phase } => match phase {
+                TwoPhases::First => {
+                    let address = cpu.read_double_register(DoubleRegister::HL);
+                    let data = memory.read(address);
 
-                cpu.write_register(Register::A, data);
-                cpu.write_double_register(DoubleRegister::HL, address - 1);
+                    cpu.write_register(Register::A, data);
+                    cpu.write_double_register(DoubleRegister::HL, address - 1);
 
-                Instruction::LoadAccumulatorToHlAndDecrement {
-                    phase: TwoPhases::Second,
+                    Instruction::LoadAccumulatorToHlAndDecrement {
+                        phase: TwoPhases::Second,
+                    }
                 }
-            }
-            Instruction::LoadHlToAccumulatorAndDecrement {
-                phase: TwoPhases::Second,
-            } => load_instruction(cpu, memory),
-            Instruction::LoadAccumulatorToHlAndDecrement {
-                phase: TwoPhases::First,
-            } => {
-                let address = cpu.read_double_register(DoubleRegister::HL);
-                let data = cpu.read_register(Register::A);
-                memory.write(address, data);
-                cpu.write_double_register(DoubleRegister::HL, address - 1);
+                TwoPhases::Second => load_instruction(cpu, memory),
+            },
+            Instruction::LoadAccumulatorToHlAndDecrement { phase } => match phase {
+                TwoPhases::First => {
+                    let address = cpu.read_double_register(DoubleRegister::HL);
+                    let data = cpu.read_register(Register::A);
+                    memory.write(address, data);
+                    cpu.write_double_register(DoubleRegister::HL, address - 1);
 
-                Instruction::LoadAccumulatorToHlAndDecrement {
-                    phase: TwoPhases::Second,
+                    Instruction::LoadAccumulatorToHlAndDecrement {
+                        phase: TwoPhases::Second,
+                    }
                 }
-            }
-            Instruction::LoadAccumulatorToHlAndDecrement {
-                phase: TwoPhases::Second,
-            } => load_instruction(cpu, memory),
-            Instruction::LoadHlToAccumulatorAndIncrement {
-                phase: TwoPhases::First,
-            } => {
-                let address = cpu.read_double_register(DoubleRegister::HL);
-                let data = memory.read(address);
+                TwoPhases::Second => load_instruction(cpu, memory),
+            },
+            Instruction::LoadHlToAccumulatorAndIncrement { phase } => match phase {
+                TwoPhases::First => {
+                    let address = cpu.read_double_register(DoubleRegister::HL);
+                    let data = memory.read(address);
 
-                cpu.write_register(Register::A, data);
-                cpu.write_double_register(DoubleRegister::HL, address + 1);
+                    cpu.write_register(Register::A, data);
+                    cpu.write_double_register(DoubleRegister::HL, address + 1);
 
-                Instruction::LoadAccumulatorToHlAndIncrement {
-                    phase: TwoPhases::Second,
+                    Instruction::LoadAccumulatorToHlAndIncrement {
+                        phase: TwoPhases::Second,
+                    }
                 }
-            }
-            Instruction::LoadHlToAccumulatorAndIncrement {
-                phase: TwoPhases::Second,
-            } => load_instruction(cpu, memory),
-            Instruction::LoadAccumulatorToHlAndIncrement {
-                phase: TwoPhases::First,
-            } => {
-                let address = cpu.read_double_register(DoubleRegister::HL);
-                let data = cpu.read_register(Register::A);
-                memory.write(address, data);
-                cpu.write_double_register(DoubleRegister::HL, address + 1);
+                TwoPhases::Second => load_instruction(cpu, memory),
+            },
+            Instruction::LoadAccumulatorToHlAndIncrement { phase } => match phase {
+                TwoPhases::First => {
+                    let address = cpu.read_double_register(DoubleRegister::HL);
+                    let data = cpu.read_register(Register::A);
+                    memory.write(address, data);
+                    cpu.write_double_register(DoubleRegister::HL, address + 1);
 
-                Instruction::LoadAccumulatorToHlAndIncrement {
-                    phase: TwoPhases::Second,
+                    Instruction::LoadAccumulatorToHlAndIncrement {
+                        phase: TwoPhases::Second,
+                    }
                 }
-            }
-            Instruction::LoadAccumulatorToHlAndIncrement {
-                phase: TwoPhases::Second,
-            } => load_instruction(cpu, memory),
+                TwoPhases::Second => load_instruction(cpu, memory),
+            },
             Instruction::None => Instruction::None,
         }
     }
