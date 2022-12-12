@@ -42,11 +42,11 @@ pub enum Instruction {
     LoadImmediateToRegister {
         destination: Register,
         value: u8,
-        phase: u8,
+        phase: TwoPhases,
     },
     LoadFromHlToRegister {
         destination: Register,
-        phase: u8,
+        phase: TwoPhases,
     },
     LoadAccumulatorToImmediateOffset {
         offset: u8,

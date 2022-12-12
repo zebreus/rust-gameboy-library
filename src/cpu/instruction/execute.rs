@@ -23,27 +23,27 @@ impl Instruction {
             Instruction::LoadImmediateToRegister {
                 destination,
                 value: _,
-                phase: 0,
+                phase: TwoPhases::First,
             } => {
                 let address = cpu.read_program_counter();
                 let value = memory.read(address);
                 return Instruction::LoadImmediateToRegister {
                     destination: *destination,
                     value,
-                    phase: 1,
+                    phase: TwoPhases::Second,
                 };
             }
             Instruction::LoadImmediateToRegister {
                 destination,
                 value,
-                phase: 1_u8..=u8::MAX,
+                phase: TwoPhases::Second,
             } => {
                 cpu.write_register(*destination, *value);
                 return load_instruction(cpu, memory);
             }
             Instruction::LoadFromHlToRegister {
                 destination,
-                phase: 0,
+                phase: TwoPhases::First,
             } => {
                 let address = cpu.read_double_register(DoubleRegister::HL);
                 let data = memory.read(address);
@@ -51,12 +51,12 @@ impl Instruction {
                 cpu.write_register(*destination, data);
                 Instruction::LoadFromHlToRegister {
                     destination: *destination,
-                    phase: 1,
+                    phase: TwoPhases::Second,
                 }
             }
             Instruction::LoadFromHlToRegister {
                 destination: _,
-                phase: 1_u8..=u8::MAX,
+                phase: TwoPhases::Second,
             } => load_instruction(cpu, memory),
 
             Instruction::LoadAccumulatorToImmediateOffset { phase, offset } => match phase {
@@ -230,7 +230,7 @@ mod tests {
         let instruction = Instruction::LoadImmediateToRegister {
             destination: Register::B,
             value: 0,
-            phase: 0,
+            phase: TwoPhases::First,
         };
 
         let instruction = instruction.execute(&mut cpu, &mut memory);
@@ -238,7 +238,7 @@ mod tests {
         assert!(matches!(
             instruction,
             Instruction::LoadImmediateToRegister {
-                phase: 1,
+                phase: TwoPhases::Second,
                 destination: Register::B,
                 value: 42
             }
@@ -258,7 +258,7 @@ mod tests {
 
         let instruction = Instruction::LoadFromHlToRegister {
             destination: Register::B,
-            phase: 0,
+            phase: TwoPhases::First,
         };
 
         cpu.write_double_register(DoubleRegister::HL, 3);
@@ -268,7 +268,7 @@ mod tests {
         assert!(matches!(
             instruction,
             Instruction::LoadFromHlToRegister {
-                phase: 1,
+                phase: TwoPhases::Second,
                 destination: Register::B,
             }
         ));

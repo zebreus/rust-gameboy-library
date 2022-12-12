@@ -1,4 +1,4 @@
-use super::{Instruction, ThreePhases};
+use super::{Instruction, ThreePhases, TwoPhases};
 
 pub fn encode(instruction: Instruction) -> Vec<u8> {
     match instruction {
@@ -21,9 +21,8 @@ pub fn encode(instruction: Instruction) -> Vec<u8> {
             let destination_code = (destination.id() << 3) & 0b00111000u8;
             let opcode = base_code | destination_code;
             match phase {
-                0 => Vec::from([opcode]),
-                1 => Vec::from([opcode, value]),
-                _ => Vec::new(),
+                TwoPhases::First => Vec::from([opcode]),
+                TwoPhases::Second => Vec::from([opcode, value]),
             }
         }
         Instruction::LoadFromHlToRegister {

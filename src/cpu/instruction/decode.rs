@@ -13,7 +13,7 @@ pub fn decode(byte: u8) -> Instruction {
         "01aaa110" => Instruction::LoadFromHlToRegister {
             destination: Register::try_from(a)
                 .expect("3 bit value should always correspond to a register"),
-            phase: 0,
+            phase: TwoPhases::First,
         },
         "01aaabbb" => Instruction::LoadFromRegisterToRegister {
             source: Register::try_from(a)
@@ -25,7 +25,7 @@ pub fn decode(byte: u8) -> Instruction {
             destination: Register::try_from(a)
                 .expect("3 bit value should always correspond to a register"),
             value: 0,
-            phase: 0,
+            phase: TwoPhases::First,
         },
         "11110000" => Instruction::LoadFromImmediateOffsetToAccumulator {
             offset: 0,
