@@ -22,17 +22,18 @@ use super::{
 ///
 /// ```
 /// # use rust_gameboy_library::cpu::Register;
-/// # use rust_gameboy_library::cpu::instruction::Instruction;
+/// # use rust_gameboy_library::cpu::instruction::InstructionEnum;
+/// # use rust_gameboy_library::cpu::instruction::LoadFromRegisterToRegister;
 /// # use rust_gameboy_library::cpu::instruction::decode;
 /// #
 /// let load_a_to_c = 0b01000010u8;
 /// let instruction = decode(load_a_to_c);
 /// assert!(matches!(
 ///     instruction,
-///     Instruction::LoadFromRegisterToRegister {
+///     InstructionEnum::LoadFromRegisterToRegister (LoadFromRegisterToRegister {
 ///         source: Register::A,
 ///         destination: Register::C
-///     }
+///     })
 /// ))
 /// ```
 #[bitmatch]

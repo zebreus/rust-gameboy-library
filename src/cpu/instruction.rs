@@ -76,6 +76,7 @@ pub trait Instruction {
     ///
     /// ```
     /// # use rust_gameboy_library::cpu::{CpuState, Cpu, Register};
+    /// # use rust_gameboy_library::cpu::instruction::LoadFromRegisterToRegister;
     /// # use rust_gameboy_library::cpu::instruction::Instruction;
     /// # use rust_gameboy_library::debug_memory::DebugMemory;
     /// #
@@ -83,7 +84,7 @@ pub trait Instruction {
     /// let mut memory = DebugMemory::new();
     /// cpu.write_register(Register::A, 100);
     ///
-    /// let instruction = Instruction::LoadFromRegisterToRegister {
+    /// let instruction = LoadFromRegisterToRegister {
     ///     source: Register::A,
     ///     destination: Register::C,
     /// };
@@ -100,9 +101,10 @@ pub trait Instruction {
     ///
     /// ```
     /// # use rust_gameboy_library::cpu::Register;
+    /// # use rust_gameboy_library::cpu::instruction::LoadFromRegisterToRegister;
     /// # use rust_gameboy_library::cpu::instruction::Instruction;
     /// #
-    /// let instruction = Instruction::LoadFromRegisterToRegister {
+    /// let instruction = LoadFromRegisterToRegister {
     ///     source: Register::A,
     ///     destination: Register::C,
     /// };
