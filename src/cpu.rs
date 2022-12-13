@@ -167,21 +167,21 @@ struct RegisterCombination {
 /// The gameboy has many instructions that combine two registers as a single 16bit value.
 ///
 /// This enum represents the two registers that are combined.
-#[derive(Debug, Clone, Copy)]
+#[derive(TryFromPrimitive, Debug, IntoPrimitive, Clone, Copy)]
 #[repr(u8)]
 pub enum DoubleRegister {
-    /// [Register::A] and [Register::F].
+    /// A double register consisting of [Register::A] and [Register::F].
     ///
     /// Does not allow writing the bits 0-3 of F. See [Register::F] for details.
-    AF,
-    /// [Register::B] and [Register::C].
-    BC,
-    /// [Register::D] and [Register::E].
-    DE,
-    /// [Register::H] and [Register::L].
+    AF = 0,
+    /// A general purpose double register consisting of [Register::B] and [Register::C].
+    BC = 1,
+    /// A general purpose double register consisting of [Register::D] and [Register::E].
+    DE = 2,
+    /// A double register consisting of [Register::H] and [Register::L].
     ///
     /// Contains memory addresses for some operations.
-    HL,
+    HL = 3,
 }
 
 impl DoubleRegister {
@@ -204,6 +204,10 @@ impl DoubleRegister {
                 low: Register::L,
             },
         }
+    }
+
+    fn numerical_id(&self) -> u8 {
+        *self as u8
     }
 }
 
