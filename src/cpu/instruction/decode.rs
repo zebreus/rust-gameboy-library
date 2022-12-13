@@ -16,7 +16,8 @@ use super::{
 };
 use super::{
     LoadAccumulatorToImmediateAddress, LoadAccumulatorToRegisterCOffset,
-    LoadFromImmediateAddressToAccumulator, LoadFromRegisterCOffsetToAccumulator, LoadRegisterToHl,
+    LoadFromImmediateAddressToAccumulator, LoadFromRegisterCOffsetToAccumulator, LoadImmediateToHl,
+    LoadRegisterToHl,
 };
 
 /// Create a instruction from an opcode.
@@ -70,6 +71,11 @@ pub fn decode(byte: u8) -> InstructionEnum {
                 .expect("3 bit value should always correspond to a register"),
             value: 0,
             phase: TwoPhases::First,
+        }
+        .into(),
+        "00110110" => LoadImmediateToHl {
+            value: 0,
+            phase: ThreePhases::First,
         }
         .into(),
         "11110000" => LoadFromImmediateOffsetToAccumulator {
