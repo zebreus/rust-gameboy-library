@@ -3,6 +3,7 @@ use crate::memory_device::MemoryDevice;
 use enum_dispatch::enum_dispatch;
 
 mod decode;
+mod load_accumulator_to_double_register;
 mod load_accumulator_to_hl_and_decrement;
 mod load_accumulator_to_hl_and_increment;
 mod load_accumulator_to_immediate_address;
@@ -24,6 +25,8 @@ pub mod phases;
 
 #[doc(inline)]
 pub use decode::decode;
+#[doc(inline)]
+pub use load_accumulator_to_double_register::LoadAccumulatorToDoubleRegister;
 #[doc(inline)]
 pub use load_accumulator_to_hl_and_decrement::LoadAccumulatorToHlAndDecrement;
 #[doc(inline)]
@@ -88,6 +91,8 @@ pub enum InstructionEnum {
     LoadFromImmediateAddressToAccumulator,
     /// See [LoadImmediateToHl]
     LoadImmediateToHl,
+    /// See [LoadAccumulatorToDoubleRegister]
+    LoadAccumulatorToDoubleRegister,
 }
 
 /// This is the trait for executable CPU instructions.

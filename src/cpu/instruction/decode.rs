@@ -1,5 +1,5 @@
 use crate::cpu::instruction::phases::{ThreePhases, TwoPhases};
-use crate::cpu::Register;
+use crate::cpu::{DoubleRegister, Register};
 use bitmatch::bitmatch;
 
 use super::phases::FourPhases;
@@ -15,9 +15,9 @@ use super::{
     load_immediate_to_register::LoadImmediateToRegister, InstructionEnum,
 };
 use super::{
-    LoadAccumulatorToImmediateAddress, LoadAccumulatorToRegisterCOffset,
-    LoadFromImmediateAddressToAccumulator, LoadFromRegisterCOffsetToAccumulator, LoadImmediateToHl,
-    LoadRegisterToHl,
+    LoadAccumulatorToDoubleRegister, LoadAccumulatorToImmediateAddress,
+    LoadAccumulatorToRegisterCOffset, LoadFromImmediateAddressToAccumulator,
+    LoadFromRegisterCOffsetToAccumulator, LoadImmediateToHl, LoadRegisterToHl,
 };
 
 /// Create a instruction from an opcode.
@@ -120,6 +120,14 @@ pub fn decode(byte: u8) -> InstructionEnum {
         "11101010" => LoadAccumulatorToImmediateAddress {
             address: 0,
             phase: FourPhases::First,
+        }
+        .into(),
+        "000a1010" => LoadAccumulatorToDoubleRegister {
+            address_register: match a {
+                0 => DoubleRegister::BC,
+                _ => DoubleRegister::DE,
+            },
+            phase: TwoPhases::First,
         }
         .into(),
         _ => LoadFromHlToRegister {
