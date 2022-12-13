@@ -16,6 +16,7 @@ mod load_from_register_to_register;
 mod load_hl_to_accumulator_and_decrement;
 mod load_hl_to_accumulator_and_increment;
 mod load_immediate_to_register;
+mod load_register_to_hl;
 
 /// Different phases for instructions
 pub mod phases;
@@ -48,12 +49,16 @@ pub use load_hl_to_accumulator_and_decrement::LoadHlToAccumulatorAndDecrement;
 pub use load_hl_to_accumulator_and_increment::LoadHlToAccumulatorAndIncrement;
 #[doc(inline)]
 pub use load_immediate_to_register::LoadImmediateToRegister;
+#[doc(inline)]
+pub use load_register_to_hl::LoadRegisterToHl;
 
 /// Contains a variant for every [Instruction]
 #[enum_dispatch]
 pub enum InstructionEnum {
     /// See [LoadFromHlToRegister]
     LoadFromHlToRegister,
+    /// See [LoadFromHlToRegister]
+    LoadRegisterToHl,
     /// See [LoadFromRegisterToRegister]
     LoadFromRegisterToRegister,
     /// See [LoadImmediateToRegister]
