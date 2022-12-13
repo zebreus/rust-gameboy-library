@@ -6,12 +6,15 @@ mod decode;
 mod load_accumulator_to_hl_and_decrement;
 mod load_accumulator_to_hl_and_increment;
 mod load_accumulator_to_immediate_offset;
+mod load_accumulator_to_register_c_offset;
 mod load_from_hl_to_register;
 mod load_from_immediate_offset_to_accumulator;
+mod load_from_register_c_offset_to_accumulator;
 mod load_from_register_to_register;
 mod load_hl_to_accumulator_and_decrement;
 mod load_hl_to_accumulator_and_increment;
 mod load_immediate_to_register;
+
 /// Different phases for instructions
 pub mod phases;
 
@@ -24,9 +27,13 @@ pub use load_accumulator_to_hl_and_increment::LoadAccumulatorToHlAndIncrement;
 #[doc(inline)]
 pub use load_accumulator_to_immediate_offset::LoadAccumulatorToImmediateOffset;
 #[doc(inline)]
+pub use load_accumulator_to_register_c_offset::LoadAccumulatorToRegisterCOffset;
+#[doc(inline)]
 pub use load_from_hl_to_register::LoadFromHlToRegister;
 #[doc(inline)]
 pub use load_from_immediate_offset_to_accumulator::LoadFromImmediateOffsetToAccumulator;
+#[doc(inline)]
+pub use load_from_register_c_offset_to_accumulator::LoadFromRegisterCOffsetToAccumulator;
 #[doc(inline)]
 pub use load_from_register_to_register::LoadFromRegisterToRegister;
 #[doc(inline)]
@@ -57,6 +64,10 @@ pub enum InstructionEnum {
     LoadAccumulatorToHlAndDecrement,
     /// See [LoadAccumulatorToHlAndIncrement]
     LoadAccumulatorToHlAndIncrement,
+    /// See [LoadAccumulatorToRegisterCOffset]
+    LoadAccumulatorToRegisterCOffset,
+    /// See [LoadFromRegisterCOffsetToAccumulator]
+    LoadFromRegisterCOffsetToAccumulator,
 }
 
 /// This is the trait for executable CPU instructions.
