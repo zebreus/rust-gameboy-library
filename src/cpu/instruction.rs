@@ -1,145 +1,122 @@
-use crate::memory_device::MemoryDevice;
-
-use super::Cpu;
 use super::CpuState;
+use crate::memory_device::MemoryDevice;
+use enum_dispatch::enum_dispatch;
 
-use super::DoubleRegister;
-use super::Register;
-
-/// Contains the decode function
 mod decode;
-/// Contains the encode method
-pub mod encode;
-/// Contains the execute method
-pub mod execute;
+mod load_accumulator_to_hl_and_decrement;
+mod load_accumulator_to_hl_and_increment;
+mod load_accumulator_to_immediate_offset;
+mod load_from_hl_to_register;
+mod load_from_immediate_offset_to_accumulator;
+mod load_from_register_to_register;
+mod load_hl_to_accumulator_and_decrement;
+mod load_hl_to_accumulator_and_increment;
+mod load_immediate_to_register;
+/// Different phases for instructions
+pub mod phases;
 
+#[doc(inline)]
 pub use decode::decode;
+#[doc(inline)]
+pub use load_accumulator_to_hl_and_decrement::LoadAccumulatorToHlAndDecrement;
+#[doc(inline)]
+pub use load_accumulator_to_hl_and_increment::LoadAccumulatorToHlAndIncrement;
+#[doc(inline)]
+pub use load_accumulator_to_immediate_offset::LoadAccumulatorToImmediateOffset;
+#[doc(inline)]
+pub use load_from_hl_to_register::LoadFromHlToRegister;
+#[doc(inline)]
+pub use load_from_immediate_offset_to_accumulator::LoadFromImmediateOffsetToAccumulator;
+#[doc(inline)]
+pub use load_from_register_to_register::LoadFromRegisterToRegister;
+#[doc(inline)]
+pub use load_hl_to_accumulator_and_decrement::LoadHlToAccumulatorAndDecrement;
+#[doc(inline)]
+pub use load_hl_to_accumulator_and_increment::LoadHlToAccumulatorAndIncrement;
+#[doc(inline)]
+pub use load_immediate_to_register::LoadImmediateToRegister;
 
-/// The phases of an instruction with two phases
-#[derive(Debug)]
-pub enum TwoPhases {
-    /// First phase
-    First,
-    /// Second phase
-    Second,
+/// Contains a variant for every [Instruction]
+#[enum_dispatch]
+pub enum InstructionEnum {
+    /// See [LoadFromHlToRegister]
+    LoadFromHlToRegister,
+    /// See [LoadFromRegisterToRegister]
+    LoadFromRegisterToRegister,
+    /// See [LoadImmediateToRegister]
+    LoadImmediateToRegister,
+    /// See [LoadAccumulatorToImmediateOffset]
+    LoadAccumulatorToImmediateOffset,
+    /// See [LoadFromImmediateOffsetToAccumulator]
+    LoadFromImmediateOffsetToAccumulator,
+    /// See [LoadHlToAccumulatorAndDecrement]
+    LoadHlToAccumulatorAndDecrement,
+    /// See [LoadHlToAccumulatorAndIncrement]
+    LoadHlToAccumulatorAndIncrement,
+    /// See [LoadAccumulatorToHlAndDecrement]
+    LoadAccumulatorToHlAndDecrement,
+    /// See [LoadAccumulatorToHlAndIncrement]
+    LoadAccumulatorToHlAndIncrement,
 }
 
-/// The phases of an instruction with three phases
-#[derive(Debug)]
-pub enum ThreePhases {
-    /// First phase
-    First,
-    /// Second phase
-    Second,
-    /// Third phase
-    Third,
-}
-
-/// The phases of an instruction with four phases
-#[derive(Debug)]
-pub enum FourPhases {
-    /// First phase
-    First,
-    /// Second phase
-    Second,
-    /// Third phase
-    Third,
-    /// Fourth phase
-    Fourth,
-}
-
-/// Instruction represents all available CPU instructions.
+/// This is the trait for executable CPU instructions.
 ///
 /// Each instruction is a struct that contains information on the current state of the instruction.
 ///
 /// Instructions that take longer then one cycle have a `phases` field indicating the current cycle of the instruction.
 ///
-/// Every instruction can be executed using the [execute] function.
-#[derive(Debug)]
-pub enum Instruction {
-    /// Copy data from one register to another one.
-    LoadFromRegisterToRegister {
-        /// The source register
-        source: Register,
-        /// The destination register
-        destination: Register,
-    },
-    /// Loads the byte following the opcode of the instruction to a register
-    LoadImmediateToRegister {
-        /// The destination register.
-        destination: Register,
-        /// The immediate value. Will only valid in the second phase.
-        value: u8,
-        /// The current phase of the instruction.
-        phase: TwoPhases,
-    },
-    /// Loads from memory at the address stored in [DoubleRegister::HL] to a register.
-    LoadFromHlToRegister {
-        /// The destination register.
-        destination: Register,
-        /// The current phase of the instruction.
-        phase: TwoPhases,
-    },
-    /// Stores the value of the [accumulator](Register::A) to memory at `0xff00 + the byte following the opcode` .
-    LoadAccumulatorToImmediateOffset {
-        /// The memory address offset from 0xff00. Only valid after the first phase.
-        offset: u8,
-        /// The current phase of the instruction.
-        phase: ThreePhases,
-    },
-    /// Loads from memory at `0xff00 + the byte following the opcode` into the [accumulator](Register::A).
-    LoadFromImmediateOffsetToAccumulator {
-        /// The memory address offset from 0xff00. Only valid after the first phase.
-        offset: u8,
-        /// The current phase of the instruction.
-        phase: ThreePhases,
-    },
-    /// Loads from memory at the address specified in [HL](DoubleRegister::HL) to the [accumulator](Register::A). Decrements [HL](DoubleRegister::HL) afterwards.
-    LoadHlToAccumulatorAndDecrement {
-        /// The current phase of the instruction.
-        phase: TwoPhases,
-    },
-    /// Stores the [accumulator](Register::A) to the address specified in [HL](DoubleRegister::HL). Decrements [HL](DoubleRegister::HL) afterwards.
-    LoadAccumulatorToHlAndDecrement {
-        /// The current phase of the instruction.
-        phase: TwoPhases,
-    },
-    /// Loads from memory at the address specified in [HL](DoubleRegister::HL) to the [accumulator](Register::A). Increments [HL](DoubleRegister::HL) afterwards.
-    LoadHlToAccumulatorAndIncrement {
-        /// The current phase of the instruction.
-        phase: TwoPhases,
-    },
-    /// Stores the [accumulator](Register::A) to the address specified in [HL](DoubleRegister::HL). Increments [HL](DoubleRegister::HL) afterwards.
-    LoadAccumulatorToHlAndIncrement {
-        /// The current phase of the instruction.
-        phase: TwoPhases,
-    },
-    /// Noop
-    None,
-}
-
-/// Load the next opcode
+/// Every instruction can be executed using the [Instruction::execute] function.
 ///
-/// Also increments the program counter
-pub fn load_opcode<T: Cpu>(cpu: &mut T, memory: &dyn MemoryDevice) -> u8 {
-    let opcode = memory.read(cpu.read_program_counter());
-    return opcode;
-}
-
-/// Load the next [Instruction]
-///
-/// Also increments the program counter
-pub fn load_instruction<T: Cpu>(cpu: &mut T, memory: &dyn MemoryDevice) -> Instruction {
-    let opcode = load_opcode(cpu, memory);
-    return decode(opcode);
+/// To be able to distinguish instructions at compile time all instructions have a corresponding variant in [InstructionEnum]
+#[enum_dispatch(InstructionEnum)]
+pub trait Instruction {
+    /// Execute the instruction on the cpu and memory. Returns the next instruction.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rust_gameboy_library::cpu::{CpuState, Cpu, Register};
+    /// # use rust_gameboy_library::cpu::instruction::Instruction;
+    /// # use rust_gameboy_library::debug_memory::DebugMemory;
+    /// #
+    /// let mut cpu = CpuState::new();
+    /// let mut memory = DebugMemory::new();
+    /// cpu.write_register(Register::A, 100);
+    ///
+    /// let instruction = Instruction::LoadFromRegisterToRegister {
+    ///     source: Register::A,
+    ///     destination: Register::C,
+    /// };
+    ///
+    /// instruction.execute(&mut cpu, &mut memory);
+    /// assert_eq!(cpu.read_register(Register::C), 100);
+    /// ```
+    fn execute<T: MemoryDevice>(&self, cpu: &mut CpuState, memory: &mut T) -> InstructionEnum;
+    /// Encode a instruction back into it's binary representation
+    ///
+    /// If the instruction is longer than 1 byte and has not yet read all relevant bytes, only the known bytes are returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rust_gameboy_library::cpu::Register;
+    /// # use rust_gameboy_library::cpu::instruction::Instruction;
+    /// #
+    /// let instruction = Instruction::LoadFromRegisterToRegister {
+    ///     source: Register::A,
+    ///     destination: Register::C,
+    /// };
+    ///
+    /// let encoded: Vec<u8> = instruction.encode();
+    /// assert_eq!(encoded, Vec::from([0b01000010u8]));
+    /// ```
+    fn encode(&self) -> Vec<u8>;
 }
 
 #[cfg(test)]
 mod tests {
-    use super::Cpu;
-    use super::CpuState;
-    use crate::cpu::instruction::load_instruction;
-    use crate::cpu::Register;
+    use crate::cpu::instruction::Instruction;
+    use crate::cpu::{Cpu, CpuState, Register};
     use crate::debug_memory::DebugMemory;
 
     #[test]
@@ -160,7 +137,7 @@ mod tests {
             42,
         ]);
 
-        let instruction = load_instruction(&mut cpu, &memory);
+        let instruction = cpu.load_instruction(&memory);
 
         let instruction = instruction.execute(&mut cpu, &mut memory);
         let instruction = instruction.execute(&mut cpu, &mut memory);

@@ -1,10 +1,18 @@
-/// Modulef
+use crate::cpu::instruction::phases::{ThreePhases, TwoPhases};
+use crate::cpu::Register;
 use bitmatch::bitmatch;
 
-use super::Instruction;
-use super::Register;
-use super::ThreePhases;
-use super::TwoPhases;
+use super::{
+    load_accumulator_to_hl_and_decrement::LoadAccumulatorToHlAndDecrement,
+    load_accumulator_to_hl_and_increment::LoadAccumulatorToHlAndIncrement,
+    load_accumulator_to_immediate_offset::LoadAccumulatorToImmediateOffset,
+    load_from_hl_to_register::LoadFromHlToRegister,
+    load_from_immediate_offset_to_accumulator::LoadFromImmediateOffsetToAccumulator,
+    load_from_register_to_register::LoadFromRegisterToRegister,
+    load_hl_to_accumulator_and_decrement::LoadHlToAccumulatorAndDecrement,
+    load_hl_to_accumulator_and_increment::LoadHlToAccumulatorAndIncrement,
+    load_immediate_to_register::LoadImmediateToRegister, InstructionEnum,
+};
 
 /// Create a instruction from an opcode.
 ///
@@ -28,56 +36,78 @@ use super::TwoPhases;
 /// ))
 /// ```
 #[bitmatch]
-pub fn decode(byte: u8) -> Instruction {
+pub fn decode(byte: u8) -> InstructionEnum {
     #[bitmatch]
-    // TODO: How can we get rid of this (soon) massive match clause
+    // We probably cannot get rid of this massive match clause
     match byte {
-        "01aaa110" => Instruction::LoadFromHlToRegister {
+        "01aaa110" => LoadFromHlToRegister {
             destination: Register::try_from(a)
                 .expect("3 bit value should always correspond to a register"),
             phase: TwoPhases::First,
-        },
-        "01aaabbb" => Instruction::LoadFromRegisterToRegister {
+        }
+        .into(),
+        "01aaabbb" => LoadFromRegisterToRegister {
             source: Register::try_from(a)
                 .expect("3 bit value should always correspond to a register"),
             destination: Register::try_from(b)
                 .expect("3 bit value should always correspond to a register"),
-        },
-        "00aaa110" => Instruction::LoadImmediateToRegister {
+        }
+        .into(),
+        "00aaa110" => LoadImmediateToRegister {
             destination: Register::try_from(a)
                 .expect("3 bit value should always correspond to a register"),
             value: 0,
             phase: TwoPhases::First,
-        },
-        "11110000" => Instruction::LoadFromImmediateOffsetToAccumulator {
+        }
+        .into(),
+        "11110000" => LoadFromImmediateOffsetToAccumulator {
             offset: 0,
             phase: ThreePhases::First,
-        },
-        "11100000" => Instruction::LoadAccumulatorToImmediateOffset {
+        }
+        .into(),
+        "11100000" => LoadAccumulatorToImmediateOffset {
             offset: 0,
             phase: ThreePhases::First,
-        },
-        "00111010" => Instruction::LoadHlToAccumulatorAndDecrement {
+        }
+        .into(),
+        "00111010" => LoadHlToAccumulatorAndDecrement {
             phase: TwoPhases::First,
-        },
-        "00110010" => Instruction::LoadAccumulatorToHlAndDecrement {
+        }
+        .into(),
+        "00110010" => LoadAccumulatorToHlAndDecrement {
             phase: TwoPhases::First,
-        },
-        "00101010" => Instruction::LoadHlToAccumulatorAndIncrement {
+        }
+        .into(),
+        "00101010" => LoadHlToAccumulatorAndIncrement {
             phase: TwoPhases::First,
-        },
-        "00100010" => Instruction::LoadAccumulatorToHlAndIncrement {
+        }
+        .into(),
+        "00100010" => LoadAccumulatorToHlAndIncrement {
             phase: TwoPhases::First,
-        },
-        _ => Instruction::None {},
+        }
+        .into(),
+        _ => LoadFromHlToRegister {
+            destination: Register::A,
+            phase: TwoPhases::First,
+        }
+        .into(),
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::decode;
-    use super::Instruction;
-    use crate::cpu::Register;
+    use crate::cpu::{
+        instruction::{
+            load_from_hl_to_register::LoadFromHlToRegister,
+            load_from_register_to_register::LoadFromRegisterToRegister,
+            load_immediate_to_register::LoadImmediateToRegister, InstructionEnum,
+            LoadAccumulatorToHlAndDecrement, LoadAccumulatorToHlAndIncrement,
+            LoadAccumulatorToImmediateOffset, LoadFromImmediateOffsetToAccumulator,
+            LoadHlToAccumulatorAndDecrement, LoadHlToAccumulatorAndIncrement,
+        },
+        Register,
+    };
 
     #[test]
     fn decode_load_from_register_to_register() {
@@ -85,10 +115,10 @@ mod tests {
         let instruction = decode(load_a_to_c);
         assert!(matches!(
             instruction,
-            Instruction::LoadFromRegisterToRegister {
+            InstructionEnum::LoadFromRegisterToRegister(LoadFromRegisterToRegister {
                 source: Register::A,
                 destination: Register::C
-            }
+            })
         ))
     }
 
@@ -98,10 +128,10 @@ mod tests {
         let instruction = decode(load_a_to_c);
         assert!(matches!(
             instruction,
-            Instruction::LoadFromHlToRegister {
+            InstructionEnum::LoadFromHlToRegister(LoadFromHlToRegister {
                 destination: Register::A,
                 phase: _
-            }
+            })
         ))
     }
 
@@ -111,11 +141,11 @@ mod tests {
         let instruction = decode(load_a_to_c);
         assert!(matches!(
             instruction,
-            Instruction::LoadImmediateToRegister {
+            InstructionEnum::LoadImmediateToRegister(LoadImmediateToRegister {
                 destination: Register::A,
                 value: _,
                 phase: _
-            }
+            })
         ))
     }
 
@@ -125,10 +155,12 @@ mod tests {
         let instruction = decode(opcode);
         assert!(matches!(
             instruction,
-            Instruction::LoadFromImmediateOffsetToAccumulator {
-                phase: _,
-                offset: _
-            }
+            InstructionEnum::LoadFromImmediateOffsetToAccumulator(
+                LoadFromImmediateOffsetToAccumulator {
+                    phase: _,
+                    offset: _
+                }
+            )
         ))
     }
 
@@ -138,10 +170,10 @@ mod tests {
         let instruction = decode(opcode);
         assert!(matches!(
             instruction,
-            Instruction::LoadAccumulatorToImmediateOffset {
+            InstructionEnum::LoadAccumulatorToImmediateOffset(LoadAccumulatorToImmediateOffset {
                 phase: _,
                 offset: _
-            }
+            })
         ))
     }
 
@@ -151,7 +183,9 @@ mod tests {
         let instruction = decode(opcode);
         assert!(matches!(
             instruction,
-            Instruction::LoadHlToAccumulatorAndDecrement { phase: _ }
+            InstructionEnum::LoadHlToAccumulatorAndDecrement(LoadHlToAccumulatorAndDecrement {
+                phase: _
+            })
         ))
     }
 
@@ -161,7 +195,9 @@ mod tests {
         let instruction = decode(opcode);
         assert!(matches!(
             instruction,
-            Instruction::LoadAccumulatorToHlAndDecrement { phase: _ }
+            InstructionEnum::LoadAccumulatorToHlAndDecrement(LoadAccumulatorToHlAndDecrement {
+                phase: _
+            })
         ))
     }
 
@@ -171,7 +207,9 @@ mod tests {
         let instruction = decode(opcode);
         assert!(matches!(
             instruction,
-            Instruction::LoadHlToAccumulatorAndIncrement { phase: _ }
+            InstructionEnum::LoadHlToAccumulatorAndIncrement(LoadHlToAccumulatorAndIncrement {
+                phase: _
+            })
         ))
     }
     #[test]
@@ -180,7 +218,9 @@ mod tests {
         let instruction = decode(opcode);
         assert!(matches!(
             instruction,
-            Instruction::LoadAccumulatorToHlAndIncrement { phase: _ }
+            InstructionEnum::LoadAccumulatorToHlAndIncrement(LoadAccumulatorToHlAndIncrement {
+                phase: _
+            })
         ))
     }
 }

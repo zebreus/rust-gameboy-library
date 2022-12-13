@@ -1,7 +1,12 @@
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
-/// Contains Instructions
+use crate::memory_device::MemoryDevice;
+
+/// Instructions can be executed to modify cpu state and memory
 pub mod instruction;
+
+use self::instruction::decode;
+use self::instruction::InstructionEnum;
 
 /// The CpuState stores the internal state of the gameboy processor.
 ///
@@ -30,6 +35,21 @@ impl CpuState {
             stack_pointer: 0xFFFE,
             registers: [0, 0, 0, 0, 0, 0, 0, 0],
         }
+    }
+    /// Load the next opcode
+    ///
+    /// Also increments the program counter
+    pub fn load_opcode(&mut self, memory: &dyn MemoryDevice) -> u8 {
+        let opcode = memory.read(self.read_program_counter());
+        return opcode;
+    }
+
+    /// Load the next [Instruction]
+    ///
+    /// Also increments the program counter
+    pub fn load_instruction(&mut self, memory: &dyn MemoryDevice) -> InstructionEnum {
+        let opcode = self.load_opcode(memory);
+        return decode(opcode);
     }
 }
 
@@ -189,10 +209,9 @@ impl DoubleRegister {
 
 #[cfg(test)]
 mod tests {
-    use super::instruction::{load_instruction, Instruction};
+    use super::instruction::{InstructionEnum, LoadFromRegisterToRegister};
     use super::Cpu;
     use super::{CpuState, DoubleRegister};
-    use crate::cpu::instruction::load_opcode;
     use crate::cpu::Register;
     use crate::debug_memory::DebugMemory;
 
@@ -225,11 +244,11 @@ mod tests {
         let mut cpu = CpuState::new();
 
         let memory = DebugMemory::new_with_init(&[0b01000010u8, 8]);
-        let opcode = load_opcode(&mut cpu, &memory);
+        let opcode = cpu.load_opcode(&memory);
 
         assert_eq!(opcode, 0b01000010u8);
 
-        let opcode = load_opcode(&mut cpu, &memory);
+        let opcode = cpu.load_opcode(&memory);
         assert_eq!(opcode, 8);
     }
 
@@ -239,13 +258,13 @@ mod tests {
         cpu.write_register(Register::A, 100);
 
         let memory = DebugMemory::new_with_init(&[0b01000010u8]);
-        let instruction = load_instruction(&mut cpu, &memory);
+        let instruction = cpu.load_instruction(&memory);
         assert!(matches!(
             instruction,
-            Instruction::LoadFromRegisterToRegister {
+            InstructionEnum::LoadFromRegisterToRegister(LoadFromRegisterToRegister {
                 source: Register::A,
                 destination: Register::C
-            }
+            })
         ))
     }
 }
