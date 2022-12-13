@@ -16,8 +16,9 @@ use super::{
 };
 use super::{
     LoadAccumulatorToDoubleRegister, LoadAccumulatorToImmediateAddress,
-    LoadAccumulatorToRegisterCOffset, LoadFromImmediateAddressToAccumulator,
-    LoadFromRegisterCOffsetToAccumulator, LoadImmediateToHl, LoadRegisterToHl,
+    LoadAccumulatorToRegisterCOffset, LoadFromDoubleRegisterToAccumulator,
+    LoadFromImmediateAddressToAccumulator, LoadFromRegisterCOffsetToAccumulator, LoadImmediateToHl,
+    LoadRegisterToHl,
 };
 
 /// Create a instruction from an opcode.
@@ -123,6 +124,14 @@ pub fn decode(byte: u8) -> InstructionEnum {
         }
         .into(),
         "000a1010" => LoadAccumulatorToDoubleRegister {
+            address_register: match a {
+                0 => DoubleRegister::BC,
+                _ => DoubleRegister::DE,
+            },
+            phase: TwoPhases::First,
+        }
+        .into(),
+        "000a0010" => LoadFromDoubleRegisterToAccumulator {
             address_register: match a {
                 0 => DoubleRegister::BC,
                 _ => DoubleRegister::DE,

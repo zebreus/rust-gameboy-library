@@ -9,6 +9,7 @@ mod load_accumulator_to_hl_and_increment;
 mod load_accumulator_to_immediate_address;
 mod load_accumulator_to_immediate_offset;
 mod load_accumulator_to_register_c_offset;
+mod load_from_double_register_to_accumulator;
 mod load_from_hl_to_register;
 mod load_from_immediate_address_to_accumulator;
 mod load_from_immediate_offset_to_accumulator;
@@ -37,6 +38,8 @@ pub use load_accumulator_to_immediate_address::LoadAccumulatorToImmediateAddress
 pub use load_accumulator_to_immediate_offset::LoadAccumulatorToImmediateOffset;
 #[doc(inline)]
 pub use load_accumulator_to_register_c_offset::LoadAccumulatorToRegisterCOffset;
+#[doc(inline)]
+pub use load_from_double_register_to_accumulator::LoadFromDoubleRegisterToAccumulator;
 #[doc(inline)]
 pub use load_from_hl_to_register::LoadFromHlToRegister;
 #[doc(inline)]
@@ -93,6 +96,8 @@ pub enum InstructionEnum {
     LoadImmediateToHl,
     /// See [LoadAccumulatorToDoubleRegister]
     LoadAccumulatorToDoubleRegister,
+    /// See [LoadFromDoubleRegisterToAccumulator]
+    LoadFromDoubleRegisterToAccumulator,
 }
 
 /// This is the trait for executable CPU instructions.
