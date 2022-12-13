@@ -2,6 +2,7 @@ use crate::cpu::instruction::phases::{ThreePhases, TwoPhases};
 use crate::cpu::Register;
 use bitmatch::bitmatch;
 
+use super::phases::FourPhases;
 use super::{
     load_accumulator_to_hl_and_decrement::LoadAccumulatorToHlAndDecrement,
     load_accumulator_to_hl_and_increment::LoadAccumulatorToHlAndIncrement,
@@ -12,6 +13,10 @@ use super::{
     load_hl_to_accumulator_and_decrement::LoadHlToAccumulatorAndDecrement,
     load_hl_to_accumulator_and_increment::LoadHlToAccumulatorAndIncrement,
     load_immediate_to_register::LoadImmediateToRegister, InstructionEnum,
+};
+use super::{
+    LoadAccumulatorToImmediateAddress, LoadAccumulatorToRegisterCOffset,
+    LoadFromImmediateAddressToAccumulator, LoadFromRegisterCOffsetToAccumulator,
 };
 
 /// Create a instruction from an opcode.
@@ -85,6 +90,24 @@ pub fn decode(byte: u8) -> InstructionEnum {
         .into(),
         "00100010" => LoadAccumulatorToHlAndIncrement {
             phase: TwoPhases::First,
+        }
+        .into(),
+        "11110010" => LoadFromRegisterCOffsetToAccumulator {
+            phase: TwoPhases::First,
+        }
+        .into(),
+        "11100010" => LoadAccumulatorToRegisterCOffset {
+            phase: TwoPhases::First,
+        }
+        .into(),
+        "11111010" => LoadFromImmediateAddressToAccumulator {
+            address: 0,
+            phase: FourPhases::First,
+        }
+        .into(),
+        "11101010" => LoadAccumulatorToImmediateAddress {
+            address: 0,
+            phase: FourPhases::First,
         }
         .into(),
         _ => LoadFromHlToRegister {

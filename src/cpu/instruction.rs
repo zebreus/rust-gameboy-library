@@ -5,9 +5,11 @@ use enum_dispatch::enum_dispatch;
 mod decode;
 mod load_accumulator_to_hl_and_decrement;
 mod load_accumulator_to_hl_and_increment;
+mod load_accumulator_to_immediate_address;
 mod load_accumulator_to_immediate_offset;
 mod load_accumulator_to_register_c_offset;
 mod load_from_hl_to_register;
+mod load_from_immediate_address_to_accumulator;
 mod load_from_immediate_offset_to_accumulator;
 mod load_from_register_c_offset_to_accumulator;
 mod load_from_register_to_register;
@@ -25,11 +27,15 @@ pub use load_accumulator_to_hl_and_decrement::LoadAccumulatorToHlAndDecrement;
 #[doc(inline)]
 pub use load_accumulator_to_hl_and_increment::LoadAccumulatorToHlAndIncrement;
 #[doc(inline)]
+pub use load_accumulator_to_immediate_address::LoadAccumulatorToImmediateAddress;
+#[doc(inline)]
 pub use load_accumulator_to_immediate_offset::LoadAccumulatorToImmediateOffset;
 #[doc(inline)]
 pub use load_accumulator_to_register_c_offset::LoadAccumulatorToRegisterCOffset;
 #[doc(inline)]
 pub use load_from_hl_to_register::LoadFromHlToRegister;
+#[doc(inline)]
+pub use load_from_immediate_address_to_accumulator::LoadFromImmediateAddressToAccumulator;
 #[doc(inline)]
 pub use load_from_immediate_offset_to_accumulator::LoadFromImmediateOffsetToAccumulator;
 #[doc(inline)]
@@ -68,6 +74,10 @@ pub enum InstructionEnum {
     LoadAccumulatorToRegisterCOffset,
     /// See [LoadFromRegisterCOffsetToAccumulator]
     LoadFromRegisterCOffsetToAccumulator,
+    /// See [LoadAccumulatorToImmediateAddress]
+    LoadAccumulatorToImmediateAddress,
+    /// See [LoadFromImmediateAddressToAccumulator]
+    LoadFromImmediateAddressToAccumulator,
 }
 
 /// This is the trait for executable CPU instructions.
