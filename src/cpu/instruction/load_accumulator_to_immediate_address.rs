@@ -4,7 +4,9 @@ use crate::{
     memory_device::MemoryDevice,
 };
 
-/// Stores the value of the [accumulator](Register::A) to memory at `0xff00 + the byte following the opcode` .
+/// Stores the value of the [accumulator](Register::A) to memory at `the second byte following the opcode + the byte following the opcode` .
+///
+/// Reads from program counter: `opcode` `address lsb` `address msb`
 pub struct LoadAccumulatorToImmediateAddress {
     /// The memory address. Only valid after the second phase.
     pub address: u16,
