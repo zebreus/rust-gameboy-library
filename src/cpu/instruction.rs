@@ -4,6 +4,7 @@ use enum_dispatch::enum_dispatch;
 
 mod decode;
 mod jump_by_immediate_offset;
+mod jump_by_immediate_offset_conditional;
 mod jump_to_hl;
 mod jump_to_immediate_address;
 mod jump_to_immediate_address_conditional;
@@ -37,6 +38,8 @@ pub mod phases;
 pub use decode::decode;
 #[doc(inline)]
 pub use jump_by_immediate_offset::JumpByImmediateOffset;
+#[doc(inline)]
+pub use jump_by_immediate_offset_conditional::JumpByImmediateOffsetConditional;
 #[doc(inline)]
 pub use jump_to_hl::JumpToHl;
 #[doc(inline)]
@@ -143,6 +146,8 @@ pub enum InstructionEnum {
     JumpToHl,
     /// See [JumpByImmediateOffset]
     JumpByImmediateOffset,
+    /// See [JumpByImmediateOffsetConditional]
+    JumpByImmediateOffsetConditional,
 }
 
 /// This is the trait for executable CPU instructions.
