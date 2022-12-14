@@ -15,12 +15,13 @@ use super::{
     load_immediate_to_register::LoadImmediateToRegister, InstructionEnum,
 };
 use super::{
-    JumpToHl, JumpToImmediateAddress, JumpToImmediateAddressConditional,
-    LoadAccumulatorToDoubleRegister, LoadAccumulatorToImmediateAddress,
-    LoadAccumulatorToRegisterCOffset, LoadFromDoubleRegisterToAccumulator,
-    LoadFromImmediateAddressToAccumulator, LoadFromRegisterCOffsetToAccumulator, LoadHlToSp,
-    LoadImmediateToDoubleRegister, LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress,
-    PopDoubleRegister, PushDoubleRegister,
+    JumpByImmediateOffset, JumpByImmediateOffsetConditional, JumpToHl, JumpToImmediateAddress,
+    JumpToImmediateAddressConditional, LoadAccumulatorToDoubleRegister,
+    LoadAccumulatorToImmediateAddress, LoadAccumulatorToRegisterCOffset,
+    LoadFromDoubleRegisterToAccumulator, LoadFromImmediateAddressToAccumulator,
+    LoadFromRegisterCOffsetToAccumulator, LoadHlToSp, LoadImmediateToDoubleRegister,
+    LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress, PopDoubleRegister,
+    PushDoubleRegister,
 };
 
 /// Create a instruction from an opcode.
@@ -102,6 +103,13 @@ pub fn decode(byte: u8) -> InstructionEnum {
             phase: FourPhases::First,
         }
         .into(),
+        "001aa000" => JumpByImmediateOffsetConditional {
+            condition: ConditionCode::try_from(a)
+                .expect("3 bit value should always correspond to a register"),
+            offset: 0,
+            phase: ThreePhases::First,
+        }
+        .into(),
         "00110110" => LoadImmediateToHl {
             value: 0,
             phase: ThreePhases::First,
@@ -179,6 +187,11 @@ pub fn decode(byte: u8) -> InstructionEnum {
         "11000011" => JumpToImmediateAddress {
             address: 0,
             phase: FourPhases::First,
+        }
+        .into(),
+        "00011000" => JumpByImmediateOffset {
+            offset: 0,
+            phase: ThreePhases::First,
         }
         .into(),
         "11101001" => JumpToHl {
