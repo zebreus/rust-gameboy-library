@@ -3,6 +3,7 @@ use crate::memory_device::MemoryDevice;
 use enum_dispatch::enum_dispatch;
 
 mod decode;
+mod jumb_by_immediate_address;
 mod load_accumulator_to_double_register;
 mod load_accumulator_to_hl_and_decrement;
 mod load_accumulator_to_hl_and_increment;
@@ -31,6 +32,8 @@ pub mod phases;
 
 #[doc(inline)]
 pub use decode::decode;
+#[doc(inline)]
+pub use jumb_by_immediate_address::JumpByImmediateAddress;
 #[doc(inline)]
 pub use load_accumulator_to_double_register::LoadAccumulatorToDoubleRegister;
 #[doc(inline)]
@@ -123,6 +126,8 @@ pub enum InstructionEnum {
     PushDoubleRegister,
     /// See [PopDoubleRegister]
     PopDoubleRegister,
+    /// See [JumpByImmediateAddress]
+    JumpByImmediateAddress,
 }
 
 /// This is the trait for executable CPU instructions.
