@@ -17,7 +17,7 @@ use super::{
 use super::{
     LoadAccumulatorToDoubleRegister, LoadAccumulatorToImmediateAddress,
     LoadAccumulatorToRegisterCOffset, LoadFromDoubleRegisterToAccumulator,
-    LoadFromImmediateAddressToAccumulator, LoadFromRegisterCOffsetToAccumulator,
+    LoadFromImmediateAddressToAccumulator, LoadFromRegisterCOffsetToAccumulator, LoadHlToSp,
     LoadImmediateToDoubleRegister, LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress,
 };
 
@@ -149,6 +149,10 @@ pub fn decode(byte: u8) -> InstructionEnum {
         "00001000" => LoadSpToImmediateAddress {
             address: 0,
             phase: FivePhases::First,
+        }
+        .into(),
+        "11111001" => LoadHlToSp {
+            phase: TwoPhases::First,
         }
         .into(),
         _ => LoadFromHlToRegister {
