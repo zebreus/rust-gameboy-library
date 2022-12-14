@@ -34,7 +34,7 @@ use super::{
 /// # use rust_gameboy_library::cpu::instruction::LoadFromRegisterToRegister;
 /// # use rust_gameboy_library::cpu::instruction::decode;
 /// #
-/// let load_a_to_c = 0b01000010u8;
+/// let load_a_to_c = 0b01111001u8;
 /// let instruction = decode(load_a_to_c);
 /// assert!(matches!(
 ///     instruction,
@@ -193,7 +193,7 @@ mod tests {
 
     #[test]
     fn decode_load_from_register_to_register() {
-        let load_a_to_c = 0b01000010u8;
+        let load_a_to_c = 0b01111001u8;
         let instruction = decode(load_a_to_c);
         assert!(matches!(
             instruction,
@@ -206,7 +206,7 @@ mod tests {
 
     #[test]
     fn decode_load_from_hl_to_register() {
-        let load_a_to_c = 0b01000110u8;
+        let load_a_to_c = 0b01111110u8;
         let instruction = decode(load_a_to_c);
         assert!(matches!(
             instruction,
@@ -219,7 +219,7 @@ mod tests {
 
     #[test]
     fn decode_load_immediate_to_register() {
-        let load_a_to_c = 0b00000110u8;
+        let load_a_to_c = 0b00111110u8;
         let instruction = decode(load_a_to_c);
         assert!(matches!(
             instruction,

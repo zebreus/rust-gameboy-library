@@ -83,6 +83,5 @@ mod tests {
         instruction.execute(&mut cpu, &mut memory);
 
         assert_eq!(cpu.read_register(Register::B), 42);
-        assert_eq!(cpu.read_register(Register::A), 0);
     }
 }

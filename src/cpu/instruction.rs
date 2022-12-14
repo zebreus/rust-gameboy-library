@@ -176,7 +176,7 @@ pub trait Instruction {
     /// };
     ///
     /// let encoded: Vec<u8> = instruction.encode();
-    /// assert_eq!(encoded, Vec::from([0b01000010u8]));
+    /// assert_eq!(encoded, Vec::from([0b01111001u8]));
     /// ```
     fn encode(&self) -> Vec<u8>;
 }
@@ -191,13 +191,16 @@ mod tests {
     fn load_from_hl_works() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
+        cpu.write_register(Register::A, 0);
+        cpu.write_register(Register::B, 0);
+        cpu.write_register(Register::C, 0);
 
         let mut memory = DebugMemory::new_with_init(&[
-            0b00110110,
+            0b00100110,
             0,
-            0b00111110,
+            0b00101110,
             9,
-            0b01000110u8,
+            0b01111110u8,
             0,
             0,
             0,

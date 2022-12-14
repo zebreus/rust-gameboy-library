@@ -31,9 +31,9 @@ impl CpuState {
     /// ```
     pub fn new() -> Self {
         Self {
-            program_counter: 0,
+            program_counter: 0, // 0x0100
             stack_pointer: 0xFFFE,
-            registers: [0, 0, 0, 0, 0, 0, 0, 0],
+            registers: [0x00, 0x13, 0x00, 0xD8, 0x01, 0x4d, 0xB0, 0x01],
         }
     }
     /// Load the next opcode
@@ -80,6 +80,12 @@ pub trait Cpu {
     ///
     /// The documentation for [DoubleRegister] contains more information on the values.
     fn write_double_register(&mut self, register: DoubleRegister, value: u16) -> ();
+    /// Read the value of a flag
+    fn read_flag(&self, flag: Flag) -> bool;
+    /// Write the value of a flag
+    fn write_flag(&mut self, flag: Flag, value: bool);
+    /// Check if a condition is currently satisfied
+    fn check_condition(&self, condition_code: ConditionCode) -> bool;
 }
 
 impl Cpu for CpuState {
@@ -111,16 +117,37 @@ impl Cpu for CpuState {
     }
     fn read_double_register(&self, register: DoubleRegister) -> u16 {
         let registers = register.id();
-        let low: u16 = self.read_register(registers.lsb).into();
-        let high: u16 = self.read_register(registers.msb).into();
-        let value: u16 = high << 8 | low;
+        let lsb = self.read_register(registers.lsb);
+        let msb = self.read_register(registers.msb);
+        let value: u16 = u16::from_le_bytes([lsb, msb]);
         return value;
     }
     fn write_double_register(&mut self, register: DoubleRegister, value: u16) -> () {
         let registers = register.id();
-        let [high, low] = u16::to_be_bytes(value);
-        self.write_register(registers.msb, high);
-        self.write_register(registers.lsb, low);
+        let [lsb, msb] = u16::to_le_bytes(value);
+        self.write_register(registers.msb, msb);
+        self.write_register(registers.lsb, lsb);
+    }
+    fn read_flag(&self, flag: Flag) -> bool {
+        let flags_register = self.read_register(Register::F);
+        (flags_register & (flag as u8)) == (flag as u8)
+    }
+    fn write_flag(&mut self, flag: Flag, value: bool) {
+        let flags_register = self.read_register(Register::F);
+        let flags_register = if value {
+            flags_register | (flag as u8)
+        } else {
+            flags_register & (!(flag as u8))
+        };
+        self.write_register(Register::F, flags_register);
+    }
+    fn check_condition(&self, condition_code: ConditionCode) -> bool {
+        match condition_code {
+            ConditionCode::ZeroFlagUnset => self.read_flag(Flag::Zero) == false,
+            ConditionCode::ZeroFlagSet => self.read_flag(Flag::Zero) == true,
+            ConditionCode::CarryFlagUnset => self.read_flag(Flag::Carry) == false,
+            ConditionCode::CarryFlagSet => self.read_flag(Flag::Carry) == true,
+        }
     }
 }
 
@@ -130,32 +157,39 @@ impl Cpu for CpuState {
 /// The registers are named A, B, C, D, E, F, H, and L.
 /// The registers are accessed by the `read_register`
 ///
-/// [Register::A] also acts as the accumulator.
+/// The number this enum uses for each register corresponds to it's binary representation in opcodes.
+/// The opcode for loading an immediate value to a register contains three bits a (`00aaa110`) which select the target register. They can be set to the value of a variant from this enum.
 #[derive(TryFromPrimitive, Debug, IntoPrimitive, Clone, Copy)]
 #[repr(u8)]
 pub enum Register {
-    /// A general purpose register. Acts as the accumulator for some instructions.
-    A = 0,
     /// A general purpose register.
-    B = 1,
+    B = 0b000,
     /// A general purpose register.
-    C = 2,
+    C = 0b001,
     /// A general purpose register.
-    D = 3,
+    D = 0b010,
     /// A general purpose register.
-    E = 4,
+    E = 0b011,
+    /// A general purpose register. Part of [DoubleRegister::HL].
+    H = 0b100,
+    /// A general purpose register. Part of [DoubleRegister::HL].
+    L = 0b101,
     /// The flags register.
     ///
+    /// Inaccessible for most operations.
+    ///
+    /// Flags get set by many instructions.
+    ///
     /// Contains flags set and used by various instructions.
+    ///
+    /// Table, when the bitorder is `0b76543210`:
     ///
     /// |  Bit 0   |   Bit 1  |   Bit 2  |   Bit 3  | Bit 4 |   Bit 5    |  Bit 6   | Bit 7 |
     /// |----------|----------|----------|----------|-------|------------|----------|-------|
     /// | readonly | readonly | readonly | readonly | carry | half-carry | negative | zero  |
-    F = 5,
-    /// A general purpose register. The high part of the address DoubleRegister [HL](DoubleRegister::HL)
-    H = 6,
-    /// A general purpose register. The low part of the address DoubleRegister [HL](DoubleRegister::HL)
-    L = 7,
+    F = 0b110,
+    /// A general purpose register. Acts as the accumulator for some instructions.
+    A = 0b111,
 }
 
 impl Register {
@@ -216,6 +250,44 @@ impl DoubleRegister {
     }
 }
 
+/// Condition codes that are used in conditional jump opcodes
+#[derive(TryFromPrimitive, Debug, IntoPrimitive, Clone, Copy)]
+#[repr(u8)]
+pub enum ConditionCode {
+    /// Jump if Z flag is reset.
+    ///
+    /// Named `NZ` in assembler
+    ZeroFlagUnset = 0b00,
+    /// Jump if Z flag is set.
+    ///
+    /// Named `Z` in assembler
+    ZeroFlagSet = 0b01,
+    /// Jump if C flag is reset.
+    ///
+    /// Named `NC` in assembler
+    CarryFlagUnset = 0b10,
+    /// Jump if C flag is set.
+    ///
+    /// Named `C` in assembler
+    CarryFlagSet = 0b11,
+}
+
+/// Condition codes that are used in conditional jump opcodes
+///
+/// The value of every element is a byte with a single bit set to 1. The set bit corresponds to the flags bit in the flags register.
+#[derive(TryFromPrimitive, Debug, IntoPrimitive, Clone, Copy)]
+#[repr(u8)]
+pub enum Flag {
+    /// Set if zero was the result of the last math operation. Also set if values compared with [CP] match.
+    Zero = 0b10000000,
+    /// Set if the last math operation included a subtraction
+    Subtract = 0b01000000,
+    /// Set if a carry on the lower nibble occurred in the last math operation
+    HalfCarry = 0b00100000,
+    /// Set if a carry occurred in the last math operation
+    Carry = 0b00010000,
+}
+
 #[cfg(test)]
 mod tests {
     use super::instruction::{InstructionEnum, LoadFromRegisterToRegister};
@@ -266,7 +338,7 @@ mod tests {
         let mut cpu = CpuState::new();
         cpu.write_register(Register::A, 100);
 
-        let memory = DebugMemory::new_with_init(&[0b01000010u8]);
+        let memory = DebugMemory::new_with_init(&[0b01111001u8]);
         let instruction = cpu.load_instruction(&memory);
         assert!(matches!(
             instruction,

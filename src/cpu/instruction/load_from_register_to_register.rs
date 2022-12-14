@@ -37,6 +37,7 @@ mod tests {
     #[test]
     fn load_instruction_works() {
         let mut cpu = CpuState::new();
+        cpu.write_register(Register::C, 0);
         cpu.write_register(Register::A, 100);
 
         let mut memory = DebugMemory::new();
