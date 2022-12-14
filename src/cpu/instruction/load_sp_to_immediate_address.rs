@@ -2,9 +2,12 @@ use super::phases::FivePhases;
 use super::Instruction;
 use crate::{cpu::Cpu, memory_device::MemoryDevice};
 
-/// Loads the two bytes following the opcode of the instruction to a double register
+/// Stores the value of the stackpointer to an address specified by the two bytes following the opcode.
+///
+/// The lsb of the stackpointer is stored at the specified address.
+/// The msb of the stackpointer is stored at the specified address + 1.
 pub struct LoadSpToImmediateAddress {
-    /// The immediate value. Will only valid after the second phase.
+    /// The target address. Will only valid after the second phase.
     pub address: u16,
     /// The current phase of the instruction.
     pub phase: FivePhases,
