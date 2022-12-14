@@ -43,7 +43,7 @@ impl Instruction for PushDoubleRegister {
                 .into()
             }
             FourPhases::Third => {
-                let data = cpu.read_register(self.source.id().low);
+                let data = cpu.read_register(self.source.id().lsb);
                 memory.write(cpu.read_stack_pointer(), data);
 
                 Self {
@@ -74,7 +74,7 @@ mod tests {
     use crate::memory_device::MemoryDevice;
 
     #[test]
-    fn load_immediate_to_double_register_works() {
+    fn push_double_register_works() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
         let mut memory = DebugMemory::new();

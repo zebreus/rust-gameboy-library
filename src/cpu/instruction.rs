@@ -23,6 +23,7 @@ mod load_immediate_to_hl;
 mod load_immediate_to_register;
 mod load_register_to_hl;
 mod load_sp_to_immediate_address;
+mod pop_double_register;
 mod push_double_register;
 
 /// Different phases for instructions
@@ -71,6 +72,8 @@ pub use load_register_to_hl::LoadRegisterToHl;
 #[doc(inline)]
 pub use load_sp_to_immediate_address::LoadSpToImmediateAddress;
 #[doc(inline)]
+pub use pop_double_register::PopDoubleRegister;
+#[doc(inline)]
 pub use push_double_register::PushDoubleRegister;
 
 /// Contains a variant for every [Instruction]
@@ -118,6 +121,8 @@ pub enum InstructionEnum {
     LoadHlToSp,
     /// See [PushDoubleRegister]
     PushDoubleRegister,
+    /// See [PopDoubleRegister]
+    PopDoubleRegister,
 }
 
 /// This is the trait for executable CPU instructions.

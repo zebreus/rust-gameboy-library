@@ -111,7 +111,7 @@ impl Cpu for CpuState {
     }
     fn read_double_register(&self, register: DoubleRegister) -> u16 {
         let registers = register.id();
-        let low: u16 = self.read_register(registers.low).into();
+        let low: u16 = self.read_register(registers.lsb).into();
         let high: u16 = self.read_register(registers.msb).into();
         let value: u16 = high << 8 | low;
         return value;
@@ -120,7 +120,7 @@ impl Cpu for CpuState {
         let registers = register.id();
         let [high, low] = u16::to_be_bytes(value);
         self.write_register(registers.msb, high);
-        self.write_register(registers.low, low);
+        self.write_register(registers.lsb, low);
     }
 }
 
@@ -165,7 +165,7 @@ impl Register {
 }
 
 struct RegisterCombination {
-    low: Register,
+    lsb: Register,
     msb: Register,
 }
 
@@ -194,19 +194,19 @@ impl DoubleRegister {
         match self {
             DoubleRegister::AF => RegisterCombination {
                 msb: Register::A,
-                low: Register::F,
+                lsb: Register::F,
             },
             DoubleRegister::BC => RegisterCombination {
                 msb: Register::B,
-                low: Register::C,
+                lsb: Register::C,
             },
             DoubleRegister::DE => RegisterCombination {
                 msb: Register::D,
-                low: Register::E,
+                lsb: Register::E,
             },
             DoubleRegister::HL => RegisterCombination {
                 msb: Register::H,
-                low: Register::L,
+                lsb: Register::L,
             },
         }
     }
