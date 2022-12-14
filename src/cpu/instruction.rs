@@ -3,6 +3,7 @@ use crate::memory_device::MemoryDevice;
 use enum_dispatch::enum_dispatch;
 
 mod decode;
+mod jump_to_hl;
 mod jump_to_immediate_address;
 mod jump_to_immediate_address_conditional;
 mod load_accumulator_to_double_register;
@@ -34,7 +35,10 @@ pub mod phases;
 #[doc(inline)]
 pub use decode::decode;
 #[doc(inline)]
+pub use jump_to_hl::JumpToHl;
+#[doc(inline)]
 pub use jump_to_immediate_address::JumpToImmediateAddress;
+#[doc(inline)]
 pub use jump_to_immediate_address_conditional::JumpToImmediateAddressConditional;
 #[doc(inline)]
 pub use load_accumulator_to_double_register::LoadAccumulatorToDoubleRegister;
@@ -132,6 +136,8 @@ pub enum InstructionEnum {
     JumpToImmediateAddress,
     /// See [JumpToImmediateAddressConditional]
     JumpToImmediateAddressConditional,
+    /// See [JumpToHl]
+    JumpToHl,
 }
 
 /// This is the trait for executable CPU instructions.

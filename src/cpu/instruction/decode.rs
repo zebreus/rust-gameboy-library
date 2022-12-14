@@ -15,12 +15,12 @@ use super::{
     load_immediate_to_register::LoadImmediateToRegister, InstructionEnum,
 };
 use super::{
-    JumpToImmediateAddress, JumpToImmediateAddressConditional, LoadAccumulatorToDoubleRegister,
-    LoadAccumulatorToImmediateAddress, LoadAccumulatorToRegisterCOffset,
-    LoadFromDoubleRegisterToAccumulator, LoadFromImmediateAddressToAccumulator,
-    LoadFromRegisterCOffsetToAccumulator, LoadHlToSp, LoadImmediateToDoubleRegister,
-    LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress, PopDoubleRegister,
-    PushDoubleRegister,
+    JumpToHl, JumpToImmediateAddress, JumpToImmediateAddressConditional,
+    LoadAccumulatorToDoubleRegister, LoadAccumulatorToImmediateAddress,
+    LoadAccumulatorToRegisterCOffset, LoadFromDoubleRegisterToAccumulator,
+    LoadFromImmediateAddressToAccumulator, LoadFromRegisterCOffsetToAccumulator, LoadHlToSp,
+    LoadImmediateToDoubleRegister, LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress,
+    PopDoubleRegister, PushDoubleRegister,
 };
 
 /// Create a instruction from an opcode.
@@ -179,6 +179,10 @@ pub fn decode(byte: u8) -> InstructionEnum {
         "11000011" => JumpToImmediateAddress {
             address: 0,
             phase: FourPhases::First,
+        }
+        .into(),
+        "11101001" => JumpToHl {
+            phase: TwoPhases::First,
         }
         .into(),
         _ => LoadFromHlToRegister {
