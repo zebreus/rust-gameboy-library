@@ -40,7 +40,7 @@ impl CpuState {
     ///
     /// Also increments the program counter
     pub fn load_opcode(&mut self, memory: &dyn MemoryDevice) -> u8 {
-        let opcode = memory.read(self.read_program_counter());
+        let opcode = memory.read(self.advance_program_counter());
         return opcode;
     }
 
@@ -56,7 +56,11 @@ impl CpuState {
 /// Trait for something that can be used as a gameboy cpu state.
 pub trait Cpu {
     /// Get the address of the current instruction. Increment the program counter
-    fn read_program_counter(&mut self) -> u16;
+    fn advance_program_counter(&mut self) -> u16;
+    /// Get the address of the current instruction.
+    fn read_program_counter(&self) -> u16;
+    /// Set the address of the current instruction
+    fn write_program_counter(&mut self, value: u16);
     /// Get the current stack pointer
     fn read_stack_pointer(&self) -> u16;
     /// Set the current stack pointer
@@ -89,10 +93,16 @@ pub trait Cpu {
 }
 
 impl Cpu for CpuState {
-    fn read_program_counter(&mut self) -> u16 {
+    fn advance_program_counter(&mut self) -> u16 {
         let result = self.program_counter;
         self.program_counter += 1;
         return result;
+    }
+    fn read_program_counter(&self) -> u16 {
+        self.program_counter
+    }
+    fn write_program_counter(&mut self, value: u16) {
+        self.program_counter = value;
     }
     fn read_stack_pointer(&self) -> u16 {
         let result = self.stack_pointer;

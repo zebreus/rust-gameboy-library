@@ -20,7 +20,7 @@ impl Instruction for LoadImmediateToHl {
     ) -> super::InstructionEnum {
         match self.phase {
             ThreePhases::First => {
-                let program_counter = cpu.read_program_counter();
+                let program_counter = cpu.advance_program_counter();
                 let data = memory.read(program_counter);
 
                 Self {

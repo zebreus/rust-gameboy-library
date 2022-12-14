@@ -22,7 +22,7 @@ impl Instruction for LoadAccumulatorToImmediateAddress {
     ) -> super::InstructionEnum {
         match self.phase {
             FourPhases::First => {
-                let program_counter = cpu.read_program_counter();
+                let program_counter = cpu.advance_program_counter();
                 let address_lsb = memory.read(program_counter);
 
                 Self {
@@ -32,7 +32,7 @@ impl Instruction for LoadAccumulatorToImmediateAddress {
                 .into()
             }
             FourPhases::Second => {
-                let program_counter = cpu.read_program_counter();
+                let program_counter = cpu.advance_program_counter();
                 let address_msb = memory.read(program_counter) as u16;
 
                 Self {

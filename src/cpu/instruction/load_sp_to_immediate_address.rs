@@ -21,7 +21,7 @@ impl Instruction for LoadSpToImmediateAddress {
     ) -> super::InstructionEnum {
         match self.phase {
             FivePhases::First => {
-                let program_counter = cpu.read_program_counter();
+                let program_counter = cpu.advance_program_counter();
                 let value_lsb = memory.read(program_counter);
 
                 Self {
@@ -31,7 +31,7 @@ impl Instruction for LoadSpToImmediateAddress {
                 .into()
             }
             FivePhases::Second => {
-                let program_counter = cpu.read_program_counter();
+                let program_counter = cpu.advance_program_counter();
                 let value_msb = memory.read(program_counter) as u16;
 
                 Self {

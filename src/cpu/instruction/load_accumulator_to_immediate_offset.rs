@@ -20,7 +20,7 @@ impl Instruction for LoadAccumulatorToImmediateOffset {
     ) -> super::InstructionEnum {
         match self.phase {
             ThreePhases::First => {
-                let next_address = cpu.read_program_counter();
+                let next_address = cpu.advance_program_counter();
                 let offset = memory.read(next_address);
 
                 Self {

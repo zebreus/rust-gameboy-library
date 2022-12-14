@@ -23,7 +23,7 @@ impl Instruction for LoadImmediateToRegister {
     ) -> super::InstructionEnum {
         match self.phase {
             TwoPhases::First => {
-                let address = cpu.read_program_counter();
+                let address = cpu.advance_program_counter();
                 let value = memory.read(address);
                 return Self {
                     destination: self.destination,

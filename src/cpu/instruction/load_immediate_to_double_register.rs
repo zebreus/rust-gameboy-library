@@ -21,7 +21,7 @@ impl Instruction for LoadImmediateToDoubleRegister {
     ) -> super::InstructionEnum {
         match self.phase {
             ThreePhases::First => {
-                let program_counter = cpu.read_program_counter();
+                let program_counter = cpu.advance_program_counter();
                 let value_lsb = memory.read(program_counter);
 
                 Self {
@@ -32,7 +32,7 @@ impl Instruction for LoadImmediateToDoubleRegister {
                 .into()
             }
             ThreePhases::Second => {
-                let program_counter = cpu.read_program_counter();
+                let program_counter = cpu.advance_program_counter();
                 let value_msb = memory.read(program_counter) as u16;
                 let data = self.value | ((value_msb) << 8);
                 cpu.write_double_register(self.destination, data);
