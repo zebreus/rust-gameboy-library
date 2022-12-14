@@ -59,6 +59,8 @@ pub trait Cpu {
     fn read_program_counter(&mut self) -> u16;
     /// Get the current stack pointer
     fn read_stack_pointer(&mut self) -> u16;
+    /// Set the current stack pointer
+    fn write_stack_pointer(&mut self, value: u16);
     /// Get the content of a register.
     fn read_register(&self, register: Register) -> u8;
     /// Write a value to a register
@@ -89,6 +91,9 @@ impl Cpu for CpuState {
     fn read_stack_pointer(&mut self) -> u16 {
         let result = self.stack_pointer;
         return result;
+    }
+    fn write_stack_pointer(&mut self, value: u16) {
+        self.stack_pointer = value;
     }
 
     fn read_register(&self, register: Register) -> u8 {

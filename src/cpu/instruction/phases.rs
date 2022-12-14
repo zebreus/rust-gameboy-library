@@ -30,3 +30,18 @@ pub enum FourPhases {
     /// Fourth phase
     Fourth,
 }
+
+/// The phases of an instruction with five phases
+#[derive(Debug)]
+pub enum FivePhases {
+    /// First phase
+    First,
+    /// Second phase
+    Second,
+    /// Third phase
+    Third,
+    /// Fourth phase
+    Fourth,
+    /// Fifth phase
+    Fifth,
+}
