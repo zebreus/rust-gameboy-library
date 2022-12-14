@@ -1,5 +1,5 @@
 use crate::cpu::instruction::phases::{ThreePhases, TwoPhases};
-use crate::cpu::{DoubleRegister, Register};
+use crate::cpu::{ConditionCode, DoubleRegister, Register};
 use bitmatch::bitmatch;
 
 use super::phases::{FivePhases, FourPhases};
@@ -15,11 +15,12 @@ use super::{
     load_immediate_to_register::LoadImmediateToRegister, InstructionEnum,
 };
 use super::{
-    JumpToImmediateAddress, LoadAccumulatorToDoubleRegister, LoadAccumulatorToImmediateAddress,
-    LoadAccumulatorToRegisterCOffset, LoadFromDoubleRegisterToAccumulator,
-    LoadFromImmediateAddressToAccumulator, LoadFromRegisterCOffsetToAccumulator, LoadHlToSp,
-    LoadImmediateToDoubleRegister, LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress,
-    PopDoubleRegister, PushDoubleRegister,
+    JumpToImmediateAddress, JumpToImmediateAddressConditional, LoadAccumulatorToDoubleRegister,
+    LoadAccumulatorToImmediateAddress, LoadAccumulatorToRegisterCOffset,
+    LoadFromDoubleRegisterToAccumulator, LoadFromImmediateAddressToAccumulator,
+    LoadFromRegisterCOffsetToAccumulator, LoadHlToSp, LoadImmediateToDoubleRegister,
+    LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress, PopDoubleRegister,
+    PushDoubleRegister,
 };
 
 /// Create a instruction from an opcode.
@@ -92,6 +93,13 @@ pub fn decode(byte: u8) -> InstructionEnum {
             destination: DoubleRegister::try_from(a)
                 .expect("3 bit value should always correspond to a register"),
             phase: ThreePhases::First,
+        }
+        .into(),
+        "110aa010" => JumpToImmediateAddressConditional {
+            condition: ConditionCode::try_from(a)
+                .expect("3 bit value should always correspond to a register"),
+            address: 0,
+            phase: FourPhases::First,
         }
         .into(),
         "00110110" => LoadImmediateToHl {
