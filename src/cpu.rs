@@ -55,10 +55,10 @@ impl CpuState {
 
 /// Trait for something that can be used as a gameboy cpu state.
 pub trait Cpu {
-    /// Get the address of the current instruction.
+    /// Get the address of the current instruction. Increment the program counter
     fn read_program_counter(&mut self) -> u16;
     /// Get the current stack pointer
-    fn read_stack_pointer(&mut self) -> u16;
+    fn read_stack_pointer(&self) -> u16;
     /// Set the current stack pointer
     fn write_stack_pointer(&mut self, value: u16);
     /// Get the content of a register.
@@ -88,7 +88,7 @@ impl Cpu for CpuState {
         self.program_counter += 1;
         return result;
     }
-    fn read_stack_pointer(&mut self) -> u16 {
+    fn read_stack_pointer(&self) -> u16 {
         let result = self.stack_pointer;
         return result;
     }
@@ -112,14 +112,14 @@ impl Cpu for CpuState {
     fn read_double_register(&self, register: DoubleRegister) -> u16 {
         let registers = register.id();
         let low: u16 = self.read_register(registers.low).into();
-        let high: u16 = self.read_register(registers.high).into();
+        let high: u16 = self.read_register(registers.msb).into();
         let value: u16 = high << 8 | low;
         return value;
     }
     fn write_double_register(&mut self, register: DoubleRegister, value: u16) -> () {
         let registers = register.id();
         let [high, low] = u16::to_be_bytes(value);
-        self.write_register(registers.high, high);
+        self.write_register(registers.msb, high);
         self.write_register(registers.low, low);
     }
 }
@@ -166,7 +166,7 @@ impl Register {
 
 struct RegisterCombination {
     low: Register,
-    high: Register,
+    msb: Register,
 }
 
 /// The gameboy has many instructions that combine two registers as a single 16bit value.
@@ -193,19 +193,19 @@ impl DoubleRegister {
     fn id(&self) -> RegisterCombination {
         match self {
             DoubleRegister::AF => RegisterCombination {
-                high: Register::A,
+                msb: Register::A,
                 low: Register::F,
             },
             DoubleRegister::BC => RegisterCombination {
-                high: Register::B,
+                msb: Register::B,
                 low: Register::C,
             },
             DoubleRegister::DE => RegisterCombination {
-                high: Register::D,
+                msb: Register::D,
                 low: Register::E,
             },
             DoubleRegister::HL => RegisterCombination {
-                high: Register::H,
+                msb: Register::H,
                 low: Register::L,
             },
         }
