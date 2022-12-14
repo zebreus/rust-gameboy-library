@@ -3,14 +3,14 @@ use super::Instruction;
 use crate::{cpu::Cpu, memory_device::MemoryDevice};
 
 /// Jumps to the address specified in the two bytes following the opcode
-pub struct JumpByImmediateAddress {
+pub struct JumpToImmediateAddress {
     /// The immediate address. Will only valid after the second phase.
     pub address: u16,
     /// The current phase of the instruction.
     pub phase: FourPhases,
 }
 
-impl Instruction for JumpByImmediateAddress {
+impl Instruction for JumpToImmediateAddress {
     fn execute<T: MemoryDevice>(
         &self,
         cpu: &mut crate::cpu::CpuState,
@@ -66,19 +66,19 @@ impl Instruction for JumpByImmediateAddress {
 
 #[cfg(test)]
 mod tests {
-    use super::JumpByImmediateAddress;
+    use super::JumpToImmediateAddress;
     use crate::cpu::instruction::phases::FourPhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState};
     use crate::debug_memory::DebugMemory;
 
     #[test]
-    fn jumb_by_immediate_address_works() {
+    fn jump_by_immediate_address_works() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
         let mut memory = DebugMemory::new_with_init(&[0x34, 0x12]);
 
-        let instruction = JumpByImmediateAddress {
+        let instruction = JumpToImmediateAddress {
             address: 0,
             phase: FourPhases::First,
         };
@@ -88,7 +88,7 @@ mod tests {
 
         assert!(matches!(
             instruction,
-            InstructionEnum::JumpByImmediateAddress(JumpByImmediateAddress {
+            InstructionEnum::JumpToImmediateAddress(JumpToImmediateAddress {
                 phase: FourPhases::Third,
                 address: 0x1234
             })
@@ -100,7 +100,7 @@ mod tests {
 
         assert!(matches!(
             instruction,
-            InstructionEnum::JumpByImmediateAddress(JumpByImmediateAddress {
+            InstructionEnum::JumpToImmediateAddress(JumpToImmediateAddress {
                 phase: FourPhases::Fourth,
                 address: 0x1234
             })
@@ -110,12 +110,12 @@ mod tests {
     }
 
     #[test]
-    fn encode_load_immediate_to_register() {
+    fn encode_jump_by_immediate_address() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
         let mut memory = DebugMemory::new_with_init(&[0x34, 0x12]);
 
-        let instruction = JumpByImmediateAddress {
+        let instruction = JumpToImmediateAddress {
             address: 0,
             phase: FourPhases::First,
         };
