@@ -4,4 +4,13 @@ pub trait MemoryDevice {
     fn read(&self, address: u16) -> u8;
     /// Write a byte to an address
     fn write(&mut self, address: u16, value: u8) -> ();
+    // TODO: Question: Is there a way to make the return type of the read function generic (i8 or u8) and automatically infer which one is needed?
+    /// Read a signed byte from an address
+    fn read_signed(&self, address: u16) -> i8 {
+        i8::from_ne_bytes([self.read(address)])
+    }
+    /// Write a signed byte to an address
+    fn write_signed(&mut self, address: u16, value: i8) -> () {
+        self.write(address, value.to_ne_bytes()[0]);
+    }
 }

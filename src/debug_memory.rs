@@ -29,12 +29,15 @@ impl DebugMemory {
 impl MemoryDevice for DebugMemory {
     fn read(&self, address: u16) -> u8 {
         let value = self.memory[address as usize];
-        println!("Read {value} from {address}");
+        println!("Read {}({:#04x}) from {:#06x}", value, value, address);
         return value;
     }
     fn write(&mut self, address: u16, value: u8) -> () {
+        println!(
+            "Write value {}({:#04x}) from {:#06x}",
+            value, value, address
+        );
         self.memory[address as usize] = value;
-        println!("Write value {value} to {address}");
     }
 }
 
