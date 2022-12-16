@@ -15,7 +15,7 @@ use super::{
     load_immediate_to_register::LoadImmediateToRegister, InstructionEnum,
 };
 use super::{
-    Call, JumpByImmediateOffset, JumpByImmediateOffsetConditional, JumpToHl,
+    Call, CallConditional, JumpByImmediateOffset, JumpByImmediateOffsetConditional, JumpToHl,
     JumpToImmediateAddress, JumpToImmediateAddressConditional, LoadAccumulatorToDoubleRegister,
     LoadAccumulatorToImmediateAddress, LoadAccumulatorToRegisterCOffset,
     LoadFromDoubleRegisterToAccumulator, LoadFromImmediateAddressToAccumulator,
@@ -108,6 +108,13 @@ pub fn decode(byte: u8) -> InstructionEnum {
                 .expect("3 bit value should always correspond to a register"),
             offset: 0,
             phase: ThreePhases::First,
+        }
+        .into(),
+        "110aa100" => CallConditional {
+            condition: ConditionCode::try_from(a)
+                .expect("3 bit value should always correspond to a register"),
+            address: 0,
+            phase: SixPhases::First,
         }
         .into(),
         "00110110" => LoadImmediateToHl {
