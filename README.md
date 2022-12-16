@@ -16,6 +16,7 @@ A gameboy emulation library
 
 ## Documentation
 
+- Non-Interactive gameboy manual: [Game Boy™ CPU Manual](http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf)
 - CPU features and memory map: [Open Game Boy Documentation Project](https://mgba-emu.github.io/gbdoc/#cpu)
 - Good documentation of instruction set and timing: [Game Boy: Complete Technical Reference](https://gekkio.fi/files/gb-docs/gbctr.pdf)
 - CPU instructions test roms: [blargg](https://github.com/retrio/gb-test-roms/tree/master/cpu_instrs)
