@@ -14,7 +14,7 @@ impl Instruction for EnableInterrupts {
     ) -> super::InstructionEnum {
         // Interrupts are only enabled after the next instruction
         let next_instruction = cpu.load_instruction(memory);
-        cpu.write_interrupt_master_enable(false);
+        cpu.write_interrupt_master_enable(true);
         return next_instruction;
     }
     fn encode(&self) -> Vec<u8> {
