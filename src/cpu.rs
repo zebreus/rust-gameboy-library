@@ -60,8 +60,14 @@ impl CpuState {
     ///
     /// Also increments the program counter
     pub fn load_instruction<T: MemoryDevice>(&mut self, memory: &T) -> InstructionEnum {
-        let opcode = self.load_opcode(memory);
-        return decode(opcode);
+        let pending_interrupt = self.get_pending_interrupt();
+        match pending_interrupt {
+            Some(interrupt) => interrupt,
+            None => {
+                let opcode = self.load_opcode(memory);
+                decode(opcode)
+            }
+        }
     }
 }
 
@@ -129,7 +135,7 @@ pub trait Cpu {
     /// This is equivalent to reading the IE register at memory address 0xffff
     fn read_interrupt_flag(&self, interrupt: Interrupt) -> bool;
     /// Get the instruction of a pending interrupt if there is one.
-    fn get_pending_interrupt<T: MemoryDevice>(&mut self) -> Option<InstructionEnum> {
+    fn get_pending_interrupt(&mut self) -> Option<InstructionEnum> {
         if !self.read_interrupt_master_enable() {
             return None;
         }
@@ -414,7 +420,11 @@ pub enum Flag {
 ///
 /// You can use them with the matching methods on the CPU.
 ///
+// TODO: Link to ISR and get_pending_interrupt
+///
 /// See [https://gbdev.io/pandocs/Interrupts.html] for more details on how interrupts work.
+///
+/// There is also a useful [section in the gameboy cpu manual](http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf#page=32)
 #[derive(TryFromPrimitive, Debug, IntoPrimitive, Clone, Copy)]
 #[repr(u8)]
 pub enum Interrupt {

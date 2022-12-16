@@ -8,6 +8,7 @@ mod call_conditional;
 mod decode;
 mod disable_interrupts;
 mod enable_interrupts;
+mod halt;
 mod interrupt_service_routine;
 mod jump_by_immediate_offset;
 mod jump_by_immediate_offset_conditional;
@@ -54,6 +55,8 @@ pub use decode::decode;
 pub use disable_interrupts::DisableInterrupts;
 #[doc(inline)]
 pub use enable_interrupts::EnableInterrupts;
+#[doc(inline)]
+pub use halt::Halt;
 #[doc(inline)]
 pub use interrupt_service_routine::InterruptServiceRoutine;
 #[doc(inline)]
@@ -188,6 +191,8 @@ pub enum InstructionEnum {
     EnableInterrupts,
     /// See [InterruptServiceRoutine]
     InterruptServiceRoutine,
+    /// See [Halt]
+    Halt,
 }
 
 /// This is the trait for executable CPU instructions.
