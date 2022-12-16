@@ -7,6 +7,7 @@ pub mod instruction;
 
 use self::instruction::decode;
 use self::instruction::InstructionEnum;
+use self::instruction::InterruptServiceRoutine;
 
 /// The CpuState stores the internal state of the gameboy processor.
 ///
@@ -15,6 +16,10 @@ pub struct CpuState {
     program_counter: u16,
     stack_pointer: u16,
     registers: [u8; 8],
+
+    interrupt_enable: u8,
+    interrupt_flags: u8,
+    interrupt_master_enable: bool,
 }
 
 impl CpuState {
@@ -34,20 +39,27 @@ impl CpuState {
             program_counter: 0, // 0x0100
             stack_pointer: 0xFFFE,
             registers: [0x00, 0x13, 0x00, 0xD8, 0x01, 0x4d, 0xB0, 0x01],
+
+            interrupt_enable: 0,
+            interrupt_flags: 0,
+            interrupt_master_enable: false,
         }
     }
     /// Load the next opcode
     ///
     /// Also increments the program counter
-    pub fn load_opcode(&mut self, memory: &dyn MemoryDevice) -> u8 {
+    pub fn load_opcode<T: MemoryDevice>(&mut self, memory: &T) -> u8 {
         let opcode = memory.read(self.advance_program_counter());
         return opcode;
     }
 
     /// Load the next [Instruction](self::instruction::Instruction)
     ///
+    // TODO: Link to ISR instruction
+    /// Returns a ISR, if there are pending interrupts and the [IME][self::Cpu::read_interrupt_master_enable] is set.
+    ///
     /// Also increments the program counter
-    pub fn load_instruction(&mut self, memory: &dyn MemoryDevice) -> InstructionEnum {
+    pub fn load_instruction<T: MemoryDevice>(&mut self, memory: &T) -> InstructionEnum {
         let opcode = self.load_opcode(memory);
         return decode(opcode);
     }
@@ -92,6 +104,70 @@ pub trait Cpu {
     fn write_flag(&mut self, flag: Flag, value: bool);
     /// Check if a condition is currently satisfied
     fn check_condition(&self, condition_code: ConditionCode) -> bool;
+    /// Set the IME. This is the only way to write the IME.
+    fn write_interrupt_master_enable(&mut self, value: bool);
+    /// Check if the IME is enabled. This is the only way to read the IME.
+    fn read_interrupt_master_enable(&mut self) -> bool;
+    /// Set the interrupt enable flag for a specific interrupt.
+    ///
+    /// This is equivalent to modifying the IE register at memory address 0xffff
+    fn write_interrupt_enable(&mut self, interrupt: Interrupt, value: bool);
+    /// Read if a interrupt is enabled.
+    ///
+    /// This is equivalent to reading the IE register at memory address 0xffff
+    fn read_interrupt_enable(&self, interrupt: Interrupt) -> bool;
+    /// Get the complete IE
+    fn read_interrupt_enable_register(&self) -> u8;
+    /// Get the complete IF
+    fn read_interrupt_flag_register(&self) -> u8;
+    /// Set the interrupt flag for a specific interrupt.
+    ///
+    /// This is equivalent to modifying the IF register at memory address 0xff0f
+    fn write_interrupt_flag(&mut self, interrupt: Interrupt, value: bool);
+    /// Read if a interrupt is requested
+    ///
+    /// This is equivalent to reading the IE register at memory address 0xffff
+    fn read_interrupt_flag(&self, interrupt: Interrupt) -> bool;
+    /// Get the instruction of a pending interrupt if there is one.
+    fn get_pending_interrupt<T: MemoryDevice>(&mut self) -> Option<InstructionEnum> {
+        if !self.read_interrupt_master_enable() {
+            return None;
+        }
+
+        let triggered_interrupts =
+            self.read_interrupt_enable_register() & self.read_interrupt_flag_register();
+
+        if triggered_interrupts == 0 {
+            return None;
+        }
+
+        if (triggered_interrupts & (Interrupt::VBlank as u8)) != 0 {
+            self.write_interrupt_flag(Interrupt::VBlank, false);
+            return Some(InterruptServiceRoutine::create(0x0040).into());
+        }
+
+        if (triggered_interrupts & (Interrupt::LcdStat as u8)) != 0 {
+            self.write_interrupt_flag(Interrupt::LcdStat, false);
+            return Some(InterruptServiceRoutine::create(0x0048).into());
+        }
+
+        if (triggered_interrupts & (Interrupt::Timer as u8)) != 0 {
+            self.write_interrupt_flag(Interrupt::Timer, false);
+            return Some(InterruptServiceRoutine::create(0x0050).into());
+        }
+
+        if (triggered_interrupts & (Interrupt::Serial as u8)) != 0 {
+            self.write_interrupt_flag(Interrupt::Serial, false);
+            return Some(InterruptServiceRoutine::create(0x0058).into());
+        }
+
+        if (triggered_interrupts & (Interrupt::Joypad as u8)) != 0 {
+            self.write_interrupt_flag(Interrupt::Joypad, false);
+            return Some(InterruptServiceRoutine::create(0x0060).into());
+        }
+
+        return None;
+    }
 }
 
 impl Cpu for CpuState {
@@ -160,6 +236,39 @@ impl Cpu for CpuState {
             ConditionCode::CarryFlagUnset => self.read_flag(Flag::Carry) == false,
             ConditionCode::CarryFlagSet => self.read_flag(Flag::Carry) == true,
         }
+    }
+    fn write_interrupt_master_enable(&mut self, value: bool) {
+        self.interrupt_master_enable = value;
+    }
+    fn read_interrupt_master_enable(&mut self) -> bool {
+        self.interrupt_master_enable
+    }
+    fn write_interrupt_enable(&mut self, interrupt: Interrupt, value: bool) {
+        self.interrupt_enable = if value {
+            self.interrupt_enable | (interrupt as u8)
+        } else {
+            self.interrupt_enable & !(interrupt as u8)
+        }
+    }
+    fn read_interrupt_enable(&self, interrupt: Interrupt) -> bool {
+        self.interrupt_enable & (interrupt as u8) != 0
+    }
+
+    fn write_interrupt_flag(&mut self, interrupt: Interrupt, value: bool) {
+        self.interrupt_flags = if value {
+            self.interrupt_flags | (interrupt as u8)
+        } else {
+            self.interrupt_flags & !(interrupt as u8)
+        }
+    }
+    fn read_interrupt_flag(&self, interrupt: Interrupt) -> bool {
+        self.interrupt_flags & (interrupt as u8) != 0
+    }
+    fn read_interrupt_enable_register(&self) -> u8 {
+        self.interrupt_enable
+    }
+    fn read_interrupt_flag_register(&self) -> u8 {
+        self.interrupt_flags
     }
 }
 
@@ -299,6 +408,36 @@ pub enum Flag {
     HalfCarry = 0b00100000,
     /// Set if a carry occurred in the last math operation
     Carry = 0b00010000,
+}
+
+/// Interrupt codes that can be used to enable and request interrupts from the CPU.
+///
+/// You can use them with the matching methods on the CPU.
+///
+/// See [https://gbdev.io/pandocs/Interrupts.html] for more details on how interrupts work.
+#[derive(TryFromPrimitive, Debug, IntoPrimitive, Clone, Copy)]
+#[repr(u8)]
+pub enum Interrupt {
+    /// VBlank interrupt
+    ///
+    /// Interrupt handler at 0x0040
+    VBlank = 0b00000001,
+    /// LcdStat interrupt
+    ///
+    /// Interrupt handler at 0x0048
+    LcdStat = 0b00000010,
+    /// Timer interrupt
+    ///
+    /// Interrupt handler at 0x0050
+    Timer = 0b00000100,
+    /// Serial Interrupt
+    ///
+    /// Interrupt handler at 0x0058
+    Serial = 0b00001000,
+    /// Joypad interrupt
+    ///
+    /// Interrupt handler at 0x0060
+    Joypad = 0b00010000,
 }
 
 #[cfg(test)]
