@@ -33,6 +33,7 @@ mod load_register_to_hl;
 mod load_sp_to_immediate_address;
 mod pop_double_register;
 mod push_double_register;
+mod return_instruction;
 
 /// Different phases for instructions
 pub mod phases;
@@ -99,6 +100,8 @@ pub use load_sp_to_immediate_address::LoadSpToImmediateAddress;
 pub use pop_double_register::PopDoubleRegister;
 #[doc(inline)]
 pub use push_double_register::PushDoubleRegister;
+#[doc(inline)]
+pub use return_instruction::Return;
 
 /// Contains a variant for every [Instruction]
 #[enum_dispatch]
@@ -163,6 +166,8 @@ pub enum InstructionEnum {
     CallConditional,
     /// See [AddRegister]
     AddRegister,
+    /// See [Return]
+    Return,
 }
 
 /// This is the trait for executable CPU instructions.
