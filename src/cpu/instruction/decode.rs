@@ -15,13 +15,14 @@ use super::{
     load_immediate_to_register::LoadImmediateToRegister, InstructionEnum,
 };
 use super::{
-    AddRegister, Call, CallConditional, JumpByImmediateOffset, JumpByImmediateOffsetConditional,
-    JumpToHl, JumpToImmediateAddress, JumpToImmediateAddressConditional,
-    LoadAccumulatorToDoubleRegister, LoadAccumulatorToImmediateAddress,
-    LoadAccumulatorToRegisterCOffset, LoadFromDoubleRegisterToAccumulator,
-    LoadFromImmediateAddressToAccumulator, LoadFromRegisterCOffsetToAccumulator, LoadHlToSp,
-    LoadImmediateToDoubleRegister, LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress,
-    PopDoubleRegister, PushDoubleRegister, Return, ReturnConditional,
+    AddRegister, Call, CallConditional, DisableInterrupts, EnableInterrupts, JumpByImmediateOffset,
+    JumpByImmediateOffsetConditional, JumpToHl, JumpToImmediateAddress,
+    JumpToImmediateAddressConditional, LoadAccumulatorToDoubleRegister,
+    LoadAccumulatorToImmediateAddress, LoadAccumulatorToRegisterCOffset,
+    LoadFromDoubleRegisterToAccumulator, LoadFromImmediateAddressToAccumulator,
+    LoadFromRegisterCOffsetToAccumulator, LoadHlToSp, LoadImmediateToDoubleRegister,
+    LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress, PopDoubleRegister,
+    PushDoubleRegister, Return, ReturnConditional,
 };
 
 /// Create a instruction from an opcode.
@@ -225,6 +226,8 @@ pub fn decode(byte: u8) -> InstructionEnum {
             phase: FourPhases::First,
         }
         .into(),
+        "11110011" => DisableInterrupts {}.into(),
+        "11111011" => EnableInterrupts {}.into(),
         _ => LoadFromHlToRegister {
             destination: Register::A,
             phase: TwoPhases::First,
