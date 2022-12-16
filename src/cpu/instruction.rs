@@ -40,6 +40,7 @@ mod pop_double_register;
 mod push_double_register;
 mod return_conditional;
 mod return_instruction;
+mod to_binary_coded_decimal;
 
 /// Different phases for instructions
 pub mod phases;
@@ -120,6 +121,8 @@ pub use push_double_register::PushDoubleRegister;
 pub use return_conditional::ReturnConditional;
 #[doc(inline)]
 pub use return_instruction::Return;
+#[doc(inline)]
+pub use to_binary_coded_decimal::ToBinaryCodedDecimal;
 
 /// Contains a variant for every [Instruction]
 #[enum_dispatch]
@@ -198,6 +201,8 @@ pub enum InstructionEnum {
     Halt,
     /// See [Nop]
     Nop,
+    /// See [ToBinaryCodedDecimal]
+    ToBinaryCodedDecimal,
 }
 
 /// This is the trait for executable CPU instructions.

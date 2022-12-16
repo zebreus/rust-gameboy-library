@@ -22,7 +22,7 @@ use super::{
     LoadFromDoubleRegisterToAccumulator, LoadFromImmediateAddressToAccumulator,
     LoadFromRegisterCOffsetToAccumulator, LoadHlToSp, LoadImmediateToDoubleRegister,
     LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress, Nop, PopDoubleRegister,
-    PushDoubleRegister, Return, ReturnConditional,
+    PushDoubleRegister, Return, ReturnConditional, ToBinaryCodedDecimal,
 };
 
 /// Create a instruction from an opcode.
@@ -230,6 +230,7 @@ pub fn decode(byte: u8) -> InstructionEnum {
         "11111011" => EnableInterrupts {}.into(),
         "01110110" => Halt {}.into(),
         "00000000" => Nop {}.into(),
+        "00100111" => ToBinaryCodedDecimal {}.into(),
         _ => LoadFromHlToRegister {
             destination: Register::A,
             phase: TwoPhases::First,
