@@ -2,6 +2,7 @@ use super::CpuState;
 use crate::memory_device::MemoryDevice;
 use enum_dispatch::enum_dispatch;
 
+mod add_register;
 mod call;
 mod call_conditional;
 mod decode;
@@ -36,6 +37,8 @@ mod push_double_register;
 /// Different phases for instructions
 pub mod phases;
 
+#[doc(inline)]
+pub use add_register::AddRegister;
 #[doc(inline)]
 pub use call::Call;
 #[doc(inline)]
@@ -158,6 +161,8 @@ pub enum InstructionEnum {
     Call,
     /// See [CallConditional]
     CallConditional,
+    /// See [AddRegister]
+    AddRegister,
 }
 
 /// This is the trait for executable CPU instructions.

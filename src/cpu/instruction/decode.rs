@@ -15,13 +15,13 @@ use super::{
     load_immediate_to_register::LoadImmediateToRegister, InstructionEnum,
 };
 use super::{
-    Call, CallConditional, JumpByImmediateOffset, JumpByImmediateOffsetConditional, JumpToHl,
-    JumpToImmediateAddress, JumpToImmediateAddressConditional, LoadAccumulatorToDoubleRegister,
-    LoadAccumulatorToImmediateAddress, LoadAccumulatorToRegisterCOffset,
-    LoadFromDoubleRegisterToAccumulator, LoadFromImmediateAddressToAccumulator,
-    LoadFromRegisterCOffsetToAccumulator, LoadHlToSp, LoadImmediateToDoubleRegister,
-    LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress, PopDoubleRegister,
-    PushDoubleRegister,
+    AddRegister, Call, CallConditional, JumpByImmediateOffset, JumpByImmediateOffsetConditional,
+    JumpToHl, JumpToImmediateAddress, JumpToImmediateAddressConditional,
+    LoadAccumulatorToDoubleRegister, LoadAccumulatorToImmediateAddress,
+    LoadAccumulatorToRegisterCOffset, LoadFromDoubleRegisterToAccumulator,
+    LoadFromImmediateAddressToAccumulator, LoadFromRegisterCOffsetToAccumulator, LoadHlToSp,
+    LoadImmediateToDoubleRegister, LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress,
+    PopDoubleRegister, PushDoubleRegister,
 };
 
 /// Create a instruction from an opcode.
@@ -208,6 +208,11 @@ pub fn decode(byte: u8) -> InstructionEnum {
         .into(),
         "11101001" => JumpToHl {
             phase: TwoPhases::First,
+        }
+        .into(),
+        "10000aaa" => AddRegister {
+            operand: Register::try_from(a)
+                .expect("3 bit value should always correspond to a register"),
         }
         .into(),
         _ => LoadFromHlToRegister {
