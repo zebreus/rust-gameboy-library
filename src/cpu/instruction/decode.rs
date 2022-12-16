@@ -21,7 +21,7 @@ use super::{
     LoadAccumulatorToImmediateAddress, LoadAccumulatorToRegisterCOffset,
     LoadFromDoubleRegisterToAccumulator, LoadFromImmediateAddressToAccumulator,
     LoadFromRegisterCOffsetToAccumulator, LoadHlToSp, LoadImmediateToDoubleRegister,
-    LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress, PopDoubleRegister,
+    LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress, Nop, PopDoubleRegister,
     PushDoubleRegister, Return, ReturnConditional,
 };
 
@@ -229,6 +229,7 @@ pub fn decode(byte: u8) -> InstructionEnum {
         "11110011" => DisableInterrupts {}.into(),
         "11111011" => EnableInterrupts {}.into(),
         "01110110" => Halt {}.into(),
+        "00000000" => Nop {}.into(),
         _ => LoadFromHlToRegister {
             destination: Register::A,
             phase: TwoPhases::First,

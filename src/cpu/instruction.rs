@@ -35,6 +35,7 @@ mod load_immediate_to_hl;
 mod load_immediate_to_register;
 mod load_register_to_hl;
 mod load_sp_to_immediate_address;
+mod nop;
 mod pop_double_register;
 mod push_double_register;
 mod return_conditional;
@@ -109,6 +110,8 @@ pub use load_immediate_to_register::LoadImmediateToRegister;
 pub use load_register_to_hl::LoadRegisterToHl;
 #[doc(inline)]
 pub use load_sp_to_immediate_address::LoadSpToImmediateAddress;
+#[doc(inline)]
+pub use nop::Nop;
 #[doc(inline)]
 pub use pop_double_register::PopDoubleRegister;
 #[doc(inline)]
@@ -193,6 +196,8 @@ pub enum InstructionEnum {
     InterruptServiceRoutine,
     /// See [Halt]
     Halt,
+    /// See [Nop]
+    Nop,
 }
 
 /// This is the trait for executable CPU instructions.
