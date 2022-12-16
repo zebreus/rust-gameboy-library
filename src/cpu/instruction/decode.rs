@@ -21,7 +21,7 @@ use super::{
     LoadAccumulatorToRegisterCOffset, LoadFromDoubleRegisterToAccumulator,
     LoadFromImmediateAddressToAccumulator, LoadFromRegisterCOffsetToAccumulator, LoadHlToSp,
     LoadImmediateToDoubleRegister, LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress,
-    PopDoubleRegister, PushDoubleRegister, Return,
+    PopDoubleRegister, PushDoubleRegister, Return, ReturnConditional,
 };
 
 /// Create a instruction from an opcode.
@@ -115,6 +115,12 @@ pub fn decode(byte: u8) -> InstructionEnum {
                 .expect("3 bit value should always correspond to a register"),
             address: 0,
             phase: SixPhases::First,
+        }
+        .into(),
+        "110aa000" => ReturnConditional {
+            condition: ConditionCode::try_from(a)
+                .expect("3 bit value should always correspond to a register"),
+            phase: FivePhases::First,
         }
         .into(),
         "00110110" => LoadImmediateToHl {

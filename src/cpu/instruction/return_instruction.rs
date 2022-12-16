@@ -67,7 +67,7 @@ mod tests {
     use crate::memory_device::MemoryDevice;
 
     #[test]
-    fn pop_double_register_works() {
+    fn return_works() {
         let mut cpu = CpuState::new();
         let mut memory = DebugMemory::new();
 
