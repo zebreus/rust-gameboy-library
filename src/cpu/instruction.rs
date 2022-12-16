@@ -2,6 +2,7 @@ use super::CpuState;
 use crate::memory_device::MemoryDevice;
 use enum_dispatch::enum_dispatch;
 
+mod call;
 mod decode;
 mod jump_by_immediate_offset;
 mod jump_by_immediate_offset_conditional;
@@ -34,6 +35,8 @@ mod push_double_register;
 /// Different phases for instructions
 pub mod phases;
 
+#[doc(inline)]
+pub use call::Call;
 #[doc(inline)]
 pub use decode::decode;
 #[doc(inline)]
@@ -148,6 +151,8 @@ pub enum InstructionEnum {
     JumpByImmediateOffset,
     /// See [JumpByImmediateOffsetConditional]
     JumpByImmediateOffsetConditional,
+    /// See [Call]
+    Call,
 }
 
 /// This is the trait for executable CPU instructions.

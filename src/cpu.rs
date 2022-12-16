@@ -56,6 +56,8 @@ impl CpuState {
 /// Trait for something that can be used as a gameboy cpu state.
 pub trait Cpu {
     /// Get the address of the current instruction. Increment the program counter
+    ///
+    /// Returns the unincremented value of the program counter.
     fn advance_program_counter(&mut self) -> u16;
     /// Get the address of the current instruction.
     fn read_program_counter(&self) -> u16;

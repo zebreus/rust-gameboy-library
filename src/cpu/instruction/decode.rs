@@ -2,7 +2,7 @@ use crate::cpu::instruction::phases::{ThreePhases, TwoPhases};
 use crate::cpu::{ConditionCode, DoubleRegister, Register};
 use bitmatch::bitmatch;
 
-use super::phases::{FivePhases, FourPhases};
+use super::phases::{FivePhases, FourPhases, SixPhases};
 use super::{
     load_accumulator_to_hl_and_decrement::LoadAccumulatorToHlAndDecrement,
     load_accumulator_to_hl_and_increment::LoadAccumulatorToHlAndIncrement,
@@ -15,8 +15,8 @@ use super::{
     load_immediate_to_register::LoadImmediateToRegister, InstructionEnum,
 };
 use super::{
-    JumpByImmediateOffset, JumpByImmediateOffsetConditional, JumpToHl, JumpToImmediateAddress,
-    JumpToImmediateAddressConditional, LoadAccumulatorToDoubleRegister,
+    Call, JumpByImmediateOffset, JumpByImmediateOffsetConditional, JumpToHl,
+    JumpToImmediateAddress, JumpToImmediateAddressConditional, LoadAccumulatorToDoubleRegister,
     LoadAccumulatorToImmediateAddress, LoadAccumulatorToRegisterCOffset,
     LoadFromDoubleRegisterToAccumulator, LoadFromImmediateAddressToAccumulator,
     LoadFromRegisterCOffsetToAccumulator, LoadHlToSp, LoadImmediateToDoubleRegister,
@@ -182,6 +182,11 @@ pub fn decode(byte: u8) -> InstructionEnum {
         .into(),
         "11111001" => LoadHlToSp {
             phase: TwoPhases::First,
+        }
+        .into(),
+        "11001101" => Call {
+            address: 0,
+            phase: SixPhases::First,
         }
         .into(),
         "11000011" => JumpToImmediateAddress {
