@@ -7,7 +7,7 @@ use crate::{
 
 /// Jumps to the address specified in the two bytes following the opcode. Writes the program counter before the jump onto the stack.
 ///
-/// See [PushDoubleRegister] for more details on how data is pushed to the stack.
+/// See [PushDoubleRegister](super::PushDoubleRegister) for more details on how data is pushed to the stack.
 ///
 /// The value pushed to the stack points to the next instruction directly after this one.
 pub struct CallConditional {

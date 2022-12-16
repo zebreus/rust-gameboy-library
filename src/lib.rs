@@ -3,9 +3,9 @@
 //!
 
 // TODO: Figure out how to idiomatically structure a rust project
-/// Contains [CpuState] and more.
+/// Contains [cpu::CpuState] and more.
 pub mod cpu;
-/// Contains [DebugMemory].
+/// Contains [debug_memory::DebugMemory].
 pub mod debug_memory;
-/// Contains the [MemoryDevice] trait.
+/// Contains the [memory_device::MemoryDevice] trait.
 pub mod memory_device;

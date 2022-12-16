@@ -4,9 +4,9 @@ use crate::{cpu::Cpu, memory_device::MemoryDevice};
 
 // The module is named `return_instruction` and not `return`, because `return` is a keyword
 
-/// Return from a previous [Call] instruction.
+/// Return from a previous [Call](super::Call) instruction.
 ///
-/// Basically just [pops](PopDoubleRegister) a address from the stack and sets the program counter to it.
+/// Basically just [pops](super::PopDoubleRegister) a address from the stack and sets the program counter to it.
 pub struct Return {
     /// The current phase of the instruction.
     pub phase: FourPhases,

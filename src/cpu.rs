@@ -44,7 +44,7 @@ impl CpuState {
         return opcode;
     }
 
-    /// Load the next [Instruction]
+    /// Load the next [Instruction](self::instruction::Instruction)
     ///
     /// Also increments the program counter
     pub fn load_instruction(&mut self, memory: &dyn MemoryDevice) -> InstructionEnum {
@@ -290,7 +290,8 @@ pub enum ConditionCode {
 #[derive(TryFromPrimitive, Debug, IntoPrimitive, Clone, Copy)]
 #[repr(u8)]
 pub enum Flag {
-    /// Set if zero was the result of the last math operation. Also set if values compared with [CP] match.
+    // TODO: Replace CP With a link to the CP instruction once that is implemented
+    /// Set if zero was the result of the last math operation. Also set if values compared with the compare instruction CP match.
     Zero = 0b10000000,
     /// Set if the last math operation included a subtraction
     Subtract = 0b01000000,
