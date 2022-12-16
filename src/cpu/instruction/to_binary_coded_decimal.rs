@@ -24,6 +24,7 @@ impl Instruction for ToBinaryCodedDecimal {
         return cpu.load_instruction(memory);
     }
     fn encode(&self) -> Vec<u8> {
+        // TODO: This is the wrong opcode
         Vec::from([0b00100111])
     }
 }
