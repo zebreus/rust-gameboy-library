@@ -206,6 +206,7 @@ impl Cpu for CpuState {
         if let Register::F = register {
             // You cannot write bit 0-3 on the flags register
             self.registers[index] = value & 0b11110000;
+            return;
         }
         self.registers[index] = value;
     }

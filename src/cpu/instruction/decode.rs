@@ -15,7 +15,7 @@ use super::{
     load_immediate_to_register::LoadImmediateToRegister, InstructionEnum,
 };
 use super::{
-    AddRegister, Call, CallConditional, DisableInterrupts, EnableInterrupts, Halt,
+    AddRegister, Call, CallConditional, Complement, DisableInterrupts, EnableInterrupts, Halt,
     JumpByImmediateOffset, JumpByImmediateOffsetConditional, JumpToHl, JumpToImmediateAddress,
     JumpToImmediateAddressConditional, LoadAccumulatorToDoubleRegister,
     LoadAccumulatorToImmediateAddress, LoadAccumulatorToRegisterCOffset,
@@ -231,6 +231,7 @@ pub fn decode(byte: u8) -> InstructionEnum {
         "01110110" => Halt {}.into(),
         "00000000" => Nop {}.into(),
         "00100111" => ToBinaryCodedDecimal {}.into(),
+        "00101111" => Complement {}.into(),
         _ => LoadFromHlToRegister {
             destination: Register::A,
             phase: TwoPhases::First,

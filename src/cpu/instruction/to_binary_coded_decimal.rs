@@ -1,12 +1,12 @@
 use super::Instruction;
 use crate::{
-    cpu::{Cpu, Register},
+    cpu::{Cpu, Flag, Register},
     memory_device::MemoryDevice,
 };
 
 /// Convert the value in the [accumulator][Register::A] to a binary coded decimal
 ///
-///
+// TODO: The behaviour is currently totally wrong. One would call this instruction after a `0x60 + 0x60 = 0xc0` and expect the result to be `0x120`,  because `60 + 60 = 120`
 pub struct ToBinaryCodedDecimal {}
 
 impl Instruction for ToBinaryCodedDecimal {
@@ -20,6 +20,10 @@ impl Instruction for ToBinaryCodedDecimal {
         let first_digit = (original / 10) % 10;
         let binary_coded_decimal = (first_digit << 4) | second_digit;
         cpu.write_register(Register::A, binary_coded_decimal);
+
+        cpu.write_flag(Flag::Zero, binary_coded_decimal == 0);
+        cpu.write_flag(Flag::HalfCarry, false);
+        cpu.write_flag(Flag::Carry, false);
 
         return cpu.load_instruction(memory);
     }

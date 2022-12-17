@@ -5,6 +5,7 @@ use enum_dispatch::enum_dispatch;
 mod add_register;
 mod call;
 mod call_conditional;
+mod complement;
 mod decode;
 mod disable_interrupts;
 mod enable_interrupts;
@@ -51,6 +52,8 @@ pub use add_register::AddRegister;
 pub use call::Call;
 #[doc(inline)]
 pub use call_conditional::CallConditional;
+#[doc(inline)]
+pub use complement::Complement;
 #[doc(inline)]
 pub use decode::decode;
 #[doc(inline)]
@@ -203,6 +206,8 @@ pub enum InstructionEnum {
     Nop,
     /// See [ToBinaryCodedDecimal]
     ToBinaryCodedDecimal,
+    /// See [Complement]
+    Complement,
 }
 
 /// This is the trait for executable CPU instructions.
