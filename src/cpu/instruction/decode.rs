@@ -22,7 +22,7 @@ use super::{
     LoadFromDoubleRegisterToAccumulator, LoadFromImmediateAddressToAccumulator,
     LoadFromRegisterCOffsetToAccumulator, LoadHlToSp, LoadImmediateToDoubleRegister,
     LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress, Nop, PopDoubleRegister,
-    PushDoubleRegister, Return, ReturnConditional, SetCarry, ToBinaryCodedDecimal,
+    PushDoubleRegister, Return, ReturnConditional, SetCarry, Stop, ToBinaryCodedDecimal,
 };
 
 /// Create a instruction from an opcode.
@@ -229,6 +229,7 @@ pub fn decode(byte: u8) -> InstructionEnum {
         "11110011" => DisableInterrupts {}.into(),
         "11111011" => EnableInterrupts {}.into(),
         "01110110" => Halt {}.into(),
+        "00010000" => Stop {}.into(),
         "00000000" => Nop {}.into(),
         "00100111" => ToBinaryCodedDecimal {}.into(),
         "00101111" => Complement {}.into(),

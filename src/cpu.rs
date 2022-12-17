@@ -134,6 +134,7 @@ pub trait Cpu {
     ///
     /// This is equivalent to reading the IE register at memory address 0xffff
     fn read_interrupt_flag(&self, interrupt: Interrupt) -> bool;
+    // TODO: Understand HALT and STOP wakeup conditions.
     /// Get the instruction of a pending interrupt if there is one.
     fn get_pending_interrupt(&mut self) -> Option<InstructionEnum> {
         if !self.read_interrupt_master_enable() {
@@ -165,6 +166,28 @@ pub trait Cpu {
         if (triggered_interrupts & (Interrupt::Serial as u8)) != 0 {
             self.write_interrupt_flag(Interrupt::Serial, false);
             return Some(InterruptServiceRoutine::create(0x0058).into());
+        }
+
+        if (triggered_interrupts & (Interrupt::Joypad as u8)) != 0 {
+            self.write_interrupt_flag(Interrupt::Joypad, false);
+            return Some(InterruptServiceRoutine::create(0x0060).into());
+        }
+
+        return None;
+    }
+    /// Similar to [Cpu::get_pending_interrupt()]
+    ///
+    /// Used to check if we should wakeup from stop.
+    ///
+    /// I am unsure about the intended behaviour. The current behaviour is probably wrong.
+    ///
+    /// For now all interrupts except the Joypad interrupts are ignored. It could be that the interrupts are not ignored but they just dont get send, because the screen, timer and serialport are all powered off.
+    fn get_pending_stop_wakeup(&mut self) -> Option<InstructionEnum> {
+        let triggered_interrupts =
+            self.read_interrupt_enable_register() & self.read_interrupt_flag_register();
+
+        if triggered_interrupts == 0 {
+            return None;
         }
 
         if (triggered_interrupts & (Interrupt::Joypad as u8)) != 0 {
