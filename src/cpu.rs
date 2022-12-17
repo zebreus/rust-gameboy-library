@@ -423,7 +423,7 @@ pub enum Flag {
 ///
 // TODO: Link to ISR and get_pending_interrupt
 ///
-/// See [https://gbdev.io/pandocs/Interrupts.html] for more details on how interrupts work.
+/// See <https://gbdev.io/pandocs/Interrupts.html> for more details on how interrupts work.
 ///
 /// There is also a useful [section in the gameboy cpu manual](http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf#page=32)
 #[derive(TryFromPrimitive, Debug, IntoPrimitive, Clone, Copy)]
