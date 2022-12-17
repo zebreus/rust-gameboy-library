@@ -11,6 +11,7 @@ mod disable_interrupts;
 mod enable_interrupts;
 mod halt;
 mod interrupt_service_routine;
+mod invert_carry;
 mod jump_by_immediate_offset;
 mod jump_by_immediate_offset_conditional;
 mod jump_to_hl;
@@ -64,6 +65,8 @@ pub use enable_interrupts::EnableInterrupts;
 pub use halt::Halt;
 #[doc(inline)]
 pub use interrupt_service_routine::InterruptServiceRoutine;
+#[doc(inline)]
+pub use invert_carry::InvertCarry;
 #[doc(inline)]
 pub use jump_by_immediate_offset::JumpByImmediateOffset;
 #[doc(inline)]
@@ -208,6 +211,8 @@ pub enum InstructionEnum {
     ToBinaryCodedDecimal,
     /// See [Complement]
     Complement,
+    /// See [InvertCarry]
+    InvertCarry,
 }
 
 /// This is the trait for executable CPU instructions.

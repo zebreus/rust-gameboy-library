@@ -16,8 +16,8 @@ use super::{
 };
 use super::{
     AddRegister, Call, CallConditional, Complement, DisableInterrupts, EnableInterrupts, Halt,
-    JumpByImmediateOffset, JumpByImmediateOffsetConditional, JumpToHl, JumpToImmediateAddress,
-    JumpToImmediateAddressConditional, LoadAccumulatorToDoubleRegister,
+    InvertCarry, JumpByImmediateOffset, JumpByImmediateOffsetConditional, JumpToHl,
+    JumpToImmediateAddress, JumpToImmediateAddressConditional, LoadAccumulatorToDoubleRegister,
     LoadAccumulatorToImmediateAddress, LoadAccumulatorToRegisterCOffset,
     LoadFromDoubleRegisterToAccumulator, LoadFromImmediateAddressToAccumulator,
     LoadFromRegisterCOffsetToAccumulator, LoadHlToSp, LoadImmediateToDoubleRegister,
@@ -232,6 +232,7 @@ pub fn decode(byte: u8) -> InstructionEnum {
         "00000000" => Nop {}.into(),
         "00100111" => ToBinaryCodedDecimal {}.into(),
         "00101111" => Complement {}.into(),
+        "00111111" => InvertCarry {}.into(),
         _ => LoadFromHlToRegister {
             destination: Register::A,
             phase: TwoPhases::First,
