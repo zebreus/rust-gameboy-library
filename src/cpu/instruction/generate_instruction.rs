@@ -1,0 +1,89 @@
+macro_rules! generate_instruction {
+    (
+    $(#[$outer:meta])*
+    $name:ident,
+    $opcode:expr,
+    $cpu:ident,
+    $memory:ident,
+    $operand:ident,
+    $content:block,
+$dollar:tt) => {
+        $(#[$outer])*
+        pub struct $name {
+            /// The operand register
+            pub operand: Register,
+        }
+
+        impl Instruction for $name {
+            fn execute<T: MemoryDevice>(
+                &self,
+                $cpu: &mut crate::cpu::CpuState,
+                $memory: &mut T,
+            ) -> super::InstructionEnum {
+                // let accumulator = $cpu.read_register(Register::A);
+                let $operand = $cpu.read_register(self.operand);
+
+                $content
+
+                return $cpu.load_instruction($memory);
+            }
+            fn encode(&self) -> Vec<u8> {
+                let base_code = $opcode & 0b11111000u8;
+                let operand_code = self.operand.id() & 0b00000111u8;
+                let opcode = base_code | operand_code;
+                Vec::from([opcode])
+            }
+        }
+
+        /// Hacky macro that can be used to test the instruction
+        ///
+        /// The macro takes two arguments in ().
+        /// The first is the initial state and the second is the expected resulting state.
+        /// You can specify the accumulator as `A` and the operant as `B` in each argument.
+        /// You can initialize the flags to true by setting one or more `FLAG:` values in the initial state.
+        /// If you dont specify `A:` or `B:` in the initial state it is initialized to `0`.
+        ///
+        /// If you dont specify `A:` or `B:` in the expected output state nothing happens. If you specify one of them, it will be asserted that they have that value.
+        /// You can specify one or more `FLAG:` or `FLAG_UNSET:` values in the expected result state. The flags will be asserted.
+        ///
+        /// The order of the values is important, it always need to be (A: xxx, B: xxx, FLAG: xxx,) for the initial state and (A: xxx, B: xxx, FLAG: xxx, FLAG_UNSET: xxx,) for the expected result state.Every value is optional. `FLAG:` and `FLAG_UNSET` can be specified multiple times.
+        ///
+        /// Example:
+        ///
+        /// ```
+        /// // assert_result!((A: 5, B: 3,), (A: 8, B: 3, FLAG_UNSET: Flag::Carry,));
+        /// ```
+        #[cfg(test)]
+        macro_rules! assert_result {
+            (($dollar(A: $accumulator:expr,)? $dollar(B: $operandd:expr,)? $dollar( FLAG: $initial_flags:expr ,)* ), ($dollar(A: $accumulator_result:expr,)? $dollar(B: $operand_result:expr,)? $dollar( FLAG: $flag_result:expr ,)* $dollar( FLAG_UNSET: $flag_unset_result:expr ,)* )) => {
+                let mut cpu = CpuState::new();
+                let mut memory = DebugMemory::new();
+
+                cpu.write_register(Register::A, [$dollar($accumulator ,)? 0][0]);
+                cpu.write_register(Register::B, [$dollar($operandd ,)? 0][0]);
+                cpu.write_flag(Flag::Zero, false);
+                cpu.write_flag(Flag::Subtract, false);
+                cpu.write_flag(Flag::HalfCarry, false);
+                cpu.write_flag(Flag::Carry, false);
+                $dollar( cpu.write_flag($initial_flags, true); )*
+
+
+                let instruction = $name {
+                    operand: Register::B,
+                };
+                instruction.execute(&mut cpu, &mut memory);
+
+
+                $dollar( assert_eq!(cpu.read_register(Register::A), $accumulator_result); )*
+                $dollar( assert_eq!(cpu.read_register(Register::B), $operand_result); )*
+                $dollar( assert_eq!(cpu.read_flag($flag_result), true); )*
+                $dollar( assert_eq!(cpu.read_flag($flag_unset_result), false); )*
+            };
+
+        }
+
+
+    };
+}
+
+pub(crate) use generate_instruction;

@@ -9,6 +9,8 @@ mod complement;
 mod decode;
 mod disable_interrupts;
 mod enable_interrupts;
+/// Really hacky macro for generating arithmetic instructions
+pub mod generate_instruction;
 mod halt;
 mod interrupt_service_routine;
 mod invert_carry;
