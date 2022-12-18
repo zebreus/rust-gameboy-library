@@ -2,230 +2,133 @@ use super::CpuState;
 use crate::memory_device::MemoryDevice;
 use enum_dispatch::enum_dispatch;
 
-mod add_register;
-mod call;
-mod call_conditional;
-mod complement;
 mod decode;
-mod disable_interrupts;
-mod enable_interrupts;
 /// Really hacky macro for generating arithmetic instructions
 pub mod generate_instruction;
-mod halt;
-mod interrupt_service_routine;
-mod invert_carry;
-mod jump_by_immediate_offset;
-mod jump_by_immediate_offset_conditional;
-mod jump_to_hl;
-mod jump_to_immediate_address;
-mod jump_to_immediate_address_conditional;
-mod load_accumulator_to_double_register;
-mod load_accumulator_to_hl_and_decrement;
-mod load_accumulator_to_hl_and_increment;
-mod load_accumulator_to_immediate_address;
-mod load_accumulator_to_immediate_offset;
-mod load_accumulator_to_register_c_offset;
-mod load_from_double_register_to_accumulator;
-mod load_from_hl_to_register;
-mod load_from_immediate_address_to_accumulator;
-mod load_from_immediate_offset_to_accumulator;
-mod load_from_register_c_offset_to_accumulator;
-mod load_from_register_to_register;
-mod load_hl_to_accumulator_and_decrement;
-mod load_hl_to_accumulator_and_increment;
-mod load_hl_to_sp;
-mod load_immediate_to_double_register;
-mod load_immediate_to_hl;
-mod load_immediate_to_register;
-mod load_register_to_hl;
-mod load_sp_to_immediate_address;
-mod nop;
-mod pop_double_register;
-mod push_double_register;
-mod return_conditional;
-mod return_instruction;
-mod set_carry;
-mod stop;
-mod to_binary_coded_decimal;
-
 /// Different phases for instructions
 pub mod phases;
 
-#[doc(inline)]
-pub use add_register::AddRegister;
-#[doc(inline)]
-pub use call::Call;
-#[doc(inline)]
-pub use call_conditional::CallConditional;
-#[doc(inline)]
-pub use complement::Complement;
-#[doc(inline)]
 pub use decode::decode;
-#[doc(inline)]
-pub use disable_interrupts::DisableInterrupts;
-#[doc(inline)]
-pub use enable_interrupts::EnableInterrupts;
-#[doc(inline)]
-pub use halt::Halt;
-#[doc(inline)]
-pub use interrupt_service_routine::InterruptServiceRoutine;
-#[doc(inline)]
-pub use invert_carry::InvertCarry;
-#[doc(inline)]
-pub use jump_by_immediate_offset::JumpByImmediateOffset;
-#[doc(inline)]
-pub use jump_by_immediate_offset_conditional::JumpByImmediateOffsetConditional;
-#[doc(inline)]
-pub use jump_to_hl::JumpToHl;
-#[doc(inline)]
-pub use jump_to_immediate_address::JumpToImmediateAddress;
-#[doc(inline)]
-pub use jump_to_immediate_address_conditional::JumpToImmediateAddressConditional;
-#[doc(inline)]
-pub use load_accumulator_to_double_register::LoadAccumulatorToDoubleRegister;
-#[doc(inline)]
-pub use load_accumulator_to_hl_and_decrement::LoadAccumulatorToHlAndDecrement;
-#[doc(inline)]
-pub use load_accumulator_to_hl_and_increment::LoadAccumulatorToHlAndIncrement;
-#[doc(inline)]
-pub use load_accumulator_to_immediate_address::LoadAccumulatorToImmediateAddress;
-#[doc(inline)]
-pub use load_accumulator_to_immediate_offset::LoadAccumulatorToImmediateOffset;
-#[doc(inline)]
-pub use load_accumulator_to_register_c_offset::LoadAccumulatorToRegisterCOffset;
-#[doc(inline)]
-pub use load_from_double_register_to_accumulator::LoadFromDoubleRegisterToAccumulator;
-#[doc(inline)]
-pub use load_from_hl_to_register::LoadFromHlToRegister;
-#[doc(inline)]
-pub use load_from_immediate_address_to_accumulator::LoadFromImmediateAddressToAccumulator;
-#[doc(inline)]
-pub use load_from_immediate_offset_to_accumulator::LoadFromImmediateOffsetToAccumulator;
-#[doc(inline)]
-pub use load_from_register_c_offset_to_accumulator::LoadFromRegisterCOffsetToAccumulator;
-#[doc(inline)]
-pub use load_from_register_to_register::LoadFromRegisterToRegister;
-#[doc(inline)]
-pub use load_hl_to_accumulator_and_decrement::LoadHlToAccumulatorAndDecrement;
-#[doc(inline)]
-pub use load_hl_to_accumulator_and_increment::LoadHlToAccumulatorAndIncrement;
-#[doc(inline)]
-pub use load_hl_to_sp::LoadHlToSp;
-#[doc(inline)]
-pub use load_immediate_to_double_register::LoadImmediateToDoubleRegister;
-#[doc(inline)]
-pub use load_immediate_to_hl::LoadImmediateToHl;
-#[doc(inline)]
-pub use load_immediate_to_register::LoadImmediateToRegister;
-#[doc(inline)]
-pub use load_register_to_hl::LoadRegisterToHl;
-#[doc(inline)]
-pub use load_sp_to_immediate_address::LoadSpToImmediateAddress;
-#[doc(inline)]
-pub use nop::Nop;
-#[doc(inline)]
-pub use pop_double_register::PopDoubleRegister;
-#[doc(inline)]
-pub use push_double_register::PushDoubleRegister;
-#[doc(inline)]
-pub use return_conditional::ReturnConditional;
-#[doc(inline)]
-pub use return_instruction::Return;
-#[doc(inline)]
-pub use set_carry::SetCarry;
-#[doc(inline)]
-pub use stop::Stop;
-#[doc(inline)]
-pub use to_binary_coded_decimal::ToBinaryCodedDecimal;
 
-/// Contains a variant for every [Instruction]
-#[enum_dispatch]
-pub enum InstructionEnum {
-    /// See [LoadFromHlToRegister]
-    LoadFromHlToRegister,
-    /// See [LoadFromHlToRegister]
-    LoadRegisterToHl,
-    /// See [LoadFromRegisterToRegister]
-    LoadFromRegisterToRegister,
-    /// See [LoadImmediateToRegister]
-    LoadImmediateToRegister,
-    /// See [LoadAccumulatorToImmediateOffset]
-    LoadAccumulatorToImmediateOffset,
-    /// See [LoadFromImmediateOffsetToAccumulator]
-    LoadFromImmediateOffsetToAccumulator,
-    /// See [LoadHlToAccumulatorAndDecrement]
-    LoadHlToAccumulatorAndDecrement,
-    /// See [LoadHlToAccumulatorAndIncrement]
-    LoadHlToAccumulatorAndIncrement,
-    /// See [LoadAccumulatorToHlAndDecrement]
-    LoadAccumulatorToHlAndDecrement,
-    /// See [LoadAccumulatorToHlAndIncrement]
-    LoadAccumulatorToHlAndIncrement,
-    /// See [LoadAccumulatorToRegisterCOffset]
-    LoadAccumulatorToRegisterCOffset,
-    /// See [LoadFromRegisterCOffsetToAccumulator]
-    LoadFromRegisterCOffsetToAccumulator,
-    /// See [LoadAccumulatorToImmediateAddress]
-    LoadAccumulatorToImmediateAddress,
-    /// See [LoadFromImmediateAddressToAccumulator]
-    LoadFromImmediateAddressToAccumulator,
-    /// See [LoadImmediateToHl]
-    LoadImmediateToHl,
-    /// See [LoadAccumulatorToDoubleRegister]
-    LoadAccumulatorToDoubleRegister,
-    /// See [LoadFromDoubleRegisterToAccumulator]
-    LoadFromDoubleRegisterToAccumulator,
-    /// See [LoadImmediateToDoubleRegister]
-    LoadImmediateToDoubleRegister,
-    /// See [LoadSpToImmediateAddress]
-    LoadSpToImmediateAddress,
-    /// See [LoadHlToSp]
-    LoadHlToSp,
-    /// See [PushDoubleRegister]
-    PushDoubleRegister,
-    /// See [PopDoubleRegister]
-    PopDoubleRegister,
-    /// See [JumpToImmediateAddress]
-    JumpToImmediateAddress,
-    /// See [JumpToImmediateAddressConditional]
-    JumpToImmediateAddressConditional,
-    /// See [JumpToHl]
-    JumpToHl,
-    /// See [JumpByImmediateOffset]
-    JumpByImmediateOffset,
-    /// See [JumpByImmediateOffsetConditional]
-    JumpByImmediateOffsetConditional,
-    /// See [Call]
-    Call,
-    /// See [CallConditional]
-    CallConditional,
-    /// See [AddRegister]
-    AddRegister,
-    /// See [Return]
-    Return,
-    /// See [ReturnConditional]
-    ReturnConditional,
-    /// See [DisableInterrupts]
-    DisableInterrupts,
-    /// See [EnableInterrupts]
-    EnableInterrupts,
-    /// See [InterruptServiceRoutine]
-    InterruptServiceRoutine,
-    /// See [Halt]
-    Halt,
-    /// See [Nop]
-    Nop,
-    /// See [ToBinaryCodedDecimal]
-    ToBinaryCodedDecimal,
-    /// See [Complement]
-    Complement,
-    /// See [InvertCarry]
-    InvertCarry,
-    /// See [SetCarry]
-    SetCarry,
-    /// See [Stop]
-    Stop,
+macro_rules! generate_instruction_enum {
+    ($enum_name:ident, $( ( $module_path:ident, $( $instruction:ident ),* ) ),+) => {
+        $(
+            mod $module_path;
+        )+
+
+        $(
+            #[doc(inline)]
+            pub use $module_path::{
+                $(
+                    $instruction,
+                )*
+            };
+        )+
+
+
+        /// Contains a variant for every [Instruction]
+        #[enum_dispatch]
+        pub enum $enum_name {
+            $(
+                $(
+                    #[doc = stringify!(See [$instruction])]
+                    $instruction ,
+                )*
+            )+
+        }
+    };
 }
+
+generate_instruction_enum!(
+    InstructionEnum,
+    (add_register, AddRegister, AddFromHl, AddImmediate),
+    (call, Call),
+    (call_conditional, CallConditional),
+    (complement, Complement),
+    (disable_interrupts, DisableInterrupts),
+    (enable_interrupts, EnableInterrupts),
+    (halt, Halt),
+    (interrupt_service_routine, InterruptServiceRoutine),
+    (invert_carry, InvertCarry),
+    (jump_by_immediate_offset, JumpByImmediateOffset),
+    (
+        jump_by_immediate_offset_conditional,
+        JumpByImmediateOffsetConditional
+    ),
+    (jump_to_hl, JumpToHl),
+    (jump_to_immediate_address, JumpToImmediateAddress),
+    (
+        jump_to_immediate_address_conditional,
+        JumpToImmediateAddressConditional
+    ),
+    (
+        load_accumulator_to_double_register,
+        LoadAccumulatorToDoubleRegister
+    ),
+    (
+        load_accumulator_to_hl_and_decrement,
+        LoadAccumulatorToHlAndDecrement
+    ),
+    (
+        load_accumulator_to_hl_and_increment,
+        LoadAccumulatorToHlAndIncrement
+    ),
+    (
+        load_accumulator_to_immediate_address,
+        LoadAccumulatorToImmediateAddress
+    ),
+    (
+        load_accumulator_to_immediate_offset,
+        LoadAccumulatorToImmediateOffset
+    ),
+    (
+        load_accumulator_to_register_c_offset,
+        LoadAccumulatorToRegisterCOffset
+    ),
+    (
+        load_from_double_register_to_accumulator,
+        LoadFromDoubleRegisterToAccumulator
+    ),
+    (load_from_hl_to_register, LoadFromHlToRegister),
+    (
+        load_from_immediate_address_to_accumulator,
+        LoadFromImmediateAddressToAccumulator
+    ),
+    (
+        load_from_immediate_offset_to_accumulator,
+        LoadFromImmediateOffsetToAccumulator
+    ),
+    (
+        load_from_register_c_offset_to_accumulator,
+        LoadFromRegisterCOffsetToAccumulator
+    ),
+    (load_from_register_to_register, LoadFromRegisterToRegister),
+    (
+        load_hl_to_accumulator_and_decrement,
+        LoadHlToAccumulatorAndDecrement
+    ),
+    (
+        load_hl_to_accumulator_and_increment,
+        LoadHlToAccumulatorAndIncrement
+    ),
+    (load_hl_to_sp, LoadHlToSp),
+    (
+        load_immediate_to_double_register,
+        LoadImmediateToDoubleRegister
+    ),
+    (load_immediate_to_hl, LoadImmediateToHl),
+    (load_immediate_to_register, LoadImmediateToRegister),
+    (load_register_to_hl, LoadRegisterToHl),
+    (load_sp_to_immediate_address, LoadSpToImmediateAddress),
+    (nop, Nop),
+    (pop_double_register, PopDoubleRegister),
+    (push_double_register, PushDoubleRegister),
+    (return_conditional, ReturnConditional),
+    (return_instruction, Return),
+    (set_carry, SetCarry),
+    (stop, Stop),
+    (to_binary_coded_decimal, ToBinaryCodedDecimal)
+);
 
 /// This is the trait for executable CPU instructions.
 ///
