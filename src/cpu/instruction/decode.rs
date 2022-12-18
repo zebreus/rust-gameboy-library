@@ -15,15 +15,42 @@ use super::{
     load_immediate_to_register::LoadImmediateToRegister, InstructionEnum,
 };
 use super::{
-    AddRegister, Call, CallConditional, Complement, DisableInterrupts, EnableInterrupts, Halt,
-    InvertCarry, JumpByImmediateOffset, JumpByImmediateOffsetConditional, JumpToHl,
-    JumpToImmediateAddress, JumpToImmediateAddressConditional, LoadAccumulatorToDoubleRegister,
-    LoadAccumulatorToImmediateAddress, LoadAccumulatorToRegisterCOffset,
-    LoadFromDoubleRegisterToAccumulator, LoadFromImmediateAddressToAccumulator,
-    LoadFromRegisterCOffsetToAccumulator, LoadHlToSp, LoadImmediateToDoubleRegister,
-    LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress, Nop, PopDoubleRegister,
-    PushDoubleRegister, Return, ReturnConditional, SetCarry, Stop, ToBinaryCodedDecimal,
+    AddFromHl, AddImmediate, AddRegister, Call, CallConditional, Complement, DisableInterrupts,
+    EnableInterrupts, Halt, InvertCarry, JumpByImmediateOffset, JumpByImmediateOffsetConditional,
+    JumpToHl, JumpToImmediateAddress, JumpToImmediateAddressConditional,
+    LoadAccumulatorToDoubleRegister, LoadAccumulatorToImmediateAddress,
+    LoadAccumulatorToRegisterCOffset, LoadFromDoubleRegisterToAccumulator,
+    LoadFromImmediateAddressToAccumulator, LoadFromRegisterCOffsetToAccumulator, LoadHlToSp,
+    LoadImmediateToDoubleRegister, LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress,
+    Nop, PopDoubleRegister, PushDoubleRegister, Return, ReturnConditional, SetCarry, Stop,
+    ToBinaryCodedDecimal,
 };
+
+macro_rules! decode_arithmetic {
+    ($a:ident, $register_instruction:ident, $hl_instruction:ident) => {
+        match $a {
+            0b00000110 => $hl_instruction {
+                phase: TwoPhases::First,
+            }
+            .into(),
+            _ => $register_instruction {
+                operand: Register::try_from($a)
+                    .expect("3 bit value should always correspond to a register"),
+            }
+            .into(),
+        }
+    };
+}
+
+macro_rules! decode_arithmetic_immediate {
+    ($immediate_instruction:ident) => {
+        $immediate_instruction {
+            phase: TwoPhases::First,
+            value: 0,
+        }
+        .into()
+    };
+}
 
 /// Create a instruction from an opcode.
 ///
@@ -217,11 +244,6 @@ pub fn decode(byte: u8) -> InstructionEnum {
             phase: TwoPhases::First,
         }
         .into(),
-        "10000aaa" => AddRegister {
-            operand: Register::try_from(a)
-                .expect("3 bit value should always correspond to a register"),
-        }
-        .into(),
         "11001001" => Return {
             phase: FourPhases::First,
         }
@@ -235,6 +257,8 @@ pub fn decode(byte: u8) -> InstructionEnum {
         "00101111" => Complement {}.into(),
         "00111111" => InvertCarry {}.into(),
         "00110111" => SetCarry {}.into(),
+        "10000aaa" => decode_arithmetic!(a, AddRegister, AddFromHl),
+        "11000111" => decode_arithmetic_immediate!(AddImmediate),
         _ => LoadFromHlToRegister {
             destination: Register::A,
             phase: TwoPhases::First,
