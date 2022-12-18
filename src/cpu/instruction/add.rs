@@ -7,11 +7,11 @@ generate_instruction!(
     /// |---------------------|----------------------------|-------------------------------------|----------------------------|
     /// | true if result is 0 | false                      | true if the lower nibble overflowed | true if a overflow occured |
     (
-        /// Add the operand register to the accumulator.
+        /// Add the operand register to the [accumulator](Register::A).
         AddRegister,
-        /// Add the value at the memory address in [DoubleRegister::HL] to the accumulator
+        /// Add the value at the memory address in [DoubleRegister::HL] to the [accumulator](Register::A)
         AddFromHl,
-        /// Add an immediate to the accumulator
+        /// Add an immediate to the [accumulator](Register::A)
         AddImmediate
     ),
     0b10000000,
@@ -35,7 +35,7 @@ generate_instruction!(
 
         result
     },
-    fn load_instruction_works() {
+    fn instruction_works() {
         assert_result!((A: 100, B: 100,), (A: 200,));
     },
     fn zero_flag_works() {

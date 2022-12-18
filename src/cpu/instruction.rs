@@ -41,7 +41,13 @@ macro_rules! generate_instruction_enum {
 
 generate_instruction_enum!(
     InstructionEnum,
-    (add_register, AddRegister, AddFromHl, AddImmediate),
+    (add, AddRegister, AddFromHl, AddImmediate),
+    (
+        add_with_carry,
+        AddWithCarryRegister,
+        AddWithCarryFromHl,
+        AddWithCarryImmediate
+    ),
     (call, Call),
     (call_conditional, CallConditional),
     (complement, Complement),
