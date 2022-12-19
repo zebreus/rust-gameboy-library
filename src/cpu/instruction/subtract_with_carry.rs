@@ -8,6 +8,7 @@ generate_instruction!(
     /// | [Zero](Flag::Zero)  | [Subtract](Flag::Subtract) | [HalfCarry](Flag::HalfCarry)        | [Carry](Flag::Carry)       |
     /// |---------------------|----------------------------|-------------------------------------|----------------------------|
     /// | true if result is 0 | true                       | true if the lower nibble overflowed | true if a overflow occured |
+    #[doc(alias = "SBC")]
     (
         /// Subtract the operand register and the previous carry from the [accumulator](Register::A).
         SubtractWithCarryRegister,

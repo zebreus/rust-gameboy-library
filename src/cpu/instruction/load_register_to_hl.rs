@@ -5,6 +5,9 @@ use crate::{
 };
 
 /// Stores the data from a register to the address specified in [HL](DoubleRegister::HL).
+#[doc(alias = "LD")]
+#[doc(alias = "LD (HL),R")]
+
 pub struct LoadRegisterToHl {
     /// The source register.
     pub source: Register,
@@ -34,6 +37,9 @@ impl Instruction for LoadRegisterToHl {
         }
     }
     fn encode(&self) -> Vec<u8> {
+        if matches!(self.source, Register::F) {
+            panic!("Cannot encode load register to hl for destination source Register::F")
+        }
         let base_code = 0b01110000 & 0b11111000u8;
         let destination_code = self.source.id() & 0b00000111u8;
         let opcode = base_code | destination_code;

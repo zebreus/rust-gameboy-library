@@ -7,6 +7,8 @@ use crate::{
 /// Stores the value of the [accumulator](Register::A) to memory at `the second byte following the opcode + the byte following the opcode` .
 ///
 /// Reads from program counter: `opcode` `address lsb` `address msb`
+#[doc(alias = "LD")]
+#[doc(alias = "LD (nn),A")]
 pub struct LoadAccumulatorToImmediateAddress {
     /// The memory address. Only valid after the second phase.
     pub address: u16,

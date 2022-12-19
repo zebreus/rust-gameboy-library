@@ -5,6 +5,9 @@ use crate::{
 };
 
 /// Stores the value of the [accumulator](Register::A) to memory at `0xff00 + the value of [Register::C]` .
+#[doc(alias = "LD")]
+#[doc(alias = "LD (C),A")]
+#[doc(alias = "LD ($FF00+C),A")]
 pub struct LoadAccumulatorToRegisterCOffset {
     /// The current phase of the instruction.
     pub phase: TwoPhases,

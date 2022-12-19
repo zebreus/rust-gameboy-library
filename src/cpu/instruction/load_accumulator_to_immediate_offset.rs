@@ -5,6 +5,10 @@ use crate::{
 };
 
 /// Stores the value of the [accumulator](Register::A) to memory at `0xff00 + the byte following the opcode` .
+#[doc(alias = "LDH")]
+#[doc(alias = "LDH (n),A")]
+#[doc(alias = "LD")]
+#[doc(alias = "LD ($FF00+n),A")]
 pub struct LoadAccumulatorToImmediateOffset {
     /// The memory address offset from 0xff00. Only valid after the first phase.
     pub offset: u8,
@@ -46,8 +50,8 @@ impl Instruction for LoadAccumulatorToImmediateOffset {
     }
     fn encode(&self) -> Vec<u8> {
         match self.phase {
-            ThreePhases::First => Vec::from([0b11110000]),
-            _ => Vec::from([0b11110000, self.offset]),
+            ThreePhases::First => Vec::from([0b11100000]),
+            _ => Vec::from([0b11100000, self.offset]),
         }
     }
 }

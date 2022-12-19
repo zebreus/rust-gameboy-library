@@ -8,6 +8,11 @@ use crate::{cpu::Cpu, memory_device::MemoryDevice};
 /// | SP  | SP + 1 |  SP + 2   |
 /// |-----|--------|-----------|
 /// | LSB |  MSB   | unchanged |
+#[doc(alias = "POP")]
+#[doc(alias = "POP BC")]
+#[doc(alias = "POP DE")]
+#[doc(alias = "POP HL")]
+#[doc(alias = "POP AF")]
 pub struct PopDoubleRegister {
     /// The destination double register.
     pub destination: DoubleRegister,

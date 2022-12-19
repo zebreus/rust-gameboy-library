@@ -5,6 +5,11 @@ use crate::{
 };
 
 /// Stores the [accumulator](Register::A) to the address specified in [HL](DoubleRegister::HL). Increments [HL](DoubleRegister::HL) afterwards.
+#[doc(alias = "LD")]
+#[doc(alias = "LD (HL+),A")]
+#[doc(alias = "LD (HLI),A")]
+#[doc(alias = "LDI")]
+#[doc(alias = "LDI (HL),A")]
 pub struct LoadAccumulatorToHlAndIncrement {
     /// The current phase of the instruction.
     pub phase: TwoPhases,

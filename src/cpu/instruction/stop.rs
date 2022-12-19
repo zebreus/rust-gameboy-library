@@ -4,6 +4,7 @@ use crate::{cpu::Cpu, memory_device::MemoryDevice};
 /// Powers down the CPU and screen until a button is pressed.
 ///
 /// Our current implementation is basically identical to [Halt][super::Halt] but it uses [Cpu::get_pending_stop_wakeup()] instead of [Cpu::get_pending_interrupt()]
+#[doc(alias = "STOP")]
 pub struct Stop {}
 
 impl Instruction for Stop {

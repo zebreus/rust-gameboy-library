@@ -10,6 +10,7 @@ use crate::{
 /// See [PushDoubleRegister](super::PushDoubleRegister) for more details on how data is pushed to the stack.
 ///
 /// The value pushed to the stack points to the next instruction directly after this one.
+#[doc(alias = "CALL")]
 pub struct CallConditional {
     /// The call is only made if the condition is fullfilled in the third phase.
     pub condition: ConditionCode,

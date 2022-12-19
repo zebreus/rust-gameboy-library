@@ -4,6 +4,13 @@ use crate::cpu::DoubleRegister;
 use crate::{cpu::Cpu, memory_device::MemoryDevice};
 
 /// Loads the two bytes following the opcode of the instruction to a double register
+///
+/// Setting destination to DoubleRegister::AF actually means loading them to the stackpointer
+#[doc(alias = "LD")]
+#[doc(alias = "LD BC,nn")]
+#[doc(alias = "LD DE,nn")]
+#[doc(alias = "LD HL,nn")]
+#[doc(alias = "LD SP,nn")]
 pub struct LoadImmediateToDoubleRegister {
     /// The destination double register.
     pub destination: DoubleRegister,
@@ -35,7 +42,10 @@ impl Instruction for LoadImmediateToDoubleRegister {
                 let program_counter = cpu.advance_program_counter();
                 let value_msb = memory.read(program_counter) as u16;
                 let data = self.value | ((value_msb) << 8);
-                cpu.write_double_register(self.destination, data);
+                match self.destination {
+                    DoubleRegister::AF => cpu.write_stack_pointer(data),
+                    _ => cpu.write_double_register(self.destination, data),
+                };
 
                 Self {
                     destination: self.destination,

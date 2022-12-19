@@ -7,6 +7,11 @@ use crate::{
 /// Convert the value in the [accumulator][Register::A] to a binary coded decimal
 ///
 // TODO: The behaviour is currently totally wrong. One would call this instruction after a `0x60 + 0x60 = 0xc0` and expect the result to be `0x120`,  because `60 + 60 = 120`
+///
+/// | [Zero](Flag::Zero)  | [Subtract](Flag::Subtract) | [HalfCarry](Flag::HalfCarry) | [Carry](Flag::Carry)       |
+/// |---------------------|----------------------------|------------------------------|----------------------------|
+/// | true if result is 0 | unchanged                  | false                        | true if a carry occurred   |
+#[doc(alias = "DAA")]
 pub struct ToBinaryCodedDecimal {}
 
 impl Instruction for ToBinaryCodedDecimal {

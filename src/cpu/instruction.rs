@@ -3,6 +3,8 @@ use crate::memory_device::MemoryDevice;
 use enum_dispatch::enum_dispatch;
 
 mod decode;
+/// Macro to ease documenting instructions
+pub mod document_instruction;
 /// Really hacky macro for generating arithmetic instructions
 pub mod generate_instruction;
 /// Different phases for instructions

@@ -5,6 +5,9 @@ use crate::{
 };
 
 /// Stores the [accumulator](Register::A) to the address specified in the double register.
+#[doc(alias = "LD")]
+#[doc(alias = "LD (BC),A")]
+#[doc(alias = "LD (DE),A")]
 pub struct LoadAccumulatorToDoubleRegister {
     /// The double register containing the address
     pub address_register: DoubleRegister,
@@ -35,8 +38,8 @@ impl Instruction for LoadAccumulatorToDoubleRegister {
     }
     fn encode(&self) -> Vec<u8> {
         match self.address_register {
-            DoubleRegister::BC => Vec::from([0b00001010]),
-            DoubleRegister::DE => Vec::from([0b00011010]),
+            DoubleRegister::BC => Vec::from([0b00000010]),
+            DoubleRegister::DE => Vec::from([0b00010010]),
             _ => panic!(
                 "Cannot only encode LoadAccumulatorToDoubleRegister for DoubleRegisters BC and DE"
             ),

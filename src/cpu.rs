@@ -341,6 +341,10 @@ pub enum Register {
     F = 0b110,
     /// A general purpose register. Acts as the accumulator for some instructions.
     A = 0b111,
+    // /// A register containing the lower half of the stackpointer. Only accessible through [DoubleRegister::SP].
+    // StackpointerLsb = 0b00001000,
+    // /// A register containing the upper half of the stackpointer. Only accessible through [DoubleRegister::SP].
+    // StackpointerMsb = 0b00001001,
 }
 
 impl Register {
@@ -360,18 +364,20 @@ struct RegisterCombination {
 #[derive(TryFromPrimitive, Debug, IntoPrimitive, Clone, Copy)]
 #[repr(u8)]
 pub enum DoubleRegister {
-    /// A double register consisting of [Register::A] and [Register::F].
-    ///
-    /// Does not allow writing the bits 0-3 of F. See [Register::F] for details.
-    AF = 0,
     /// A general purpose double register consisting of [Register::B] and [Register::C].
-    BC = 1,
+    BC = 0,
     /// A general purpose double register consisting of [Register::D] and [Register::E].
-    DE = 2,
+    DE = 1,
     /// A double register consisting of [Register::H] and [Register::L].
     ///
     /// Contains memory addresses for some operations.
-    HL = 3,
+    HL = 2,
+    /// A double register consisting of [Register::A] and [Register::F].
+    ///
+    /// Does not allow writing the bits 0-3 of F. See [Register::F] for details.
+    AF = 3,
+    // /// A double register consisting of [Register::StackpointerLsb] and [Register::StackpointerMsb].
+    // SP = 3,
 }
 
 impl DoubleRegister {

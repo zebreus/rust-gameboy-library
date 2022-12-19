@@ -7,6 +7,7 @@ use crate::{cpu::Cpu, memory_device::MemoryDevice};
 ///
 /// Cancels pending [EnableInterrupts](super::EnableInterrupts).
 /// In our case we dont need to do anything special for that, as that happens implicitly.
+#[doc(alias = "DI")]
 pub struct DisableInterrupts {}
 
 impl Instruction for DisableInterrupts {

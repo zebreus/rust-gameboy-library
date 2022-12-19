@@ -44,6 +44,9 @@ macro_rules! generate_instruction {
             fn encode(&self) -> Vec<u8> {
                 let base_code = $opcode & 0b11111000u8;
                 let operand_code = self.operand.id() & 0b00000111u8;
+                if(matches!(self.operand, Register::F)){
+                    panic!("Arithmetic instructions do not have an opcode for operating on Register::F")
+                }
                 let opcode = base_code | operand_code;
                 Vec::from([opcode])
             }

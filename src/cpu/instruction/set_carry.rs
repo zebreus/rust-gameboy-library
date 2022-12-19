@@ -4,7 +4,6 @@ use crate::{
     memory_device::MemoryDevice,
 };
 
-#[doc(alias = "SCF")]
 /// Set the [Flag::Carry] flag to `true`.
 ///
 /// ```
@@ -23,6 +22,11 @@ use crate::{
 /// assert_eq!(cpu.read_flag(Flag::HalfCarry), false);
 /// assert_eq!(cpu.read_flag(Flag::Carry), true);
 /// ```
+///
+/// | [Zero](Flag::Zero)  | [Subtract](Flag::Subtract) | [HalfCarry](Flag::HalfCarry) | [Carry](Flag::Carry)       |
+/// |---------------------|----------------------------|------------------------------|----------------------------|
+/// | unchanged           | false                      | false                        | true                       |
+#[doc(alias = "SCF")]
 pub struct SetCarry {}
 
 impl Instruction for SetCarry {

@@ -5,6 +5,11 @@ use crate::{
 };
 
 /// Stores the [accumulator](Register::A) to the address specified in [HL](DoubleRegister::HL). Decrements [HL](DoubleRegister::HL) afterwards.
+#[doc(alias = "LD")]
+#[doc(alias = "LD (HL-),A")]
+#[doc(alias = "LD (HLD),A")]
+#[doc(alias = "LDD")]
+#[doc(alias = "LDD (HL),A")]
 pub struct LoadAccumulatorToHlAndDecrement {
     /// The current phase of the instruction.
     pub phase: TwoPhases,

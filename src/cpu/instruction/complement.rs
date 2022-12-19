@@ -27,6 +27,11 @@ use crate::{
 /// assert_eq!(cpu.read_flag(Flag::Subtract), true);
 /// assert_eq!(cpu.read_flag(Flag::HalfCarry), true);
 /// ```
+///
+/// | [Zero](Flag::Zero)  | [Subtract](Flag::Subtract) | [HalfCarry](Flag::HalfCarry) | [Carry](Flag::Carry)       |
+/// |---------------------|----------------------------|------------------------------|----------------------------|
+/// | unchanged           | true                       | true                         | unchanged                  |
+#[doc(alias = "CPL")]
 pub struct Complement {}
 
 impl Instruction for Complement {

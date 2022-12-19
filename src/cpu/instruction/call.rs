@@ -7,6 +7,7 @@ use crate::{cpu::Cpu, memory_device::MemoryDevice};
 /// See [PushDoubleRegister](super::PushDoubleRegister) for more details on how data is pushed to the stack.
 ///
 /// The value pushed to the stack points to the next instruction directly after this one.
+#[doc(alias = "CALL")]
 pub struct Call {
     /// The immediate address. Will only valid after the second phase.
     pub address: u16,

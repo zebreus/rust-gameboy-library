@@ -6,6 +6,7 @@ generate_instruction!(
     /// | [Zero](Flag::Zero)  | [Subtract](Flag::Subtract) | [HalfCarry](Flag::HalfCarry)        | [Carry](Flag::Carry)       |
     /// |---------------------|----------------------------|-------------------------------------|----------------------------|
     /// | true if result is 0 | false                      | true if the lower nibble overflowed | true if a overflow occured |
+    #[doc(alias = "ADD")]
     (
         /// Add the operand register to the [accumulator](Register::A).
         AddRegister,

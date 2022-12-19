@@ -6,6 +6,7 @@ generate_instruction!(
     /// | [Zero](Flag::Zero)  | [Subtract](Flag::Subtract) | [HalfCarry](Flag::HalfCarry) | [Carry](Flag::Carry)       |
     /// |---------------------|----------------------------|------------------------------|----------------------------|
     /// | true if result is 0 | false                      | false                        | false                      |
+    #[doc(alias = "OR")]
     (
         /// [Bitwise or](https://wikipedia.org/wiki/Bitwise_operation#OR) between operand register and the [accumulator](Register::A). The result is stored in the [accumulator](Register::A).
         BitwiseOrRegister,

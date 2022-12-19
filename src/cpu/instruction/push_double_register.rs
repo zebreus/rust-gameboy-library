@@ -8,6 +8,11 @@ use crate::{cpu::Cpu, memory_device::MemoryDevice};
 /// | SP - 2 | SP - 1 |    SP     |
 /// |--------|--------|-----------|
 /// |  LSB   |  MSB   | unchanged |
+#[doc(alias = "PUSH")]
+#[doc(alias = "PUSH BC")]
+#[doc(alias = "PUSH DE")]
+#[doc(alias = "PUSH HL")]
+#[doc(alias = "PUSH AF")]
 pub struct PushDoubleRegister {
     /// The source double register.
     pub source: DoubleRegister,

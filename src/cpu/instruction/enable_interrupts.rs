@@ -4,6 +4,7 @@ use crate::{cpu::Cpu, memory_device::MemoryDevice};
 /// Enable interrupts after the next instruction has finished.
 ///
 /// Sets IME to true.
+#[doc(alias = "EI")]
 pub struct EnableInterrupts {}
 
 impl Instruction for EnableInterrupts {

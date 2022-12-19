@@ -12,6 +12,11 @@ use crate::{
 /// This instruction is only two phases long, if the condition is not met in the first phase.
 ///
 /// Basically just [pops](super::PopDoubleRegister) a address from the stack and sets the program counter to it.
+#[doc(alias = "RET")]
+#[doc(alias = "RET NZ")]
+#[doc(alias = "RET Z")]
+#[doc(alias = "RET NC")]
+#[doc(alias = "RET C")]
 pub struct ReturnConditional {
     /// The jump is only made if the condition is fullfilled in the third phase.
     pub condition: ConditionCode,

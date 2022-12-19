@@ -10,6 +10,7 @@ use crate::{
 /// This instruction skips the fourth phase, if the condition is not met in the third phase.
 ///
 /// The condition is evaluated in the third phase
+#[doc(alias = "JP")]
 pub struct JumpToImmediateAddressConditional {
     /// The jump is only made if the condition is fullfilled in the third phase.
     pub condition: ConditionCode,

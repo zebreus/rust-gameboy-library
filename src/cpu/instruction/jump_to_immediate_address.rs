@@ -3,6 +3,7 @@ use super::Instruction;
 use crate::{cpu::Cpu, memory_device::MemoryDevice};
 
 /// Jumps to the address specified in the two bytes following the opcode
+#[doc(alias = "JP")]
 pub struct JumpToImmediateAddress {
     /// The immediate address. Will only valid after the second phase.
     pub address: u16,

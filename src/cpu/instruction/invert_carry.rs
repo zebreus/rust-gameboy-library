@@ -4,7 +4,6 @@ use crate::{
     memory_device::MemoryDevice,
 };
 
-#[doc(alias = "CCF")]
 /// Invert the current value of the [Flag::Carry] flag.
 ///
 /// ```
@@ -25,6 +24,11 @@ use crate::{
 /// assert_eq!(cpu.read_flag(Flag::HalfCarry), false);
 /// assert_eq!(cpu.read_flag(Flag::Carry), true);
 /// ```
+///
+/// | [Zero](Flag::Zero)  | [Subtract](Flag::Subtract) | [HalfCarry](Flag::HalfCarry) | [Carry](Flag::Carry)       |
+/// |---------------------|----------------------------|------------------------------|----------------------------|
+/// | unchanged           | false                      | false                        | true if carry was set      |
+#[doc(alias = "CCF")]
 pub struct InvertCarry {}
 
 impl Instruction for InvertCarry {

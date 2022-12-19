@@ -2,8 +2,8 @@ use super::Instruction;
 use crate::memory_device::MemoryDevice;
 
 /// Do nothing and load the next instruction.
+#[doc(alias = "NOP")]
 pub struct Nop {}
-
 impl Instruction for Nop {
     fn execute<T: MemoryDevice>(
         &self,

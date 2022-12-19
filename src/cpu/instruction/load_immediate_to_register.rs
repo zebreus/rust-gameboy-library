@@ -6,6 +6,8 @@ use crate::{
 };
 
 /// Loads the byte following the opcode of the instruction to a register
+#[doc(alias = "LD")]
+#[doc(alias = "LD R,n")]
 pub struct LoadImmediateToRegister {
     /// The destination register.
     pub destination: Register,
@@ -39,6 +41,9 @@ impl Instruction for LoadImmediateToRegister {
         }
     }
     fn encode(&self) -> Vec<u8> {
+        if matches!(self.destination, Register::F) {
+            panic!("Cannot encode load immediate to register for destination register Register::F")
+        }
         let base_code = 0b00000110 & 0b11000111u8;
         let destination_code = (self.destination.id() << 3) & 0b00111000u8;
         let opcode = base_code | destination_code;

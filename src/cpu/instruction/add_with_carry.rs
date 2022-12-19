@@ -8,6 +8,7 @@ generate_instruction!(
     /// | [Zero](Flag::Zero)  | [Subtract](Flag::Subtract) | [HalfCarry](Flag::HalfCarry)        | [Carry](Flag::Carry)       |
     /// |---------------------|----------------------------|-------------------------------------|----------------------------|
     /// | true if result is 0 | false                      | true if the lower nibble overflowed | true if a overflow occured |
+    #[doc(alias = "ADC")]
     (
         /// Add the operand register and the previous carry to the [accumulator](Register::A).
         AddWithCarryRegister,
