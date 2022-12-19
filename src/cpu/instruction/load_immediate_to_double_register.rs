@@ -126,7 +126,7 @@ mod tests {
         let mut memory = DebugMemory::new_with_init(&[0x34, 0x12]);
 
         let instruction = LoadImmediateToDoubleRegister {
-            destination: DoubleRegister::BC,
+            destination: DoubleRegister::DE,
             value: 0,
             phase: ThreePhases::First,
         };
