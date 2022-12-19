@@ -264,6 +264,12 @@ pub fn decode(byte: u8) -> InstructionEnum {
         "11010111" => decode_arithmetic_immediate!(SubtractImmediate),
         "10011aaa" => decode_arithmetic!(a, SubtractWithCarryRegister, SubtractWithCarryFromHl),
         "11011111" => decode_arithmetic_immediate!(SubtractWithCarryImmediate),
+        "10100aaa" => decode_arithmetic!(a, BitwiseAndRegister, BitwiseAndFromHl),
+        "11100111" => decode_arithmetic_immediate!(BitwiseAndImmediate),
+        "10101aaa" => decode_arithmetic!(a, BitwiseExclusiveOrRegister, BitwiseExclusiveOrFromHl),
+        "11101111" => decode_arithmetic_immediate!(BitwiseExclusiveOrImmediate),
+        "10110aaa" => decode_arithmetic!(a, BitwiseOrRegister, BitwiseOrFromHl),
+        "11110111" => decode_arithmetic_immediate!(BitwiseOrImmediate),
         _ => LoadFromHlToRegister {
             destination: Register::A,
             phase: TwoPhases::First,

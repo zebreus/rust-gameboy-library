@@ -60,6 +60,24 @@ generate_instruction_enum!(
         SubtractWithCarryFromHl,
         SubtractWithCarryImmediate
     ),
+    (
+        bitwise_and,
+        BitwiseAndRegister,
+        BitwiseAndFromHl,
+        BitwiseAndImmediate
+    ),
+    (
+        bitwise_or,
+        BitwiseOrRegister,
+        BitwiseOrFromHl,
+        BitwiseOrImmediate
+    ),
+    (
+        bitwise_exclusive_or,
+        BitwiseExclusiveOrRegister,
+        BitwiseExclusiveOrFromHl,
+        BitwiseExclusiveOrImmediate
+    ),
     (call, Call),
     (call_conditional, CallConditional),
     (complement, Complement),
