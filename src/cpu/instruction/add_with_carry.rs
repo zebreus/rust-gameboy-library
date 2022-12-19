@@ -62,5 +62,6 @@ generate_instruction!(
         assert_result!((A: 15, B: 0, FLAG: Flag::Carry,), (FLAG: Flag::HalfCarry,));
 
         assert_result!((A: 0b00001010, B: 0b00001111, FLAG: Flag::Carry,), (FLAG: Flag::HalfCarry,));
+        assert_result!((A: 0b00000000, B: 0b11111111, FLAG: Flag::Carry,), (A: 0b00000000, FLAG: Flag::HalfCarry,));
     }
 );

@@ -48,6 +48,18 @@ generate_instruction_enum!(
         AddWithCarryFromHl,
         AddWithCarryImmediate
     ),
+    (
+        subtract,
+        SubtractRegister,
+        SubtractFromHl,
+        SubtractImmediate
+    ),
+    (
+        subtract_with_carry,
+        SubtractWithCarryRegister,
+        SubtractWithCarryFromHl,
+        SubtractWithCarryImmediate
+    ),
     (call, Call),
     (call_conditional, CallConditional),
     (complement, Complement),

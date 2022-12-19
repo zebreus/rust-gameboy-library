@@ -20,13 +20,10 @@ generate_instruction!(
     operand,
     accumulator,
     {
-        let result = accumulator.wrapping_add(operand);
-
-        // set flags
+        let (result, carry_flag) = accumulator.overflowing_add(operand);
         let zero_flag = result == 0;
         let subtract_flag = false;
         let half_carry_flag = (accumulator ^ operand ^ result) & 0b00010000 == 0b00010000;
-        let carry_flag = result < accumulator;
 
         cpu.write_flag(Flag::Zero, zero_flag);
         cpu.write_flag(Flag::Subtract, subtract_flag);
