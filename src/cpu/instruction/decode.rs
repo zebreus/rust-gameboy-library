@@ -22,7 +22,8 @@ use super::{
     LoadFromDoubleRegisterToAccumulator, LoadFromImmediateAddressToAccumulator,
     LoadFromRegisterCOffsetToAccumulator, LoadHlToSp, LoadImmediateToDoubleRegister,
     LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress, Nop, PopDoubleRegister,
-    PushDoubleRegister, Restart, Return, ReturnConditional, SetCarry, Stop, ToBinaryCodedDecimal,
+    PushDoubleRegister, Restart, Return, ReturnConditional, ReturnFromInterrupt, SetCarry, Stop,
+    ToBinaryCodedDecimal,
 };
 
 macro_rules! decode_arithmetic {
@@ -244,6 +245,10 @@ pub fn decode(byte: u8) -> InstructionEnum {
         }
         .into(),
         "11001001" => Return {
+            phase: FourPhases::First,
+        }
+        .into(),
+        "11011001" => ReturnFromInterrupt {
             phase: FourPhases::First,
         }
         .into(),

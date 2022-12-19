@@ -164,6 +164,7 @@ generate_instruction_enum!(
     (push_double_register, PushDoubleRegister),
     (return_conditional, ReturnConditional),
     (return_instruction, Return),
+    (return_from_interrupt, ReturnFromInterrupt),
     (set_carry, SetCarry),
     (stop, Stop),
     (to_binary_coded_decimal, ToBinaryCodedDecimal),
