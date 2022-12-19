@@ -133,7 +133,7 @@ macro_rules! generate_instruction {
 
                 }
                 fn encode(&self) -> Vec<u8> {
-                    let opcode_immediate = $opcode + 0b01000111;
+                    let opcode_immediate = $opcode + 0b01000110;
                     match self.phase {
                         TwoPhases::First => Vec::from([opcode_immediate]),
                         TwoPhases::Second => Vec::from([opcode_immediate, self.value]),

@@ -53,7 +53,7 @@ macro_rules! decode_arithmetic_immediate {
 
 /// Create a instruction from an opcode.
 ///
-/// Some instructions are longer than one byte because they have immediate arguments. The additional arguments are loaded here. Instead they are loaded in the appropriate cycles when executing the instructions.
+/// Some instructions are longer than one byte because they have immediate arguments. The additional arguments are not loaded here. Instead they are loaded in the appropriate cycles when executing the instructions.
 ///
 /// # Examples
 ///
@@ -257,21 +257,21 @@ pub fn decode(byte: u8) -> InstructionEnum {
         "00111111" => InvertCarry {}.into(),
         "00110111" => SetCarry {}.into(),
         "10000aaa" => decode_arithmetic!(a, AddRegister, AddFromHl),
-        "11000111" => decode_arithmetic_immediate!(AddImmediate),
+        "11000110" => decode_arithmetic_immediate!(AddImmediate),
         "10001aaa" => decode_arithmetic!(a, AddWithCarryRegister, AddWithCarryFromHl),
-        "11001111" => decode_arithmetic_immediate!(AddWithCarryImmediate),
+        "11001110" => decode_arithmetic_immediate!(AddWithCarryImmediate),
         "10010aaa" => decode_arithmetic!(a, SubtractRegister, SubtractFromHl),
-        "11010111" => decode_arithmetic_immediate!(SubtractImmediate),
+        "11010110" => decode_arithmetic_immediate!(SubtractImmediate),
         "10011aaa" => decode_arithmetic!(a, SubtractWithCarryRegister, SubtractWithCarryFromHl),
-        "11011111" => decode_arithmetic_immediate!(SubtractWithCarryImmediate),
+        "11011110" => decode_arithmetic_immediate!(SubtractWithCarryImmediate),
         "10100aaa" => decode_arithmetic!(a, BitwiseAndRegister, BitwiseAndFromHl),
-        "11100111" => decode_arithmetic_immediate!(BitwiseAndImmediate),
+        "11100110" => decode_arithmetic_immediate!(BitwiseAndImmediate),
         "10101aaa" => decode_arithmetic!(a, BitwiseExclusiveOrRegister, BitwiseExclusiveOrFromHl),
-        "11101111" => decode_arithmetic_immediate!(BitwiseExclusiveOrImmediate),
+        "11101110" => decode_arithmetic_immediate!(BitwiseExclusiveOrImmediate),
         "10110aaa" => decode_arithmetic!(a, BitwiseOrRegister, BitwiseOrFromHl),
-        "11110111" => decode_arithmetic_immediate!(BitwiseOrImmediate),
+        "11110110" => decode_arithmetic_immediate!(BitwiseOrImmediate),
         "10111aaa" => decode_arithmetic!(a, CompareRegister, CompareFromHl),
-        "11111111" => decode_arithmetic_immediate!(CompareImmediate),
+        "11111110" => decode_arithmetic_immediate!(CompareImmediate),
         _ => LoadFromHlToRegister {
             destination: Register::A,
             phase: TwoPhases::First,
