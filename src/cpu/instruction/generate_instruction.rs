@@ -184,11 +184,17 @@ macro_rules! prepare_generate_instruction {
         #[cfg(test)]
         macro_rules! assert_result {
             (($dollar(A: $accumulator:expr,)? $dollar(B: $operandd:expr,)? $dollar( FLAG: $initial_flags:expr ,)* ), ($dollar(A: $accumulator_result:expr,)? $dollar(B: $operand_result:expr,)? $dollar( FLAG: $flag_result:expr ,)* $dollar( FLAG_UNSET: $flag_unset_result:expr ,)* )) => {
+                {
                 let mut cpu = CpuState::new();
                 let mut memory = DebugMemory::new();
 
-                cpu.write_register(Register::A, [$dollar($accumulator ,)? 0][0]);
-                cpu.write_register(Register::B, [$dollar($operandd ,)? 0][0]);
+                let accumulator_value = [$dollar($accumulator ,)? 0][0];
+                let operand_value = [$dollar($operandd ,)? 0][0];
+                #[allow(unused)]
+                let flags_string = stringify!($dollar( $initial_flags )&*);
+
+                cpu.write_register(Register::A, accumulator_value);
+                cpu.write_register(Register::B, operand_value);
                 cpu.write_flag(Flag::Zero, false);
                 cpu.write_flag(Flag::Subtract, false);
                 cpu.write_flag(Flag::HalfCarry, false);
@@ -201,11 +207,16 @@ macro_rules! prepare_generate_instruction {
                 };
                 instruction.execute(&mut cpu, &mut memory);
 
+                #[allow(unused)]
+                let result_value = cpu.read_register(Register::A);
+                #[allow(unused)]
+                let module_name = module_path!().rsplit("::").skip(1).next().expect("name");
 
-                $dollar( assert_eq!(cpu.read_register(Register::A), $accumulator_result); )*
-                $dollar( assert_eq!(cpu.read_register(Register::B), $operand_result); )*
-                $dollar( assert_eq!(cpu.read_flag($flag_result), true); )*
-                $dollar( assert_eq!(cpu.read_flag($flag_unset_result), false); )*
+                $dollar( assert_eq!(cpu.read_register(Register::A), $accumulator_result, "\n\n\n#####>    Expected accumulator to be {} but got {} instead!    <#####\n\nWhere      : {}:{}\nFlags      : {}\nAccumulator: {:#010b} {:#004x} {}\nOperand    : {:#010b} {:#004x} {}\nResult     : {:#010b} {:#004x} {}\n\n", $accumulator_result, result_value, file!(), line!(), flags_string, accumulator_value, accumulator_value, accumulator_value, operand_value, operand_value, operand_value, result_value, result_value, result_value); )*
+                $dollar( assert_eq!(cpu.read_register(Register::B), $operand_result, "\n\n\n#####>    Expected operand to be {} but got {} instead!    <#####\n\nWhere      : {}:{}\nFlags      : {}\nAccumulator: {:#010b} {:#004x} {}\nOperand    : {:#010b} {:#004x} {}\nResult     : {:#010b} {:#004x} {}\n\n", $operand_result, operand_value, file!(), line!(), flags_string, accumulator_value, accumulator_value, accumulator_value, operand_value, operand_value, operand_value, result_value, result_value, result_value); )*
+                $dollar( assert_eq!(cpu.read_flag($flag_result), true, "\n\n\n#####>    Expected {} to be set!    <#####\n\nWhere      : {}:{}\nFlags      : {}\nAccumulator: {:#010b} {:#004x} {}\nOperand    : {:#010b} {:#004x} {}\nResult     : {:#010b} {:#004x} {}\n\n", stringify!($flag_result), file!(), line!(), flags_string, accumulator_value, accumulator_value, accumulator_value, operand_value, operand_value, operand_value, result_value, result_value, result_value); )*
+                $dollar( assert_eq!(cpu.read_flag($flag_unset_result), false, "\n\n\n#####>    Expected {} to be unset!    <#####\n\nWhere      : {}:{}\nFlags      : {}\nAccumulator: {:#010b} {:#004x} {}\nOperand    : {:#010b} {:#004x} {}\nResult     : {:#010b} {:#004x} {}\n\n", stringify!($flag_unset_result), file!(), line!(), flags_string, accumulator_value, accumulator_value, accumulator_value, operand_value, operand_value, operand_value, result_value, result_value, result_value); )*
+}
             };
 
         }

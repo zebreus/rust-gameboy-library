@@ -37,7 +37,7 @@ generate_instruction!(
         let carry_flag = carry_flag || operand_overflow;
         let zero_flag = result == 0;
         let subtract_flag = false;
-        let half_carry_flag = carry_flag || (accumulator & 0b11110000) != (result & 0b11110000);
+        let half_carry_flag = (accumulator ^ operand ^ result) & 0b00010000 == 0b00010000;
 
         cpu.write_flag(Flag::Zero, zero_flag);
         cpu.write_flag(Flag::Subtract, subtract_flag);
@@ -61,6 +61,6 @@ generate_instruction!(
         assert_result!((A: 15, B: 0,), (FLAG_UNSET: Flag::HalfCarry,));
         assert_result!((A: 15, B: 0, FLAG: Flag::Carry,), (FLAG: Flag::HalfCarry,));
 
-        assert_result!((A: 10, B: 15, FLAG: Flag::Carry,), (FLAG: Flag::HalfCarry,));
+        assert_result!((A: 0b00001010, B: 0b00001111, FLAG: Flag::Carry,), (FLAG: Flag::HalfCarry,));
     }
 );
