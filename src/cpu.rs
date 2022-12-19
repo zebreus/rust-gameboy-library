@@ -480,6 +480,73 @@ pub enum Interrupt {
     Joypad = 0b00010000,
 }
 
+/// Addresses that can be used with [instruction::Restart]
+#[derive(Debug, Clone, Copy)]
+#[repr(u8)]
+pub enum RestartAddress {
+    /// Restart at 0x00
+    A,
+    /// Restart at 0x08
+    B,
+    /// Restart at 0x10
+    C,
+    /// Restart at 0x18
+    D,
+    /// Restart at 0x20
+    E,
+    /// Restart at 0x28
+    F,
+    /// Restart at 0x30
+    G,
+    /// Restart at 0x38
+    H,
+}
+
+impl Into<RestartAddress> for u8 {
+    fn into(self) -> RestartAddress {
+        match self {
+            0b000 => RestartAddress::A,
+            0b001 => RestartAddress::B,
+            0b010 => RestartAddress::C,
+            0b011 => RestartAddress::D,
+            0b100 => RestartAddress::E,
+            0b101 => RestartAddress::F,
+            0b110 => RestartAddress::G,
+            0b111 => RestartAddress::H,
+            _ => panic!("Can only convert opcode parts between 0b000 and 0b111 to RestartAddress"),
+        }
+    }
+}
+impl Into<u8> for RestartAddress {
+    fn into(self) -> u8 {
+        match self {
+            RestartAddress::A => 0b000,
+            RestartAddress::B => 0b001,
+            RestartAddress::C => 0b010,
+            RestartAddress::D => 0b011,
+            RestartAddress::E => 0b100,
+            RestartAddress::F => 0b101,
+            RestartAddress::G => 0b110,
+            RestartAddress::H => 0b111,
+        }
+    }
+}
+
+impl RestartAddress {
+    fn get_address(&self) -> u16 {
+        match self {
+            RestartAddress::A => 0x00,
+            RestartAddress::B => 0x08,
+            RestartAddress::C => 0x10,
+            RestartAddress::D => 0x18,
+            RestartAddress::E => 0x20,
+            RestartAddress::F => 0x28,
+            RestartAddress::G => 0x30,
+            RestartAddress::H => 0x38,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::instruction::{InstructionEnum, LoadFromRegisterToRegister};

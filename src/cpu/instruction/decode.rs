@@ -22,7 +22,7 @@ use super::{
     LoadFromDoubleRegisterToAccumulator, LoadFromImmediateAddressToAccumulator,
     LoadFromRegisterCOffsetToAccumulator, LoadHlToSp, LoadImmediateToDoubleRegister,
     LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress, Nop, PopDoubleRegister,
-    PushDoubleRegister, Return, ReturnConditional, SetCarry, Stop, ToBinaryCodedDecimal,
+    PushDoubleRegister, Restart, Return, ReturnConditional, SetCarry, Stop, ToBinaryCodedDecimal,
 };
 
 macro_rules! decode_arithmetic {
@@ -272,6 +272,11 @@ pub fn decode(byte: u8) -> InstructionEnum {
         "11110110" => decode_arithmetic_immediate!(BitwiseOrImmediate),
         "10111aaa" => decode_arithmetic!(a, CompareRegister, CompareFromHl),
         "11111110" => decode_arithmetic_immediate!(CompareImmediate),
+        "11aaa111" => Restart {
+            address: a.into(),
+            phase: FourPhases::First,
+        }
+        .into(),
         _ => LoadFromHlToRegister {
             destination: Register::A,
             phase: TwoPhases::First,

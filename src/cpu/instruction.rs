@@ -166,7 +166,8 @@ generate_instruction_enum!(
     (return_instruction, Return),
     (set_carry, SetCarry),
     (stop, Stop),
-    (to_binary_coded_decimal, ToBinaryCodedDecimal)
+    (to_binary_coded_decimal, ToBinaryCodedDecimal),
+    (restart, Restart)
 );
 
 /// This is the trait for executable CPU instructions.
