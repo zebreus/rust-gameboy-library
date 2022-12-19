@@ -78,6 +78,7 @@ generate_instruction_enum!(
         BitwiseExclusiveOrFromHl,
         BitwiseExclusiveOrImmediate
     ),
+    (compare, CompareRegister, CompareFromHl, CompareImmediate),
     (call, Call),
     (call_conditional, CallConditional),
     (complement, Complement),
