@@ -15,10 +15,10 @@ use super::{
     load_immediate_to_register::LoadImmediateToRegister, InstructionEnum,
 };
 use super::{
-    AddImmediateOffsetToSp, Call, CallConditional, Complement, DecrementDoubleRegister,
-    DisableInterrupts, EnableInterrupts, Halt, IncrementDoubleRegister, InvertCarry,
-    JumpByImmediateOffset, JumpByImmediateOffsetConditional, JumpToHl, JumpToImmediateAddress,
-    JumpToImmediateAddressConditional, LoadAccumulatorToDoubleRegister,
+    AddDoubleRegisterToHl, AddImmediateOffsetToSp, Call, CallConditional, Complement,
+    DecrementDoubleRegister, DisableInterrupts, EnableInterrupts, Halt, IncrementDoubleRegister,
+    InvertCarry, JumpByImmediateOffset, JumpByImmediateOffsetConditional, JumpToHl,
+    JumpToImmediateAddress, JumpToImmediateAddressConditional, LoadAccumulatorToDoubleRegister,
     LoadAccumulatorToImmediateAddress, LoadAccumulatorToRegisterCOffset,
     LoadFromDoubleRegisterToAccumulator, LoadFromImmediateAddressToAccumulator,
     LoadFromRegisterCOffsetToAccumulator, LoadHlToSp, LoadImmediateToDoubleRegister,
@@ -301,6 +301,12 @@ pub fn decode(byte: u8) -> InstructionEnum {
         .into(),
         "00aa1011" => DecrementDoubleRegister {
             destination: DoubleRegister::try_from(a)
+                .expect("2 bit value should always correspond to a double register"),
+            phase: TwoPhases::First,
+        }
+        .into(),
+        "00aa1001" => AddDoubleRegisterToHl {
+            operand: DoubleRegister::try_from(a)
                 .expect("2 bit value should always correspond to a double register"),
             phase: TwoPhases::First,
         }
