@@ -55,7 +55,7 @@ generate_instruction!(
     fn flags_look_correct() {
         assert_result!((B: 0b00000000,), (B: 0b00000000, FLAG: Flag::Zero, FLAG_UNSET: Flag::HalfCarry, FLAG_UNSET: Flag::Carry, FLAG_UNSET: Flag::Subtract,));
         assert_result!((B: 0b00000000, FLAG: Flag::Carry,), (B: 0b10000000, FLAG_UNSET: Flag::Zero, FLAG_UNSET: Flag::HalfCarry, FLAG_UNSET: Flag::Carry, FLAG_UNSET: Flag::Subtract,));
-        assert_result!((B: 0b01000000,), (B: 0b00000010, FLAG_UNSET: Flag::Zero, FLAG_UNSET: Flag::HalfCarry, FLAG_UNSET: Flag::Carry, FLAG_UNSET: Flag::Subtract,));
+        assert_result!((B: 0b01000000,), (B: 0b00100000, FLAG_UNSET: Flag::Zero, FLAG_UNSET: Flag::HalfCarry, FLAG_UNSET: Flag::Carry, FLAG_UNSET: Flag::Subtract,));
         assert_result!((B: 0b00000001,), (B: 0b00000000, FLAG: Flag::Carry, FLAG: Flag::Zero, FLAG_UNSET: Flag::HalfCarry, FLAG_UNSET: Flag::Subtract,));
     }
 );
