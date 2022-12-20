@@ -44,7 +44,7 @@ macro_rules! decode_arithmetic {
     };
 }
 
-macro_rules! decode_operant_arithmetic {
+macro_rules! decode_operand_arithmetic {
     ($a:ident, $register_instruction:ident, $hl_instruction:ident) => {
         match $a {
             0b00000110 => super::$hl_instruction {
@@ -295,8 +295,8 @@ pub fn decode(byte: u8) -> InstructionEnum {
         "11110110" => decode_arithmetic_immediate!(BitwiseOrImmediate),
         "10111aaa" => decode_arithmetic!(a, CompareRegister, CompareFromHl),
         "11111110" => decode_arithmetic_immediate!(CompareImmediate),
-        "00aaa100" => decode_operant_arithmetic!(a, IncrementRegister, IncrementAtHl),
-        "00aaa101" => decode_operant_arithmetic!(a, DecrementRegister, DecrementAtHl),
+        "00aaa100" => decode_operand_arithmetic!(a, IncrementRegister, IncrementAtHl),
+        "00aaa101" => decode_operand_arithmetic!(a, DecrementRegister, DecrementAtHl),
         "11aaa111" => Restart {
             address: a.into(),
             phase: FourPhases::First,

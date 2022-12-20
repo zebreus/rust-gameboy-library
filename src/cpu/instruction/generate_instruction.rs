@@ -5,7 +5,8 @@ macro_rules! generate_instruction {
     $register_instruction_name:ident, $(#[$hl_instruction_docs:meta])+
     $hl_instruction_name:ident $(, $(#[$immediate_instruction_docs:meta])+
     $immediate_instruction_name:ident )? ),
-    $opcode:expr,
+    $( $cb_prefix:ident, )?
+    $opcode:literal,
     $( $register_part_offset:literal, )?
     $cpu:ident,
     $memory:ident,
@@ -221,7 +222,7 @@ macro_rules! prepare_generate_instruction {
         ///
         /// The macro takes two arguments in ().
         /// The first is the initial state and the second is the expected resulting state.
-        /// You can specify the accumulator as `A` and the operant as `B` in each argument.
+        /// You can specify the accumulator as `A` and the operand as `B` in each argument.
         /// You can initialize the flags to true by setting one or more `FLAG:` values in the initial state.
         /// If you dont specify `A:` or `B:` in the initial state it is initialized to `0`.
         ///

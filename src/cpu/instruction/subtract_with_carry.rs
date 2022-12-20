@@ -73,7 +73,7 @@ generate_instruction!(
 
         assert_result!((A: 30, B: 15, FLAG: Flag::Carry,), (FLAG: Flag::HalfCarry,));
     },
-    fn half_carry_flag_works_even_if_operant_overflows() {
+    fn half_carry_flag_works_even_if_operand_overflows() {
         assert_result!((A: 10, B: 255,), (A: 11, FLAG: Flag::HalfCarry,));
         assert_result!((A: 10, B: 255, FLAG: Flag::Carry,), (A: 10, FLAG: Flag::HalfCarry,));
     }

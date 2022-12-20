@@ -82,6 +82,18 @@ generate_instruction_enum!(
         BitwiseExclusiveOrFromHl,
         BitwiseExclusiveOrImmediate
     ),
+    (rotate_left, RotateLeftRegister, RotateLeftAtHl),
+    (rotate_right, RotateRightRegister, RotateRightAtHl),
+    (
+        rotate_left_through_carry,
+        RotateLeftThroughCarryRegister,
+        RotateLeftThroughCarryAtHl
+    ),
+    (
+        rotate_right_through_carry,
+        RotateRightThroughCarryRegister,
+        RotateRightThroughCarryAtHl
+    ),
     (compare, CompareRegister, CompareFromHl, CompareImmediate),
     (call, Call),
     (call_conditional, CallConditional),
