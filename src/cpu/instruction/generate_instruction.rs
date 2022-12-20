@@ -60,7 +60,7 @@ macro_rules! generate_instruction {
                 let base_code = $opcode & !(0b00000111u8 << [$($register_part_offset ,)? 0][0]);
                 let operand_code = (self.operand.id() & 0b00000111u8) << [$($register_part_offset ,)? 0][0];
                 let opcode = base_code | operand_code;
-                Vec::from([opcode])
+                Vec::from([$(consume_first!($cb_prefix 0xcb) , )? opcode])
             }
         }
 
@@ -139,7 +139,7 @@ macro_rules! generate_instruction {
                 let base_code = $opcode & !(0b00000111u8 << [$($register_part_offset ,)? 0][0]);
                 let operand_code = 0b00000110 << [$($register_part_offset ,)? 0][0];
                 let opcode = base_code | operand_code;
-                Vec::from([opcode])
+                Vec::from([$(consume_first!($cb_prefix 0xcb) , )? opcode])
             }
         }
 

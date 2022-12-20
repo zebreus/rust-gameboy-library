@@ -1,8 +1,7 @@
-use crate::cpu::instruction::phases::{ThreePhases, TwoPhases};
-use crate::cpu::{ConditionCode, DoubleRegister, Register};
+use crate::cpu::instruction::phases::ThreePhases;
+use crate::cpu::Register;
 use bitmatch::bitmatch;
 
-use super::phases::{FivePhases, FourPhases, SixPhases};
 use super::{HaltAndCatchFire, InstructionEnum};
 
 macro_rules! decode_operand_arithmetic {
