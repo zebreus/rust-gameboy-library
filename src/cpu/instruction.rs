@@ -203,6 +203,16 @@ generate_instruction_enum!(
     (decrement_double_register, DecrementDoubleRegister),
     (halt_and_catch_fire, HaltAndCatchFire),
     (restart, Restart),
+    (rotate_accumulator_left, RotateAccumulatorLeft),
+    (
+        rotate_accumulator_left_through_carry,
+        RotateAccumulatorLeftThroughCarry
+    ),
+    (rotate_accumulator_right, RotateAccumulatorRight),
+    (
+        rotate_accumulator_right_through_carry,
+        RotateAccumulatorRightThroughCarry
+    ),
     (prefix_cb, PrefixCb)
 );
 
