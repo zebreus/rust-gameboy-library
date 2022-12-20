@@ -15,9 +15,9 @@ use super::{
     load_immediate_to_register::LoadImmediateToRegister, InstructionEnum,
 };
 use super::{
-    Call, CallConditional, Complement, DisableInterrupts, EnableInterrupts, Halt, InvertCarry,
-    JumpByImmediateOffset, JumpByImmediateOffsetConditional, JumpToHl, JumpToImmediateAddress,
-    JumpToImmediateAddressConditional, LoadAccumulatorToDoubleRegister,
+    AddImmediateOffsetToSp, Call, CallConditional, Complement, DisableInterrupts, EnableInterrupts,
+    Halt, InvertCarry, JumpByImmediateOffset, JumpByImmediateOffsetConditional, JumpToHl,
+    JumpToImmediateAddress, JumpToImmediateAddressConditional, LoadAccumulatorToDoubleRegister,
     LoadAccumulatorToImmediateAddress, LoadAccumulatorToRegisterCOffset,
     LoadFromDoubleRegisterToAccumulator, LoadFromImmediateAddressToAccumulator,
     LoadFromRegisterCOffsetToAccumulator, LoadHlToSp, LoadImmediateToDoubleRegister,
@@ -279,6 +279,11 @@ pub fn decode(byte: u8) -> InstructionEnum {
         "11111110" => decode_arithmetic_immediate!(CompareImmediate),
         "11aaa111" => Restart {
             address: a.into(),
+            phase: FourPhases::First,
+        }
+        .into(),
+        "11101000" => AddImmediateOffsetToSp {
+            offset: 0,
             phase: FourPhases::First,
         }
         .into(),

@@ -168,6 +168,7 @@ generate_instruction_enum!(
     (set_carry, SetCarry),
     (stop, Stop),
     (to_binary_coded_decimal, ToBinaryCodedDecimal),
+    (add_immediate_offset_to_sp, AddImmediateOffsetToSp),
     (restart, Restart)
 );
 
