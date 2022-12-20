@@ -176,6 +176,7 @@ generate_instruction_enum!(
     (add_double_register_to_hl, AddDoubleRegisterToHl),
     (increment_double_register, IncrementDoubleRegister),
     (decrement_double_register, DecrementDoubleRegister),
+    (halt_and_catch_fire, HaltAndCatchFire),
     (restart, Restart)
 );
 

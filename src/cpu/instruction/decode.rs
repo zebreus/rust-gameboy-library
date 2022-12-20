@@ -16,15 +16,16 @@ use super::{
 };
 use super::{
     AddDoubleRegisterToHl, AddImmediateOffsetToSp, Call, CallConditional, Complement,
-    DecrementDoubleRegister, DisableInterrupts, EnableInterrupts, Halt, IncrementDoubleRegister,
-    InvertCarry, JumpByImmediateOffset, JumpByImmediateOffsetConditional, JumpToHl,
-    JumpToImmediateAddress, JumpToImmediateAddressConditional, LoadAccumulatorToDoubleRegister,
-    LoadAccumulatorToImmediateAddress, LoadAccumulatorToRegisterCOffset,
-    LoadFromDoubleRegisterToAccumulator, LoadFromImmediateAddressToAccumulator,
-    LoadFromRegisterCOffsetToAccumulator, LoadHlToSp, LoadImmediateToDoubleRegister,
-    LoadImmediateToHl, LoadRegisterToHl, LoadSpPlusImmediateOffsetToHl, LoadSpToImmediateAddress,
-    Nop, PopDoubleRegister, PushDoubleRegister, Restart, Return, ReturnConditional,
-    ReturnFromInterrupt, SetCarry, Stop, ToBinaryCodedDecimal,
+    DecrementDoubleRegister, DisableInterrupts, EnableInterrupts, Halt, HaltAndCatchFire,
+    IncrementDoubleRegister, InvertCarry, JumpByImmediateOffset, JumpByImmediateOffsetConditional,
+    JumpToHl, JumpToImmediateAddress, JumpToImmediateAddressConditional,
+    LoadAccumulatorToDoubleRegister, LoadAccumulatorToImmediateAddress,
+    LoadAccumulatorToRegisterCOffset, LoadFromDoubleRegisterToAccumulator,
+    LoadFromImmediateAddressToAccumulator, LoadFromRegisterCOffsetToAccumulator, LoadHlToSp,
+    LoadImmediateToDoubleRegister, LoadImmediateToHl, LoadRegisterToHl,
+    LoadSpPlusImmediateOffsetToHl, LoadSpToImmediateAddress, Nop, PopDoubleRegister,
+    PushDoubleRegister, Restart, Return, ReturnConditional, ReturnFromInterrupt, SetCarry, Stop,
+    ToBinaryCodedDecimal,
 };
 
 macro_rules! decode_arithmetic {
@@ -329,6 +330,17 @@ pub fn decode(byte: u8) -> InstructionEnum {
             phase: TwoPhases::First,
         }
         .into(),
+        "11010011" => HaltAndCatchFire { opcode: byte }.into(),
+        "11011011" => HaltAndCatchFire { opcode: byte }.into(),
+        "11011101" => HaltAndCatchFire { opcode: byte }.into(),
+        "11100011" => HaltAndCatchFire { opcode: byte }.into(),
+        "11100100" => HaltAndCatchFire { opcode: byte }.into(),
+        "11101011" => HaltAndCatchFire { opcode: byte }.into(),
+        "11101100" => HaltAndCatchFire { opcode: byte }.into(),
+        "11101101" => HaltAndCatchFire { opcode: byte }.into(),
+        "11110100" => HaltAndCatchFire { opcode: byte }.into(),
+        "11111100" => HaltAndCatchFire { opcode: byte }.into(),
+        "11111101" => HaltAndCatchFire { opcode: byte }.into(),
         _ => LoadFromHlToRegister {
             destination: Register::A,
             phase: TwoPhases::First,
