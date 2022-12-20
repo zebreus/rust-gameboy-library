@@ -28,9 +28,9 @@ use crate::{
 /// assert_eq!(cpu.read_flag(Flag::HalfCarry), true);
 /// ```
 ///
-/// | [Zero](Flag::Zero)  | [Subtract](Flag::Subtract) | [HalfCarry](Flag::HalfCarry) | [Carry](Flag::Carry)       |
-/// |---------------------|----------------------------|------------------------------|----------------------------|
-/// | unchanged           | true                       | true                         | unchanged                  |
+/// | [Zero](Flag::Zero)  | [Subtract](Flag::Subtract) | [HalfCarry](Flag::HalfCarry) | [Carry](Flag::Carry) |
+/// |---------------------|----------------------------|------------------------------|----------------------|
+/// | unchanged           | true                       | true                         | unchanged            |
 #[doc(alias = "CPL")]
 pub struct Complement {}
 

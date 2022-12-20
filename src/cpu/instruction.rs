@@ -173,6 +173,8 @@ generate_instruction_enum!(
         load_sp_plus_immediate_offset_to_hl,
         LoadSpPlusImmediateOffsetToHl
     ),
+    (increment_double_register, IncrementDoubleRegister),
+    (decrement_double_register, DecrementDoubleRegister),
     (restart, Restart)
 );
 
