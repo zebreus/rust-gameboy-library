@@ -33,11 +33,16 @@ pub fn decode_cb(byte: u8) -> InstructionEnum {
             RotateLeftThroughCarryRegister,
             RotateLeftThroughCarryAtHl
         ),
-        "00001aaa" => decode_operand_arithmetic!(
+        "00011aaa" => decode_operand_arithmetic!(
             a,
             RotateRightThroughCarryRegister,
             RotateRightThroughCarryAtHl
         ),
+        "00100aaa" => decode_operand_arithmetic!(a, ShiftLeftRegister, ShiftLeftAtHl),
+        "00101aaa" => decode_operand_arithmetic!(a, ShiftRightRegister, ShiftRightAtHl),
+        "00111aaa" => {
+            decode_operand_arithmetic!(a, ShiftRightLogicalRegister, ShiftRightLogicalAtHl)
+        }
         _ => HaltAndCatchFire { opcode: byte }.into(),
     }
 }

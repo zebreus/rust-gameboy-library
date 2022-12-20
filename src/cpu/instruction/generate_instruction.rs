@@ -217,7 +217,8 @@ macro_rules! generate_instruction {
 macro_rules! prepare_generate_instruction {
     (
     $dollar:tt,
-    $register_instruction_name:ident) => {
+    $register_instruction_name:ident
+    $( , $use_operand_result:ident )? ) => {
         /// Hacky macro that can be used to test the instruction
         ///
         /// The macro takes two arguments in ().
@@ -265,10 +266,12 @@ macro_rules! prepare_generate_instruction {
                 #[allow(unused)]
                 let result_value = cpu.read_register(Register::A);
                 #[allow(unused)]
+                let operand_result_value = cpu.read_register(Register::B);
+                #[allow(unused)]
                 let module_name = module_path!().rsplit("::").skip(1).next().expect("name");
 
                 $dollar( assert_eq!(cpu.read_register(Register::A), $accumulator_result, "\n\n\n#####>    Expected accumulator to be {} but got {} instead!    <#####\n\nWhere      : {}:{}\nFlags      : {}\nAccumulator: {:#010b} {:#004x} {}\nOperand    : {:#010b} {:#004x} {}\nResult     : {:#010b} {:#004x} {}\n\n", $accumulator_result, result_value, file!(), line!(), flags_string, accumulator_value, accumulator_value, accumulator_value, operand_value, operand_value, operand_value, result_value, result_value, result_value); )*
-                $dollar( assert_eq!(cpu.read_register(Register::B), $operand_result, "\n\n\n#####>    Expected operand to be {} but got {} instead!    <#####\n\nWhere      : {}:{}\nFlags      : {}\nAccumulator: {:#010b} {:#004x} {}\nOperand    : {:#010b} {:#004x} {}\nResult     : {:#010b} {:#004x} {}\n\n", $operand_result, operand_value, file!(), line!(), flags_string, accumulator_value, accumulator_value, accumulator_value, operand_value, operand_value, operand_value, result_value, result_value, result_value); )*
+                $dollar( assert_eq!(cpu.read_register(Register::B), $operand_result, "\n\n\n#####>    Expected operand to be {} but got {} instead!    <#####\n\nWhere      : {}:{}\nFlags      : {}\nAccumulator: {:#010b} {:#004x} {}\nOperand    : {:#010b} {:#004x} {}\nOperand    : {:#010b} {:#004x} {}\n\n", $operand_result, operand_result_value, file!(), line!(), flags_string, accumulator_value, accumulator_value, accumulator_value, operand_value, operand_value, operand_value, operand_result_value, operand_result_value, operand_result_value); )*
                 $dollar( assert_eq!(cpu.read_flag($flag_result), true, "\n\n\n#####>    Expected {} to be set!    <#####\n\nWhere      : {}:{}\nFlags      : {}\nAccumulator: {:#010b} {:#004x} {}\nOperand    : {:#010b} {:#004x} {}\nResult     : {:#010b} {:#004x} {}\n\n", stringify!($flag_result), file!(), line!(), flags_string, accumulator_value, accumulator_value, accumulator_value, operand_value, operand_value, operand_value, result_value, result_value, result_value); )*
                 $dollar( assert_eq!(cpu.read_flag($flag_unset_result), false, "\n\n\n#####>    Expected {} to be unset!    <#####\n\nWhere      : {}:{}\nFlags      : {}\nAccumulator: {:#010b} {:#004x} {}\nOperand    : {:#010b} {:#004x} {}\nResult     : {:#010b} {:#004x} {}\n\n", stringify!($flag_unset_result), file!(), line!(), flags_string, accumulator_value, accumulator_value, accumulator_value, operand_value, operand_value, operand_value, result_value, result_value, result_value); )*
 }

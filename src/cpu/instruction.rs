@@ -94,6 +94,13 @@ generate_instruction_enum!(
         RotateRightThroughCarryRegister,
         RotateRightThroughCarryAtHl
     ),
+    (shift_left, ShiftLeftRegister, ShiftLeftAtHl),
+    (shift_right, ShiftRightRegister, ShiftRightAtHl),
+    (
+        shift_right_logical,
+        ShiftRightLogicalRegister,
+        ShiftRightLogicalAtHl
+    ),
     (compare, CompareRegister, CompareFromHl, CompareImmediate),
     (call, Call),
     (call_conditional, CallConditional),
