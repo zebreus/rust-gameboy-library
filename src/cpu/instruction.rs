@@ -3,12 +3,14 @@ use crate::memory_device::MemoryDevice;
 use enum_dispatch::enum_dispatch;
 
 mod decode;
+mod decode_cb;
 /// Really hacky macro for generating arithmetic instructions
 pub mod generate_instruction;
 /// Different phases for instructions
 pub mod phases;
 
 pub use decode::decode;
+pub use decode_cb::decode_cb;
 
 macro_rules! generate_instruction_enum {
     ($enum_name:ident, $( ( $module_path:ident, $( $instruction:ident ),* ) ),+) => {
@@ -177,7 +179,8 @@ generate_instruction_enum!(
     (increment_double_register, IncrementDoubleRegister),
     (decrement_double_register, DecrementDoubleRegister),
     (halt_and_catch_fire, HaltAndCatchFire),
-    (restart, Restart)
+    (restart, Restart),
+    (prefix_cb, PrefixCb)
 );
 
 /// This is the trait for executable CPU instructions.
