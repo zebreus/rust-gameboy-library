@@ -6,6 +6,7 @@ macro_rules! generate_instruction {
     $hl_instruction_name:ident $(, $(#[$immediate_instruction_docs:meta])+
     $immediate_instruction_name:ident )? ),
     $opcode:expr,
+    $( $register_part_offset:literal, )?
     $cpu:ident,
     $memory:ident,
     $operand:ident,
@@ -42,11 +43,11 @@ macro_rules! generate_instruction {
                 return $cpu.load_instruction($memory);
             }
             fn encode(&self) -> Vec<u8> {
-                let base_code = $opcode & 0b11111000u8;
-                let operand_code = self.operand.id() & 0b00000111u8;
                 if(matches!(self.operand, Register::F)){
-                    panic!("Arithmetic instructions do not have an opcode for operating on Register::F")
+                    panic!(stringify!(Arithmetic instructions do not have an opcode for operating on Register::F. That opcode is used for $hl_instruction_name))
                 }
+                let base_code = $opcode & !(0b00000111u8 << [$($register_part_offset ,)? 0][0]);
+                let operand_code = (self.operand.id() & 0b00000111u8) << [$($register_part_offset ,)? 0][0];
                 let opcode = base_code | operand_code;
                 Vec::from([opcode])
             }
@@ -87,8 +88,8 @@ macro_rules! generate_instruction {
 
             }
             fn encode(&self) -> Vec<u8> {
-                let base_code = $opcode & 0b11111000u8;
-                let operand_code = 0b00000110 & 0b00000111u8;
+                let base_code = $opcode & !(0b00000111u8 << [$($register_part_offset ,)? 0][0]);
+                let operand_code = 0b00000110 << [$($register_part_offset ,)? 0][0];
                 let opcode = base_code | operand_code;
                 Vec::from([opcode])
             }
