@@ -40,6 +40,7 @@ pub fn decode_cb(byte: u8) -> InstructionEnum {
         ),
         "00100aaa" => decode_operand_arithmetic!(a, ShiftLeftRegister, ShiftLeftAtHl),
         "00101aaa" => decode_operand_arithmetic!(a, ShiftRightRegister, ShiftRightAtHl),
+        "00110aaa" => decode_operand_arithmetic!(a, SwapNibblesRegister, SwapNibblesAtHl),
         "00111aaa" => {
             decode_operand_arithmetic!(a, ShiftRightLogicalRegister, ShiftRightLogicalAtHl)
         }
