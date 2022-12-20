@@ -10,14 +10,16 @@ macro_rules! generate_instruction {
     $cpu:ident,
     $memory:ident,
     $operand:ident,
-    $accumulator:ident,
+    $($accumulator:ident ,)?
+    $($target_operand:literal ,)?
     $content:block,
     $(fn $test_name:ident() $test_content:block),*) => {
         use crate::{
             cpu::{Cpu, Flag, Register, DoubleRegister},
             memory_device::MemoryDevice,
         };
-        use super::phases::TwoPhases;
+        $(consume_first!{$accumulator use super::phases::TwoPhases;})?
+        $(consume_first!{$target_operand use super::phases::ThreePhases;})?
         use super::Instruction;
 
         $(#[$register_instruction_docs])*
@@ -34,11 +36,19 @@ macro_rules! generate_instruction {
                 $memory: &mut T,
             ) -> super::InstructionEnum {
                 let $operand = $cpu.read_register(self.operand);
+                $(
                 let $accumulator = $cpu.read_register(Register::A);
+                )?
 
+                #[deny(unused)]
                 let result: u8 = $content;
 
-                $cpu.write_register(Register::A, result);
+                $(consume_first!($accumulator
+                    $cpu.write_register(Register::A, result);
+                );)?
+                $(consume_first!($target_operand
+                    $cpu.write_register(self.operand, result);
+                );)?
 
                 return $cpu.load_instruction($memory);
             }
@@ -57,8 +67,9 @@ macro_rules! generate_instruction {
         $(#[$shared_docs])*
         pub struct $hl_instruction_name {
             /// The current phase of the instruction.
-            pub phase: TwoPhases,
+            pub phase: $(consume_first!($accumulator TwoPhases))? $(consume_first!($target_operand ThreePhases))?
         }
+
 
         impl Instruction for $hl_instruction_name {
             fn execute<T: MemoryDevice>(
@@ -66,22 +77,58 @@ macro_rules! generate_instruction {
                 $cpu: &mut crate::cpu::CpuState,
                 $memory: &mut T,
             ) -> super::InstructionEnum {
+                $(consume_first!($accumulator
+                    macro_rules! first_phase {
+                        () => { _ }
+                    }
+                    macro_rules! second_phase {
+                        () => { TwoPhases::First }
+                    }
+                    macro_rules! third_phase {
+                        () => { TwoPhases::Second }
+                    }
+                );)?
+                $(consume_first!($target_operand
+                    macro_rules! first_phase {
+                        () => { ThreePhases::First }
+                    }
+                    macro_rules! second_phase {
+                        () => { ThreePhases::Second }
+                    }
+                    macro_rules! third_phase {
+                        () => { ThreePhases::Third }
+                    }
+                );)?
                 match self.phase {
-                TwoPhases::First => {
+                     second_phase!() => {
                         let address = $cpu.read_double_register(DoubleRegister::HL);
                         let $operand = $memory.read(address);
-                        let $accumulator = $cpu.read_register(Register::A);
+                        $(
+                            let $accumulator = $cpu.read_register(Register::A);
+                        )?
 
+                        #[deny(unused)]
                         let result: u8 = $content;
 
-                        $cpu.write_register(Register::A, result);
+                        $(consume_first!($accumulator
+                            $cpu.write_register(Register::A, result);
+                        );)?
+                        $(consume_first!($target_operand
+                            $memory.write(address, result);
+                        );)?
 
                         Self {
-                            phase: TwoPhases::Second
+                            phase: third_phase!()
                         }.into()
                     },
-                    TwoPhases::Second => {
+                    third_phase!() => {
                         return $cpu.load_instruction($memory);
+                    },
+                    #[allow(unreachable_patterns)]
+                    first_phase!() => {
+                        Self {
+                            phase: second_phase!()
+                        }.into()
                     }
                 }
 
@@ -159,6 +206,9 @@ macro_rules! generate_instruction {
                 #[test]
                 fn $test_name() $test_content
             )*
+
+            // #[test]
+            // fn generate_instruction_macro_is_called_correctly() {}
         }
     };
 }
@@ -225,6 +275,11 @@ macro_rules! prepare_generate_instruction {
 
         }
 
+    macro_rules! consume_first {
+        ($first:tt $dollar($token:tt)*) => {
+            $dollar($token)*
+        };
+    }
 
     };
 }

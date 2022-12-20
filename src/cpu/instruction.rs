@@ -66,6 +66,8 @@ generate_instruction_enum!(
         BitwiseAndFromHl,
         BitwiseAndImmediate
     ),
+    (increment, IncrementRegister, IncrementAtHl),
+    (decrement, DecrementRegister, DecrementAtHl),
     (
         bitwise_or,
         BitwiseOrRegister,

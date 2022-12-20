@@ -43,6 +43,22 @@ macro_rules! decode_arithmetic {
     };
 }
 
+macro_rules! decode_operant_arithmetic {
+    ($a:ident, $register_instruction:ident, $hl_instruction:ident) => {
+        match $a {
+            0b00000110 => super::$hl_instruction {
+                phase: ThreePhases::First,
+            }
+            .into(),
+            _ => super::$register_instruction {
+                operand: Register::try_from($a)
+                    .expect("3 bit value should always correspond to a register"),
+            }
+            .into(),
+        }
+    };
+}
+
 macro_rules! decode_arithmetic_immediate {
     ($immediate_instruction:ident) => {
         super::$immediate_instruction {
@@ -278,6 +294,8 @@ pub fn decode(byte: u8) -> InstructionEnum {
         "11110110" => decode_arithmetic_immediate!(BitwiseOrImmediate),
         "10111aaa" => decode_arithmetic!(a, CompareRegister, CompareFromHl),
         "11111110" => decode_arithmetic_immediate!(CompareImmediate),
+        "00aaa100" => decode_operant_arithmetic!(a, IncrementRegister, IncrementAtHl),
+        "00aaa101" => decode_operant_arithmetic!(a, DecrementRegister, DecrementAtHl),
         "11aaa111" => Restart {
             address: a.into(),
             phase: FourPhases::First,
