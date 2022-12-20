@@ -63,6 +63,8 @@ pub fn decode_cb(byte: u8) -> InstructionEnum {
             decode_operand_arithmetic!(a, ShiftRightLogicalRegister, ShiftRightLogicalAtHl)
         }
         "01bbbaaa" => decode_operand_arithmetic_with_bit!(a, b, CheckBitRegister, CheckBitAtHl),
+        "10bbbaaa" => decode_operand_arithmetic_with_bit!(a, b, ResetBitRegister, ResetBitAtHl),
+        "11bbbaaa" => decode_operand_arithmetic_with_bit!(a, b, SetBitRegister, SetBitAtHl),
         _ => HaltAndCatchFire { opcode: byte }.into(),
     }
 }
