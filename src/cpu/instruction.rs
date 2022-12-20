@@ -169,6 +169,10 @@ generate_instruction_enum!(
     (stop, Stop),
     (to_binary_coded_decimal, ToBinaryCodedDecimal),
     (add_immediate_offset_to_sp, AddImmediateOffsetToSp),
+    (
+        load_sp_plus_immediate_offset_to_hl,
+        LoadSpPlusImmediateOffsetToHl
+    ),
     (restart, Restart)
 );
 

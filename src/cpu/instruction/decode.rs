@@ -21,9 +21,9 @@ use super::{
     LoadAccumulatorToImmediateAddress, LoadAccumulatorToRegisterCOffset,
     LoadFromDoubleRegisterToAccumulator, LoadFromImmediateAddressToAccumulator,
     LoadFromRegisterCOffsetToAccumulator, LoadHlToSp, LoadImmediateToDoubleRegister,
-    LoadImmediateToHl, LoadRegisterToHl, LoadSpToImmediateAddress, Nop, PopDoubleRegister,
-    PushDoubleRegister, Restart, Return, ReturnConditional, ReturnFromInterrupt, SetCarry, Stop,
-    ToBinaryCodedDecimal,
+    LoadImmediateToHl, LoadRegisterToHl, LoadSpPlusImmediateOffsetToHl, LoadSpToImmediateAddress,
+    Nop, PopDoubleRegister, PushDoubleRegister, Restart, Return, ReturnConditional,
+    ReturnFromInterrupt, SetCarry, Stop, ToBinaryCodedDecimal,
 };
 
 macro_rules! decode_arithmetic {
@@ -285,6 +285,11 @@ pub fn decode(byte: u8) -> InstructionEnum {
         "11101000" => AddImmediateOffsetToSp {
             offset: 0,
             phase: FourPhases::First,
+        }
+        .into(),
+        "11111000" => LoadSpPlusImmediateOffsetToHl {
+            offset: 0,
+            phase: ThreePhases::First,
         }
         .into(),
         _ => LoadFromHlToRegister {

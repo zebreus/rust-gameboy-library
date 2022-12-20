@@ -1,42 +1,44 @@
-use super::phases::FourPhases;
+use super::phases::ThreePhases;
 use super::Instruction;
 use crate::{
-    cpu::{Cpu, Flag},
+    cpu::{Cpu, DoubleRegister, Flag},
     memory_device::MemoryDevice,
 };
 
-/// Adds a signed offset specified in the byte following the opcode to the stackpointer.
+/// Copies the stackpointer plus a signed offset specified in the byte following the opcode into [DoubleRegister::HL].
 ///
 /// | [Zero](Flag::Zero)  | [Subtract](Flag::Subtract) | [HalfCarry](Flag::HalfCarry)        | [Carry](Flag::Carry)       |
 /// |---------------------|----------------------------|-------------------------------------|----------------------------|
 /// | false               | false                      | true if the lower nibble overflowed | true if a overflow occured |
-#[doc(alias = "ADD")]
-#[doc(alias = "ADD SP,n")]
-pub struct AddImmediateOffsetToSp {
+#[doc(alias = "LD")]
+#[doc(alias = "LD HL,SP+n")]
+#[doc(alias = "LDHL")]
+#[doc(alias = "LDHL SP,n")]
+pub struct LoadSpPlusImmediateOffsetToHl {
     /// The immediate offset. Will only valid after the first phase.
     pub offset: i8,
     /// The current phase of the instruction.
-    pub phase: FourPhases,
+    pub phase: ThreePhases,
 }
 
-impl Instruction for AddImmediateOffsetToSp {
+impl Instruction for LoadSpPlusImmediateOffsetToHl {
     fn execute<T: MemoryDevice>(
         &self,
         cpu: &mut crate::cpu::CpuState,
         memory: &mut T,
     ) -> super::InstructionEnum {
         match self.phase {
-            FourPhases::First => {
+            ThreePhases::First => {
                 let program_counter = cpu.advance_program_counter();
                 let offset: i8 = memory.read_signed(program_counter);
 
                 Self {
-                    phase: FourPhases::Second,
+                    phase: ThreePhases::Second,
                     offset,
                 }
                 .into()
             }
-            FourPhases::Second => {
+            ThreePhases::Second => {
                 let previous_stack_pointer = cpu.read_stack_pointer();
                 let (result, carry_flag) =
                     previous_stack_pointer.overflowing_add_signed(self.offset.into());
@@ -53,38 +55,33 @@ impl Instruction for AddImmediateOffsetToSp {
                 cpu.write_flag(Flag::HalfCarry, half_carry_flag);
                 cpu.write_flag(Flag::Carry, carry_flag);
 
-                cpu.write_stack_pointer(result);
+                cpu.write_double_register(DoubleRegister::HL, result);
 
                 Self {
-                    phase: FourPhases::Third,
+                    phase: ThreePhases::Third,
                     offset: self.offset,
                 }
                 .into()
             }
-            FourPhases::Third => Self {
-                phase: FourPhases::Fourth,
-                offset: self.offset,
-            }
-            .into(),
-            FourPhases::Fourth => {
+            ThreePhases::Third => {
                 return cpu.load_instruction(memory);
             }
         }
     }
     fn encode(&self) -> Vec<u8> {
         match self.phase {
-            FourPhases::First => Vec::from([0b11101000]),
-            _ => Vec::from([0b11101000, self.offset.to_ne_bytes()[0]]),
+            ThreePhases::First => Vec::from([0b11111000]),
+            _ => Vec::from([0b11111000, self.offset.to_ne_bytes()[0]]),
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::AddImmediateOffsetToSp;
-    use crate::cpu::instruction::phases::FourPhases;
+    use super::LoadSpPlusImmediateOffsetToHl;
+    use crate::cpu::instruction::phases::ThreePhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
-    use crate::cpu::{Cpu, CpuState};
+    use crate::cpu::{Cpu, CpuState, DoubleRegister};
     use crate::debug_memory::DebugMemory;
 
     #[test]
@@ -94,30 +91,29 @@ mod tests {
 
         cpu.write_stack_pointer(0x0f00);
 
-        let instruction = AddImmediateOffsetToSp {
+        let instruction = LoadSpPlusImmediateOffsetToHl {
             offset: 0,
-            phase: FourPhases::First,
+            phase: ThreePhases::First,
         };
 
         let instruction = instruction.execute(&mut cpu, &mut memory);
 
         assert!(matches!(
             instruction,
-            InstructionEnum::AddImmediateOffsetToSp(AddImmediateOffsetToSp {
-                phase: FourPhases::Second,
+            InstructionEnum::LoadSpPlusImmediateOffsetToHl(LoadSpPlusImmediateOffsetToHl {
+                phase: ThreePhases::Second,
                 offset: -20
             })
         ));
 
         let instruction = instruction.execute(&mut cpu, &mut memory);
-        let instruction = instruction.execute(&mut cpu, &mut memory);
 
-        assert_eq!(cpu.read_stack_pointer(), 0x0f00 - 20);
+        assert_eq!(cpu.read_double_register(DoubleRegister::HL), 0x0f00 - 20);
 
         assert!(matches!(
             instruction,
-            InstructionEnum::AddImmediateOffsetToSp(AddImmediateOffsetToSp {
-                phase: FourPhases::Fourth,
+            InstructionEnum::LoadSpPlusImmediateOffsetToHl(LoadSpPlusImmediateOffsetToHl {
+                phase: ThreePhases::Third,
                 offset: -20
             })
         ));
