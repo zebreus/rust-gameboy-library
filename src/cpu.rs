@@ -547,6 +547,69 @@ impl RestartAddress {
     }
 }
 
+/// Represents a bit in a byte.
+///
+/// [Bit::Zero] is the least significant bit.
+///
+/// [Bit::Seven] is the most significant bit.
+#[derive(Debug, Clone, Copy)]
+#[repr(u8)]
+pub enum Bit {
+    /// The bit at position 0.
+    Zero,
+    /// The bit at position 1.
+    One,
+    /// The bit at position 2.
+    Two,
+    /// The bit at position 3.
+    Three,
+    /// The bit at position 4.
+    Four,
+    /// The bit at position 5.
+    Five,
+    /// The bit at position 6.
+    Six,
+    /// The bit at position 7.
+    Seven,
+}
+
+impl Into<Bit> for u8 {
+    fn into(self) -> Bit {
+        match self {
+            0b000 => Bit::Zero,
+            0b001 => Bit::One,
+            0b010 => Bit::Two,
+            0b011 => Bit::Three,
+            0b100 => Bit::Four,
+            0b101 => Bit::Five,
+            0b110 => Bit::Six,
+            0b111 => Bit::Seven,
+            _ => panic!("Can only convert opcode parts between 0b000 and 0b111 to a Bit"),
+        }
+    }
+}
+
+impl Into<u8> for Bit {
+    fn into(self) -> u8 {
+        self as u8
+    }
+}
+
+impl Bit {
+    fn get_mask(&self) -> u8 {
+        match self {
+            Bit::Zero => 0b00000001,
+            Bit::One => 0b00000010,
+            Bit::Two => 0b00000100,
+            Bit::Three => 0b00001000,
+            Bit::Four => 0b00010000,
+            Bit::Five => 0b00100000,
+            Bit::Six => 0b01000000,
+            Bit::Seven => 0b10000000,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::instruction::{InstructionEnum, LoadFromRegisterToRegister};

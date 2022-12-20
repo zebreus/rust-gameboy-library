@@ -12,15 +12,18 @@ macro_rules! generate_instruction {
     $memory:ident,
     $operand:ident,
     $($accumulator:ident ,)?
+    $( (  $bit_ident:ident ) ,)?
     $($target_operand:literal ,)?
     $content:block,
     $(fn $test_name:ident() $test_content:block),*) => {
+        #[allow(unused)]
         use crate::{
-            cpu::{Cpu, Flag, Register, DoubleRegister},
+            cpu::{Cpu, Flag, Register, DoubleRegister, Bit},
             memory_device::MemoryDevice,
         };
         $(consume_first!{$accumulator use super::phases::TwoPhases;})?
         $(consume_first!{$target_operand use super::phases::ThreePhases;})?
+
         use super::Instruction;
 
         $(#[$register_instruction_docs])*
@@ -28,6 +31,10 @@ macro_rules! generate_instruction {
         pub struct $register_instruction_name {
             /// The operand register
             pub operand: Register,
+            $(
+                /// The selected bit.
+                pub bit: consume_first!($bit_ident Bit)
+            )?
         }
 
         impl Instruction for $register_instruction_name {
@@ -39,6 +46,9 @@ macro_rules! generate_instruction {
                 let $operand = $cpu.read_register(self.operand);
                 $(
                 let $accumulator = $cpu.read_register(Register::A);
+                )?
+                $(
+                    let $bit_ident = self.bit;
                 )?
 
                 #[deny(unused)]
@@ -60,6 +70,12 @@ macro_rules! generate_instruction {
                 let base_code = $opcode & !(0b00000111u8 << [$($register_part_offset ,)? 0][0]);
                 let operand_code = (self.operand.id() & 0b00000111u8) << [$($register_part_offset ,)? 0][0];
                 let opcode = base_code | operand_code;
+
+                $(
+                    let selected_bit_code = consume_first!($bit_ident Into::<u8>::into(self.bit) << 3 );
+                    let opcode = opcode | selected_bit_code;
+                )?
+
                 Vec::from([$(consume_first!($cb_prefix 0xcb) , )? opcode])
             }
         }
@@ -68,7 +84,11 @@ macro_rules! generate_instruction {
         $(#[$shared_docs])*
         pub struct $hl_instruction_name {
             /// The current phase of the instruction.
-            pub phase: $(consume_first!($accumulator TwoPhases))? $(consume_first!($target_operand ThreePhases))?
+            pub phase: $(consume_first!($accumulator TwoPhases))? $(consume_first!($target_operand ThreePhases))? ,
+            $(
+                /// The selected bit.
+                pub bit: consume_first!($bit_ident Bit)
+            )?
         }
 
 
@@ -107,6 +127,9 @@ macro_rules! generate_instruction {
                         $(
                             let $accumulator = $cpu.read_register(Register::A);
                         )?
+                        $(
+                            let $bit_ident = self.bit;
+                        )?
 
                         #[deny(unused)]
                         let result: u8 = $content;
@@ -119,7 +142,10 @@ macro_rules! generate_instruction {
                         );)?
 
                         Self {
-                            phase: third_phase!()
+                            phase: third_phase!(),
+                            $(
+                                bit: consume_first!($bit_ident self.bit)
+                            )?
                         }.into()
                     },
                     third_phase!() => {
@@ -128,7 +154,10 @@ macro_rules! generate_instruction {
                     #[allow(unreachable_patterns)]
                     first_phase!() => {
                         Self {
-                            phase: second_phase!()
+                            phase: second_phase!(),
+                            $(
+                                bit: consume_first!($bit_ident self.bit)
+                            )?
                         }.into()
                     }
                 }
@@ -136,9 +165,16 @@ macro_rules! generate_instruction {
 
             }
             fn encode(&self) -> Vec<u8> {
+
                 let base_code = $opcode & !(0b00000111u8 << [$($register_part_offset ,)? 0][0]);
                 let operand_code = 0b00000110 << [$($register_part_offset ,)? 0][0];
                 let opcode = base_code | operand_code;
+
+                $(
+                    let selected_bit_code = consume_first!($bit_ident Into::<u8>::into(self.bit) << 3 );
+                    let opcode = opcode | selected_bit_code;
+                )?
+
                 Vec::from([$(consume_first!($cb_prefix 0xcb) , )? opcode])
             }
         }
@@ -202,6 +238,7 @@ macro_rules! generate_instruction {
             use crate::cpu::instruction::Instruction;
             use crate::cpu::{Cpu, CpuState, Flag, Register};
             use crate::debug_memory::DebugMemory;
+            $(consume_first!{$bit_ident use crate::cpu::Bit;})?
 
             $(
                 #[test]
@@ -218,7 +255,7 @@ macro_rules! prepare_generate_instruction {
     (
     $dollar:tt,
     $register_instruction_name:ident
-    $( , $use_operand_result:ident )? ) => {
+    $( , $bit:ident )? ) => {
         /// Hacky macro that can be used to test the instruction
         ///
         /// The macro takes two arguments in ().
@@ -239,7 +276,7 @@ macro_rules! prepare_generate_instruction {
         /// ```
         #[cfg(test)]
         macro_rules! assert_result {
-            (($dollar(A: $accumulator:expr,)? $dollar(B: $operandd:expr,)? $dollar( FLAG: $initial_flags:expr ,)* ), ($dollar(A: $accumulator_result:expr,)? $dollar(B: $operand_result:expr,)? $dollar( FLAG: $flag_result:expr ,)* $dollar( FLAG_UNSET: $flag_unset_result:expr ,)* )) => {
+            (($dollar(A: $accumulator:expr,)? $dollar(B: $operandd:expr,)? $dollar( FLAG: $initial_flags:expr ,)* $dollar( BIT: $select_bit:expr ,)? ), ($dollar(A: $accumulator_result:expr,)? $dollar(B: $operand_result:expr,)? $dollar( FLAG: $flag_result:expr ,)* $dollar( FLAG_UNSET: $flag_unset_result:expr ,)* )) => {
                 {
                 let mut cpu = CpuState::new();
                 let mut memory = DebugMemory::new();
@@ -260,6 +297,10 @@ macro_rules! prepare_generate_instruction {
 
                 let instruction = $register_instruction_name {
                     operand: Register::B,
+                    $(
+                        /// The affected bit.
+                        bit: consume_first!($bit [$dollar($select_bit ,)? crate::cpu::Bit::Zero][0])
+                    )?
                 };
                 instruction.execute(&mut cpu, &mut memory);
 

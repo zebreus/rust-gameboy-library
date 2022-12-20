@@ -97,6 +97,7 @@ generate_instruction_enum!(
     (shift_left, ShiftLeftRegister, ShiftLeftAtHl),
     (shift_right, ShiftRightRegister, ShiftRightAtHl),
     (swap_nibbles, SwapNibblesRegister, SwapNibblesAtHl),
+    (check_bit, CheckBitRegister, CheckBitAtHl),
     (
         shift_right_logical,
         ShiftRightLogicalRegister,

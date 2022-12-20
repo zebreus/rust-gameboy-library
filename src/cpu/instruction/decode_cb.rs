@@ -20,6 +20,24 @@ macro_rules! decode_operand_arithmetic {
     };
 }
 
+macro_rules! decode_operand_arithmetic_with_bit {
+    ($a:ident, $b:ident, $register_instruction:ident, $hl_instruction:ident) => {
+        match $a {
+            0b00000110 => super::$hl_instruction {
+                phase: ThreePhases::First,
+                bit: $b.into(),
+            }
+            .into(),
+            _ => super::$register_instruction {
+                operand: Register::try_from($a)
+                    .expect("3 bit value should always correspond to a register"),
+                bit: $b.into(),
+            }
+            .into(),
+        }
+    };
+}
+
 /// Decode an [InstructionEnum] from the byte following the [PrefixCb](super::PrefixCb) instruction
 #[bitmatch]
 pub fn decode_cb(byte: u8) -> InstructionEnum {
@@ -44,6 +62,7 @@ pub fn decode_cb(byte: u8) -> InstructionEnum {
         "00111aaa" => {
             decode_operand_arithmetic!(a, ShiftRightLogicalRegister, ShiftRightLogicalAtHl)
         }
+        "01bbbaaa" => decode_operand_arithmetic_with_bit!(a, b, CheckBitRegister, CheckBitAtHl),
         _ => HaltAndCatchFire { opcode: byte }.into(),
     }
 }
