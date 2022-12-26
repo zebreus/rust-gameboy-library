@@ -68,3 +68,57 @@ pub fn decode_cb(byte: u8) -> InstructionEnum {
         _ => HaltAndCatchFire { opcode: byte }.into(),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::decode_cb;
+    use crate::cpu::instruction::{Instruction, InstructionEnum};
+
+    #[test]
+    fn all_cp_opcodes_reencode_to_the_same_opcode() {
+        let opcodes = 0u8..255u8;
+        let instructions = opcodes
+            .map(|opcode| decode_cb(opcode))
+            .collect::<Vec<InstructionEnum>>();
+        for expected_opcode in 0u8..255u8 {
+            let decoded_instruction = instructions
+                .get(expected_opcode as usize)
+                .expect("should always match");
+
+            let reencoded_opcode = *decoded_instruction
+                .encode()
+                .get(1)
+                .expect("cb instruction should always have a opcode length of at least 2");
+
+            assert_eq!(
+                expected_opcode, reencoded_opcode,
+                "Expected opcode {:#010b}, got opcode {:#010b}",
+                expected_opcode, reencoded_opcode
+            );
+        }
+    }
+
+    #[test]
+    fn all_cp_opcodes_reencode_with_0xcb_as_first_byte() {
+        let opcodes = 0u8..255u8;
+        let instructions = opcodes
+            .map(|opcode| decode_cb(opcode))
+            .collect::<Vec<InstructionEnum>>();
+        for expected_opcode in 0u8..255u8 {
+            let decoded_instruction = instructions
+                .get(expected_opcode as usize)
+                .expect("should always match");
+
+            let reencoded_opcode = *decoded_instruction
+                .encode()
+                .get(0)
+                .expect("cb instruction should always have a opcode length of at least 2");
+
+            assert_eq!(
+                0xCB, reencoded_opcode,
+                "Expected opcode first byte to be 0xCB, got {:#010b}",
+                reencoded_opcode
+            );
+        }
+    }
+}
