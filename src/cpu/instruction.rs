@@ -226,7 +226,7 @@ generate_instruction_enum!(
 ///
 /// To be able to distinguish instructions at compile time all instructions have a corresponding variant in [InstructionEnum]
 #[enum_dispatch(InstructionEnum)]
-pub trait Instruction {
+pub trait Instruction: Sized {
     /// Execute the instruction on the cpu and memory. Returns the next instruction.
     ///
     /// # Examples

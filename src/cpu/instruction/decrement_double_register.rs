@@ -53,7 +53,7 @@ impl Instruction for DecrementDoubleRegister {
     }
     fn encode(&self) -> Vec<u8> {
         let register_part = self.destination.numerical_id() << 4;
-        let opcode = 0b00010011 | register_part;
+        let opcode = 0b00001011 | register_part;
         Vec::from([opcode])
     }
 }

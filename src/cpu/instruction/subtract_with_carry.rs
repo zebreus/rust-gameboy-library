@@ -17,7 +17,7 @@ generate_instruction!(
         /// Subtract an immediate and the previous carry from the [accumulator](Register::A)
         SubtractWithCarryImmediate
     ),
-    0b10001100,
+    0b10011000,
     cpu,
     memory,
     operand,

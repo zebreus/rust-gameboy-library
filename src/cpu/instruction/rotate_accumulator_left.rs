@@ -31,7 +31,6 @@ impl Instruction for RotateAccumulatorLeft {
         let operand = cpu.read_register(Register::A);
 
         let result = operand.rotate_left(1);
-        let zero_flag = result == 0;
         let carry_flag = operand >= 0b10000000;
         cpu.write_flag(Flag::Zero, false);
         cpu.write_flag(Flag::Subtract, false);
