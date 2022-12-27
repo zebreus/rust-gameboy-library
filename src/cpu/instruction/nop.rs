@@ -3,6 +3,7 @@ use crate::memory::MemoryDevice;
 
 /// Do nothing and load the next instruction.
 #[doc(alias = "NOP")]
+#[derive(Debug)]
 pub struct Nop {}
 impl Instruction for Nop {
     fn execute<T: MemoryDevice>(

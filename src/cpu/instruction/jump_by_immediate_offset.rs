@@ -4,6 +4,7 @@ use crate::{cpu::Cpu, memory::MemoryDevice};
 
 /// Jumps by a signed offset specified in the byte following the opcode.
 #[doc(alias = "JR")]
+#[derive(Debug)]
 pub struct JumpByImmediateOffset {
     /// The immediate offset. Will only valid after the first phase.
     pub offset: i8,

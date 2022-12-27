@@ -12,6 +12,7 @@ use crate::{
 /// |---------------------|----------------------------|------------------------------|----------------------------|
 /// | true if result is 0 | unchanged                  | false                        | true if a carry occurred   |
 #[doc(alias = "DAA")]
+#[derive(Debug)]
 pub struct ToBinaryCodedDecimal {}
 
 impl Instruction for ToBinaryCodedDecimal {

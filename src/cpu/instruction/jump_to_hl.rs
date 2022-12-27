@@ -7,6 +7,7 @@ use crate::{
 
 /// Jumps to the address stored in [DoubleRegister::HL].
 #[doc(alias = "JP")]
+#[derive(Debug)]
 pub struct JumpToHl {
     /// The current phase of the instruction.
     pub phase: TwoPhases,

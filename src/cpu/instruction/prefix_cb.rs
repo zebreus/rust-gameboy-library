@@ -5,6 +5,7 @@ use crate::{cpu::Cpu, memory::MemoryDevice};
 ///
 /// Most bit operations have opcodes prefixed by `0xCB`.
 #[doc(alias = "CB")]
+#[derive(Debug)]
 pub struct PrefixCb {}
 impl Instruction for PrefixCb {
     fn execute<T: MemoryDevice>(

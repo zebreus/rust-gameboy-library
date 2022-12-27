@@ -11,6 +11,7 @@ use crate::{cpu::Cpu, memory::MemoryDevice};
 #[doc(alias = "LD DE,nn")]
 #[doc(alias = "LD HL,nn")]
 #[doc(alias = "LD SP,nn")]
+#[derive(Debug)]
 pub struct LoadImmediateToDoubleRegister {
     /// The destination double register.
     pub destination: DoubleRegister,

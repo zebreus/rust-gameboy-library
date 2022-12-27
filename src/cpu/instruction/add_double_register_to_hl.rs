@@ -17,6 +17,7 @@ use crate::{
 #[doc(alias = "ADD HL,DE")]
 #[doc(alias = "ADD HL,HL")]
 #[doc(alias = "ADD HL,SP")]
+#[derive(Debug)]
 pub struct AddDoubleRegisterToHl {
     /// The destination double register.
     pub operand: DoubleRegister,

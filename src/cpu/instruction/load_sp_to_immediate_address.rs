@@ -8,6 +8,7 @@ use crate::{cpu::Cpu, memory::MemoryDevice};
 /// The msb of the stackpointer is stored at the specified address + 1.
 #[doc(alias = "LD")]
 #[doc(alias = "LD (nn),SP")]
+#[derive(Debug)]
 pub struct LoadSpToImmediateAddress {
     /// The target address. Will only valid after the second phase.
     pub address: u16,

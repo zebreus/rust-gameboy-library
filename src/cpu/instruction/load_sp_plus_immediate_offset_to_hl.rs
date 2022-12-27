@@ -14,6 +14,7 @@ use crate::{
 #[doc(alias = "LD HL,SP+n")]
 #[doc(alias = "LDHL")]
 #[doc(alias = "LDHL SP,n")]
+#[derive(Debug)]
 pub struct LoadSpPlusImmediateOffsetToHl {
     /// The immediate offset. Will only valid after the first phase.
     pub offset: i8,

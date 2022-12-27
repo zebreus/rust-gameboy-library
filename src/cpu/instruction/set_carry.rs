@@ -27,6 +27,7 @@ use crate::{
 /// |---------------------|----------------------------|------------------------------|----------------------------|
 /// | unchanged           | false                      | false                        | true                       |
 #[doc(alias = "SCF")]
+#[derive(Debug)]
 pub struct SetCarry {}
 
 impl Instruction for SetCarry {

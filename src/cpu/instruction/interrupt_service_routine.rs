@@ -11,6 +11,7 @@ use crate::{cpu::Cpu, memory::MemoryDevice};
 /// It also disables the interrupt master enable. That needs to be enabled again before the net interrupt can be processed.
 ///
 /// For some reason this is one phase shorter than [Call](super::Call), idk why maybe the docs are wrong.
+#[derive(Debug)]
 pub struct InterruptServiceRoutine {
     /// The address of the interrupt handler.
     pub address: u16,

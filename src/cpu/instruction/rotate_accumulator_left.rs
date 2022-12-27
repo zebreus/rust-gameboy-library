@@ -20,6 +20,7 @@ use crate::{
 /// |--------------------|----------------------------|------------------------------|-------------------------------|
 /// | false              | false                      | false                        | set to the value of old bit 7 |
 #[doc(alias = "RLCA")]
+#[derive(Debug)]
 pub struct RotateAccumulatorLeft {}
 
 impl Instruction for RotateAccumulatorLeft {

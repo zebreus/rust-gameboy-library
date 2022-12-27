@@ -15,6 +15,7 @@ use crate::{cpu::Cpu, memory::MemoryDevice};
 #[doc(alias = "DEC DE")]
 #[doc(alias = "DEC HL")]
 #[doc(alias = "DEC SP")]
+#[derive(Debug)]
 pub struct DecrementDoubleRegister {
     /// The destination double register.
     pub destination: DoubleRegister,

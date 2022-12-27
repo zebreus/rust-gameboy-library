@@ -8,6 +8,7 @@ use crate::{cpu::Cpu, memory::MemoryDevice};
 ///
 /// The value pushed to the stack points to the next instruction directly after this one.
 #[doc(alias = "CALL")]
+#[derive(Debug)]
 pub struct Call {
     /// The immediate address. Will only valid after the second phase.
     pub address: u16,

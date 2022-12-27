@@ -41,8 +41,12 @@ mod tests {
         cartridge.place_into_memory(&mut memory);
         cpu.write_program_counter(0x0100);
         let mut instruction = cpu.load_instruction(&mut memory);
-        for _id in 1..1000000 {
+        for _id in 1..100000000 {
             instruction = instruction.execute(&mut cpu, &mut memory);
+            if cpu.read_program_counter() >= 0xc000 {
+                // For breakpoint
+                let _x = 0;
+            }
         }
         let tiles = memory.get_tile_data();
         assert_eq!(tiles.len(), 256);

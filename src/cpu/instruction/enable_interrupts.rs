@@ -5,6 +5,7 @@ use crate::{cpu::Cpu, memory::MemoryDevice};
 ///
 /// Sets IME to true.
 #[doc(alias = "EI")]
+#[derive(Debug)]
 pub struct EnableInterrupts {}
 
 impl Instruction for EnableInterrupts {

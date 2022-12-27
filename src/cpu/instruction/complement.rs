@@ -32,6 +32,7 @@ use crate::{
 /// |---------------------|----------------------------|------------------------------|----------------------|
 /// | unchanged           | true                       | true                         | unchanged            |
 #[doc(alias = "CPL")]
+#[derive(Debug)]
 pub struct Complement {}
 
 impl Instruction for Complement {

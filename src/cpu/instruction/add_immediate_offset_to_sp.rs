@@ -12,6 +12,7 @@ use crate::{
 /// | false               | false                      | true if the lower nibble overflowed | true if a overflow occured |
 #[doc(alias = "ADD")]
 #[doc(alias = "ADD SP,n")]
+#[derive(Debug)]
 pub struct AddImmediateOffsetToSp {
     /// The immediate offset. Will only valid after the first phase.
     pub offset: i8,

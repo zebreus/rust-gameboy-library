@@ -5,6 +5,7 @@ use crate::{cpu::Cpu, memory::MemoryDevice};
 ///
 /// Our current implementation is basically identical to [Halt][super::Halt] but it uses [Cpu::get_pending_stop_wakeup()] instead of [Cpu::get_pending_interrupt()]
 #[doc(alias = "STOP")]
+#[derive(Debug)]
 pub struct Stop {}
 
 impl Instruction for Stop {

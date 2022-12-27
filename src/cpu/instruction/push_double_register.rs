@@ -13,6 +13,7 @@ use crate::{cpu::Cpu, memory::MemoryDevice};
 #[doc(alias = "PUSH DE")]
 #[doc(alias = "PUSH HL")]
 #[doc(alias = "PUSH AF")]
+#[derive(Debug)]
 pub struct PushDoubleRegister {
     /// The source double register.
     pub source: DoubleRegister,

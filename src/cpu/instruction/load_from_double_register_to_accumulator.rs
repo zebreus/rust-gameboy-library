@@ -8,6 +8,7 @@ use crate::{
 #[doc(alias = "LD")]
 #[doc(alias = "LD A,(BC)")]
 #[doc(alias = "LD A,(DE)")]
+#[derive(Debug)]
 pub struct LoadFromDoubleRegisterToAccumulator {
     /// The double register containing the address
     pub address_register: DoubleRegister,

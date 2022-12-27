@@ -8,6 +8,7 @@ use crate::{cpu::Cpu, memory::MemoryDevice};
 ///
 /// Basically just [pops](super::PopDoubleRegister) a address from the stack and sets the program counter to it.
 #[doc(alias = "RET")]
+#[derive(Debug)]
 pub struct Return {
     /// The current phase of the instruction.
     pub phase: FourPhases,

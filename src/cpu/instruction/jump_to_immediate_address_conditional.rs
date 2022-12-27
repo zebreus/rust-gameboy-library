@@ -11,6 +11,7 @@ use crate::{
 ///
 /// The condition is evaluated in the third phase
 #[doc(alias = "JP")]
+#[derive(Debug)]
 pub struct JumpToImmediateAddressConditional {
     /// The jump is only made if the condition is fullfilled in the third phase.
     pub condition: ConditionCode,

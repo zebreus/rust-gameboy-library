@@ -13,6 +13,7 @@ use crate::{cpu::Cpu, memory::MemoryDevice};
 #[doc(alias = "POP DE")]
 #[doc(alias = "POP HL")]
 #[doc(alias = "POP AF")]
+#[derive(Debug)]
 pub struct PopDoubleRegister {
     /// The destination double register.
     pub destination: DoubleRegister,

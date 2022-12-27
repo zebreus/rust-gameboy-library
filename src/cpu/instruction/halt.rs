@@ -8,6 +8,7 @@ use crate::{cpu::Cpu, memory::MemoryDevice};
 // TODO: The halt instruction on gameboy apparently has some weird bug that is not implemented for now.
 // TODO: It also has slightly different behaviour than this, but I did not understand what exactly is different. See https://gbdev.io/pandocs/halt.html and https://www.reddit.com/r/EmuDev/comments/5bfb2t/comment/d9oqrwo/
 #[doc(alias = "HALT")]
+#[derive(Debug)]
 pub struct Halt {}
 
 impl Instruction for Halt {

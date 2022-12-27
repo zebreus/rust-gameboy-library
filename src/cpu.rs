@@ -64,13 +64,20 @@ impl CpuState {
     /// Also increments the program counter
     pub fn load_instruction<T: MemoryDevice>(&mut self, memory: &mut T) -> InstructionEnum {
         let pending_interrupt = self.get_pending_interrupt(memory);
-        match pending_interrupt {
+        let loaded_instruction = match pending_interrupt {
             Some(interrupt) => interrupt,
             None => {
                 let opcode = self.load_opcode(memory);
                 decode(opcode)
             }
-        }
+        };
+        // println!(
+        //     "Loading instruction from {:#06x}: {:?}",
+        //     self.read_program_counter() - 1,
+        //     loaded_instruction
+        // );
+        // dbg!(loaded_instruction);
+        loaded_instruction
     }
 }
 

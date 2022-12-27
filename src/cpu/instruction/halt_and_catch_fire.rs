@@ -3,6 +3,7 @@ use crate::memory::MemoryDevice;
 
 /// Illegal instruction. Lock up cpu.
 #[doc(alias = "HCF")]
+#[derive(Debug)]
 pub struct HaltAndCatchFire {
     /// The opcode that triggered this.
     pub opcode: u8,

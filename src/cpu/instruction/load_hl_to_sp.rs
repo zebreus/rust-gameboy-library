@@ -7,6 +7,7 @@ use crate::{
 /// Copies the data stored in [DoubleRegister::HL] to the stackpointer register
 #[doc(alias = "LD")]
 #[doc(alias = "LD SP,HL")]
+#[derive(Debug)]
 pub struct LoadHlToSp {
     /// The current phase of the instruction.
     pub phase: TwoPhases,

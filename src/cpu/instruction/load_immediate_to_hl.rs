@@ -7,6 +7,7 @@ use crate::{
 /// Stores the byte following the opcode to the address specified in [HL](DoubleRegister::HL).
 #[doc(alias = "LD")]
 #[doc(alias = "LD (HL),n")]
+#[derive(Debug)]
 pub struct LoadImmediateToHl {
     /// The immediate value. Only valid after the first phase.
     pub value: u8,

@@ -9,6 +9,7 @@ use crate::{
 #[doc(alias = "LDH (n),A")]
 #[doc(alias = "LD")]
 #[doc(alias = "LD ($FF00+n),A")]
+#[derive(Debug)]
 pub struct LoadAccumulatorToImmediateOffset {
     /// The memory address offset from 0xff00. Only valid after the first phase.
     pub offset: u8,

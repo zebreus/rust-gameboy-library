@@ -6,6 +6,7 @@ use crate::{cpu::Register, memory::MemoryDevice};
 /// Cannot be used with [Register::F]
 #[doc(alias = "LD")]
 #[doc(alias = "LD R,R")]
+#[derive(Debug)]
 pub struct LoadFromRegisterToRegister {
     /// The source register
     pub source: Register,
@@ -32,8 +33,8 @@ impl Instruction for LoadFromRegisterToRegister {
             panic!("Cannot encode load from register to register for source register Register::F")
         }
         let base_code = 0b01000000 & 0b11000000u8;
-        let source_code = (self.source.id() << 3) & 0b00111000u8;
-        let destination_code = self.destination.id() & 0b00000111u8;
+        let source_code = self.source.id() & 0b00000111u8;
+        let destination_code = (self.destination.id() << 3) & 0b00111000u8;
         let opcode = base_code | source_code | destination_code;
         Vec::from([opcode])
     }

@@ -10,6 +10,7 @@ use crate::{
 #[doc(alias = "LD (HLD),A")]
 #[doc(alias = "LDD")]
 #[doc(alias = "LDD (HL),A")]
+#[derive(Debug)]
 pub struct LoadAccumulatorToHlAndDecrement {
     /// The current phase of the instruction.
     pub phase: TwoPhases,

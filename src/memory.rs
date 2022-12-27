@@ -4,6 +4,7 @@ use arr_macro::arr;
 pub struct Memory {
     /// The memory
     pub memory: [u8; 65536],
+    serial_line: String,
 }
 
 impl Memory {
@@ -11,6 +12,7 @@ impl Memory {
     pub fn new() -> Memory {
         Memory {
             memory: arr![0; 65536],
+            serial_line: String::new(),
         }
     }
 
@@ -18,18 +20,26 @@ impl Memory {
     pub fn new_with_init(init: &[u8]) -> Memory {
         let mut memory = Memory {
             memory: arr![0; 65536],
+            serial_line: String::new(),
         };
         for (dst, src) in memory.memory.iter_mut().zip(init) {
             *dst = *src;
         }
         return memory;
     }
+
+    pub fn get_video_memory(&self) -> &[u8] {
+        return &self.memory[0x8000..=0x9FFF];
+    }
 }
 
 impl MemoryDevice for Memory {
     fn read(&self, address: u16) -> u8 {
         let value = self.memory[address as usize];
-        //println!("Read {}({:#04x}) from {:#06x}", value, value, address);
+        // if (address == 0xff01) || (address == 0xff02) {
+        //     println!("Read value {}({:#04x}) from {:#06x}", value, value, address);
+        // }
+        // println!("Read {}({:#04x}) from {:#06x}", value, value, address);
         return value;
     }
     fn write(&mut self, address: u16, value: u8) -> () {
@@ -37,6 +47,18 @@ impl MemoryDevice for Memory {
         //     "Write value {}({:#04x}) from {:#06x}",
         //     value, value, address
         // );
+        if address == 0xff01 {
+            let character = value as char;
+            match character {
+                '\n' => {
+                    println!("Serial: {}", self.serial_line);
+                    self.serial_line = String::new();
+                }
+                _ => {
+                    self.serial_line.push(character);
+                }
+            }
+        }
         self.memory[address as usize] = value;
     }
 }

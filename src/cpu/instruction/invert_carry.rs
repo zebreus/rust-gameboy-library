@@ -29,6 +29,7 @@ use crate::{
 /// |---------------------|----------------------------|------------------------------|----------------------------|
 /// | unchanged           | false                      | false                        | true if carry was set      |
 #[doc(alias = "CCF")]
+#[derive(Debug)]
 pub struct InvertCarry {}
 
 impl Instruction for InvertCarry {

@@ -9,6 +9,7 @@ use crate::{
 /// Reads from program counter: `opcode` `address lsb` `address msb`
 #[doc(alias = "LD")]
 #[doc(alias = "LD (nn),A")]
+#[derive(Debug)]
 pub struct LoadAccumulatorToImmediateAddress {
     /// The memory address. Only valid after the second phase.
     pub address: u16,

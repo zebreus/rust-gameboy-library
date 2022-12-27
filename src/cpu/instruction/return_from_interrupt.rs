@@ -8,6 +8,7 @@ use crate::{cpu::Cpu, memory::MemoryDevice};
 ///
 /// Basically this has the same effect as calling [EnableInterrupts](super::EnableInterrupts) and then [Return](super::Return)
 #[doc(alias = "RETI")]
+#[derive(Debug)]
 pub struct ReturnFromInterrupt {
     /// The current phase of the instruction.
     pub phase: FourPhases,

@@ -28,7 +28,8 @@ macro_rules! generate_instruction {
 
         $(#[$register_instruction_docs])*
         $(#[$shared_docs])*
-        pub struct $register_instruction_name {
+        #[derive(Debug)]
+pub struct $register_instruction_name {
             /// The operand register
             pub operand: Register,
             $(
@@ -82,7 +83,8 @@ macro_rules! generate_instruction {
 
         $(#[$hl_instruction_docs])*
         $(#[$shared_docs])*
-        pub struct $hl_instruction_name {
+        #[derive(Debug)]
+pub struct $hl_instruction_name {
             /// The current phase of the instruction.
             pub phase: $(consume_first!($accumulator TwoPhases))? $(consume_first!($target_operand ThreePhases))? ,
             $(
@@ -185,7 +187,8 @@ macro_rules! generate_instruction {
         )?
             $(#[$shared_docs])*
         $(
-            pub struct $immediate_instruction_name {
+            #[derive(Debug)]
+pub struct $immediate_instruction_name {
                 /// The immediate value. Will only valid in the second phase.
                 pub value: u8,
                 /// The current phase of the instruction.

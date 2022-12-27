@@ -11,6 +11,7 @@ use crate::{
 ///
 /// The condition is evaluated in the second phase
 #[doc(alias = "JR")]
+#[derive(Debug)]
 pub struct JumpByImmediateOffsetConditional {
     /// The jump is only made if the condition is fullfilled in the third phase.
     pub condition: ConditionCode,

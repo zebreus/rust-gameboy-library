@@ -7,6 +7,7 @@ use crate::{
 /// Loads from memory at the address stored in [DoubleRegister::HL] to a register.
 #[doc(alias = "LD")]
 #[doc(alias = "LD R,(HL)")]
+#[derive(Debug)]
 pub struct LoadFromHlToRegister {
     /// The destination register.
     pub destination: Register,

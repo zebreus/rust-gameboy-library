@@ -8,6 +8,7 @@ use crate::{
 #[doc(alias = "LD")]
 #[doc(alias = "LD (C),A")]
 #[doc(alias = "LD ($FF00+C),A")]
+#[derive(Debug)]
 pub struct LoadAccumulatorToRegisterCOffset {
     /// The current phase of the instruction.
     pub phase: TwoPhases,

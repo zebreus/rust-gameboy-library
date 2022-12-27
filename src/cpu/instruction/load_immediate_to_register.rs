@@ -8,6 +8,7 @@ use crate::{
 /// Loads the byte following the opcode of the instruction to a register
 #[doc(alias = "LD")]
 #[doc(alias = "LD R,n")]
+#[derive(Debug)]
 pub struct LoadImmediateToRegister {
     /// The destination register.
     pub destination: Register,

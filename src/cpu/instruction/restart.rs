@@ -11,6 +11,7 @@ use crate::{
 ///
 /// The value pushed to the stack points to the next instruction directly after this one.
 #[doc(alias = "RST")]
+#[derive(Debug)]
 pub struct Restart {
     /// The immediate address. Will only valid after the second phase.
     pub address: RestartAddress,

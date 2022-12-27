@@ -1,10 +1,10 @@
 use crate::cpu::instruction::{
-    phases::{ThreePhases, TwoPhases}, InstructionEnum,
+    phases::{ThreePhases, TwoPhases},
+    InstructionEnum,
 };
 use crate::cpu::{ConditionCode, DoubleRegister, Register};
 use bitmatch::bitmatch;
 
-use super::{phases::{FivePhases, FourPhases, SixPhases}, PrefixCb};
 use super::{
     load_accumulator_to_hl_and_decrement::LoadAccumulatorToHlAndDecrement,
     load_accumulator_to_hl_and_increment::LoadAccumulatorToHlAndIncrement,
@@ -15,6 +15,10 @@ use super::{
     load_hl_to_accumulator_and_decrement::LoadHlToAccumulatorAndDecrement,
     load_hl_to_accumulator_and_increment::LoadHlToAccumulatorAndIncrement,
     load_immediate_to_register::LoadImmediateToRegister,
+};
+use super::{
+    phases::{FivePhases, FourPhases, SixPhases},
+    PrefixCb,
 };
 use super::{
     AddDoubleRegisterToHl, AddImmediateOffsetToSp, Call, CallConditional, Complement,
@@ -254,72 +258,72 @@ pub fn decode(byte: u8) -> InstructionEnum {
         .into(),
         "00aa0011" => IncrementDoubleRegister {
             destination: DoubleRegister::try_from(a)
-            .expect("2 bit value should always correspond to a double register"),
+                .expect("2 bit value should always correspond to a double register"),
             phase: TwoPhases::First,
         }
         .into(),
         "00aa1011" => DecrementDoubleRegister {
             destination: DoubleRegister::try_from(a)
-            .expect("2 bit value should always correspond to a double register"),
+                .expect("2 bit value should always correspond to a double register"),
             phase: TwoPhases::First,
         }
         .into(),
         "00aa1001" => AddDoubleRegisterToHl {
             operand: DoubleRegister::try_from(a)
-            .expect("2 bit value should always correspond to a double register"),
+                .expect("2 bit value should always correspond to a double register"),
             phase: TwoPhases::First,
         }
         .into(),
         "00aaa110" => LoadImmediateToRegister {
             destination: Register::try_from(a)
-            .expect("3 bit value should always correspond to a register"),
+                .expect("3 bit value should always correspond to a register"),
             value: 0,
             phase: TwoPhases::First,
         }
         .into(),
         "00aa0001" => LoadImmediateToDoubleRegister {
             destination: DoubleRegister::try_from(a)
-            .expect("3 bit value should always correspond to a register"),
+                .expect("3 bit value should always correspond to a register"),
             value: 0,
             phase: ThreePhases::First,
         }
         .into(),
         "11aa0101" => PushDoubleRegister {
             source: DoubleRegister::try_from(a)
-            .expect("3 bit value should always correspond to a register"),
+                .expect("3 bit value should always correspond to a register"),
             phase: FourPhases::First,
         }
         .into(),
         "11aa0001" => PopDoubleRegister {
             destination: DoubleRegister::try_from(a)
-            .expect("3 bit value should always correspond to a register"),
+                .expect("3 bit value should always correspond to a register"),
             phase: ThreePhases::First,
         }
         .into(),
         "110aa010" => JumpToImmediateAddressConditional {
             condition: ConditionCode::try_from(a)
-            .expect("3 bit value should always correspond to a register"),
+                .expect("3 bit value should always correspond to a register"),
             address: 0,
             phase: FourPhases::First,
         }
         .into(),
         "001aa000" => JumpByImmediateOffsetConditional {
             condition: ConditionCode::try_from(a)
-            .expect("3 bit value should always correspond to a register"),
+                .expect("3 bit value should always correspond to a register"),
             offset: 0,
             phase: ThreePhases::First,
         }
         .into(),
         "110aa100" => CallConditional {
             condition: ConditionCode::try_from(a)
-            .expect("3 bit value should always correspond to a register"),
+                .expect("3 bit value should always correspond to a register"),
             address: 0,
             phase: SixPhases::First,
         }
         .into(),
         "110aa000" => ReturnConditional {
             condition: ConditionCode::try_from(a)
-            .expect("3 bit value should always correspond to a register"),
+                .expect("3 bit value should always correspond to a register"),
             phase: FivePhases::First,
         }
         .into(),
@@ -332,21 +336,21 @@ pub fn decode(byte: u8) -> InstructionEnum {
         .into(),
         "01aaa110" => LoadFromHlToRegister {
             destination: Register::try_from(a)
-            .expect("3 bit value should always correspond to a register"),
+                .expect("3 bit value should always correspond to a register"),
             phase: TwoPhases::First,
         }
         .into(),
         "01110aaa" => LoadRegisterToHl {
             source: Register::try_from(a)
-            .expect("3 bit value should always correspond to a register"),
+                .expect("3 bit value should always correspond to a register"),
             phase: TwoPhases::First,
         }
         .into(),
         "01aaabbb" => LoadFromRegisterToRegister {
-            source: Register::try_from(a)
-            .expect("3 bit value should always correspond to a register"),
-            destination: Register::try_from(b)
-            .expect("3 bit value should always correspond to a register"),
+            source: Register::try_from(b)
+                .expect("3 bit value should always correspond to a register"),
+            destination: Register::try_from(a)
+                .expect("3 bit value should always correspond to a register"),
         }
         .into(),
         _ => panic!("Failed to encode opcode {:#010b}", byte),
@@ -370,7 +374,7 @@ mod tests {
 
     #[test]
     fn decode_load_from_register_to_register() {
-        let load_a_to_c = 0b01111001u8;
+        let load_a_to_c = 0b01001111u8;
         let instruction = decode(load_a_to_c);
         assert!(matches!(
             instruction,
@@ -493,13 +497,17 @@ mod tests {
             let decoded_instruction = instructions
                 .get(expected_opcode as usize)
                 .expect("should always match");
-                
+
             let reencoded_opcode = *decoded_instruction
                 .encode()
                 .get(0)
                 .expect("opcode should not be empty");
 
-            assert_eq!(expected_opcode, reencoded_opcode, "Expected opcode {:#010b}, got opcode {:#010b}", expected_opcode, reencoded_opcode);
+            assert_eq!(
+                expected_opcode, reencoded_opcode,
+                "Expected opcode {:#010b}, got opcode {:#010b}",
+                expected_opcode, reencoded_opcode
+            );
         }
     }
 }

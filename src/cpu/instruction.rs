@@ -30,6 +30,7 @@ macro_rules! generate_instruction_enum {
 
         /// Contains a variant for every [Instruction]
         #[enum_dispatch]
+        #[derive(Debug)]
         pub enum $enum_name {
             $(
                 $(

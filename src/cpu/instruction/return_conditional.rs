@@ -17,6 +17,7 @@ use crate::{
 #[doc(alias = "RET Z")]
 #[doc(alias = "RET NC")]
 #[doc(alias = "RET C")]
+#[derive(Debug)]
 pub struct ReturnConditional {
     /// The jump is only made if the condition is fullfilled in the third phase.
     pub condition: ConditionCode,

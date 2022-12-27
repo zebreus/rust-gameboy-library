@@ -11,6 +11,7 @@ use crate::{
 ///
 /// The value pushed to the stack points to the next instruction directly after this one.
 #[doc(alias = "CALL")]
+#[derive(Debug)]
 pub struct CallConditional {
     /// The call is only made if the condition is fullfilled in the third phase.
     pub condition: ConditionCode,

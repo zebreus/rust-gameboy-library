@@ -20,6 +20,7 @@ use crate::{
 /// |--------------------|----------------------------|------------------------------|-------------------------------|
 /// | false              | false                      | false                        | set to the value of old bit 0 |
 #[doc(alias = "RRA")]
+#[derive(Debug)]
 pub struct RotateAccumulatorRightThroughCarry {}
 
 impl Instruction for RotateAccumulatorRightThroughCarry {
