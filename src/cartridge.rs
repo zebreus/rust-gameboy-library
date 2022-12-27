@@ -119,7 +119,7 @@ impl Into<CartridgeType> for u8 {
 
 /// Represents a gameboy cartridge. Currently for debugging only
 pub struct Cartridge {
-    memory: [u8; 65536],
+    rom: [u8; 65536],
     /// The title of the ROm
     pub title: String,
     /// Indicates what kind of hardware is present on the cartridge
@@ -178,7 +178,7 @@ impl Cartridge {
         let cartridge_checksum = u16::from_be_bytes([memory[0x014E], memory[0x014F]]);
 
         Cartridge {
-            memory,
+            rom: memory,
             title,
             cartridge_type,
             rom_size,
@@ -191,7 +191,7 @@ impl Cartridge {
     }
     /// Check if the cartridge header is valid
     pub fn check_header_checksum(&self) -> Result<(), ()> {
-        let checksum_bytes = &self.memory[0x0134..0x014C + 1];
+        let checksum_bytes = &self.rom[0x0134..0x014C + 1];
         let checksum = checksum_bytes.iter().fold(0u8, |accumulator, byte| {
             accumulator.wrapping_sub(*byte).wrapping_sub(1)
         });
@@ -202,7 +202,7 @@ impl Cartridge {
     }
     /// Check if the cartridge ROM is valid
     pub fn check_cartridge_checksum(&self) -> Result<(), ()> {
-        let checksum_with_checksum_bytes = self.memory.iter().fold(0u16, |accumulator, byte| {
+        let checksum_with_checksum_bytes = self.rom.iter().fold(0u16, |accumulator, byte| {
             accumulator.wrapping_add(*byte as u16)
         });
         let checksum = checksum_with_checksum_bytes
@@ -213,34 +213,25 @@ impl Cartridge {
         }
         Ok(())
     }
-}
-
-impl MemoryDevice for Cartridge {
-    fn read(&self, address: u16) -> u8 {
-        let value = self.memory[address as usize];
-        println!("Read {}({:#04x}) from {:#06x}", value, value, address);
-        return value;
-    }
-    fn write(&mut self, address: u16, value: u8) -> () {
-        println!(
-            "Write value {}({:#04x}) from {:#06x}",
-            value, value, address
-        );
-        self.memory[address as usize] = value;
+    /// Put the cartridge ROM into memory
+    pub fn place_into_memory<M: MemoryDevice>(&self, memory: &mut M) {
+        for (index, byte) in self.rom[0..=0x7FFF].iter().enumerate() {
+            memory.write(index as u16, *byte);
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::memory::MemoryDevice;
+    use crate::{memory::Memory, memory::MemoryDevice};
 
     use super::Cartridge;
 
     #[test]
     fn loads_correctly() {
         let cartridge = Cartridge::new();
-        assert_eq!(cartridge.read(0x0100), 0);
-        assert_eq!(cartridge.read(0x0101), 195);
+        assert_eq!(cartridge.rom[0x0100], 0);
+        assert_eq!(cartridge.rom[0x0101], 195);
     }
 
     #[test]
@@ -255,5 +246,14 @@ mod tests {
         let cartridge = Cartridge::new();
         let check_result = cartridge.check_cartridge_checksum();
         assert!(check_result.is_ok());
+    }
+
+    #[test]
+    fn test_cartridge_can_be_placed_in_memory() {
+        let cartridge = Cartridge::new();
+        let mut memory = Memory::new();
+        cartridge.place_into_memory(&mut memory);
+        assert_eq!(memory.read(0x0100), 0);
+        assert_eq!(memory.read(0x0101), 195);
     }
 }
