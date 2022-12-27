@@ -299,7 +299,7 @@ mod tests {
             42,
         ]);
 
-        let instruction = cpu.load_instruction(&memory);
+        let instruction = cpu.load_instruction(&mut memory);
 
         let instruction = instruction.execute(&mut cpu, &mut memory);
         let instruction = instruction.execute(&mut cpu, &mut memory);

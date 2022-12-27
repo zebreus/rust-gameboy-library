@@ -11,9 +11,9 @@ impl Instruction for Stop {
     fn execute<T: MemoryDevice>(
         &self,
         cpu: &mut crate::cpu::CpuState,
-        _memory: &mut T,
+        memory: &mut T,
     ) -> super::InstructionEnum {
-        let interrupt = cpu.get_pending_stop_wakeup();
+        let interrupt = cpu.get_pending_stop_wakeup(memory);
         match interrupt {
             Some(instruction) => instruction,
             None => (Self {}).into(),
@@ -28,7 +28,8 @@ impl Instruction for Stop {
 mod tests {
     use super::Stop;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
-    use crate::cpu::{Cpu, CpuState, Interrupt};
+    use crate::cpu::interrupt_controller::InterruptController;
+    use crate::cpu::{CpuState, Interrupt};
     use crate::debug_memory::DebugMemory;
 
     #[test]
@@ -47,8 +48,8 @@ mod tests {
 
         assert!(matches!(instruction, InstructionEnum::Stop(Stop {})));
 
-        cpu.write_interrupt_enable(Interrupt::Joypad, true);
-        cpu.write_interrupt_flag(Interrupt::Joypad, true);
+        memory.write_interrupt_enable(Interrupt::Joypad, true);
+        memory.write_interrupt_flag(Interrupt::Joypad, true);
 
         let instruction = instruction.execute(&mut cpu, &mut memory);
 

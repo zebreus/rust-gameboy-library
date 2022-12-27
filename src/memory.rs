@@ -1,3 +1,8 @@
+/// Address for the interrupt enable register.
+pub const INTERRUPT_ENABLE_ADDRESS: u16 = 0xFFFF;
+/// Address for the interrupt flags register.
+pub const INTERRUPT_FLAG_ADDRESS: u16 = 0xFF0F;
+
 /// The trait for things that can be accessed via memory
 pub trait MemoryDevice {
     /// Read a byte from an address

@@ -19,7 +19,7 @@ macro_rules! generate_instruction {
         #[allow(unused)]
         use crate::{
             cpu::{Cpu, Flag, Register, DoubleRegister, Bit},
-            memory_device::MemoryDevice,
+            memory::MemoryDevice,
         };
         $(consume_first!{$accumulator use super::phases::TwoPhases;})?
         $(consume_first!{$target_operand use super::phases::ThreePhases;})?

@@ -9,5 +9,5 @@ pub mod cartridge;
 pub mod cpu;
 /// Contains [debug_memory::DebugMemory].
 pub mod debug_memory;
-/// Contains the [memory_device::MemoryDevice] trait.
+/// Contains the [memory::MemoryDevice] trait.
 pub mod memory;

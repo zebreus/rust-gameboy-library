@@ -14,9 +14,9 @@ impl Instruction for Halt {
     fn execute<T: MemoryDevice>(
         &self,
         cpu: &mut crate::cpu::CpuState,
-        _memory: &mut T,
+        memory: &mut T,
     ) -> super::InstructionEnum {
-        let interrupt = cpu.get_pending_interrupt();
+        let interrupt = cpu.get_pending_interrupt(memory);
         match interrupt {
             Some(instruction) => instruction,
             None => (Self {}).into(),
@@ -31,6 +31,7 @@ impl Instruction for Halt {
 mod tests {
     use super::Halt;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
+    use crate::cpu::interrupt_controller::InterruptController;
     use crate::cpu::{Cpu, CpuState, Interrupt};
     use crate::debug_memory::DebugMemory;
 
@@ -53,8 +54,8 @@ mod tests {
         assert!(matches!(instruction, InstructionEnum::Halt(Halt {})));
 
         cpu.write_interrupt_master_enable(true);
-        cpu.write_interrupt_enable(Interrupt::VBlank, true);
-        cpu.write_interrupt_flag(Interrupt::VBlank, true);
+        memory.write_interrupt_enable(Interrupt::VBlank, true);
+        memory.write_interrupt_flag(Interrupt::VBlank, true);
 
         let instruction = instruction.execute(&mut cpu, &mut memory);
 
