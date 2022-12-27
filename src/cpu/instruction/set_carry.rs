@@ -10,10 +10,10 @@ use crate::{
 /// # use rust_gameboy_library::cpu::{CpuState, Cpu, Register, Flag};
 /// # use rust_gameboy_library::cpu::instruction::SetCarry;
 /// # use rust_gameboy_library::cpu::instruction::Instruction;
-/// # use rust_gameboy_library::debug_memory::DebugMemory;
+/// # use rust_gameboy_library::memory::Memory;
 /// #
 /// # let mut cpu = CpuState::new();
-/// # let mut memory = DebugMemory::new();
+/// # let mut memory = Memory::new();
 /// #
 /// let instruction = SetCarry {};
 /// instruction.execute(&mut cpu, &mut memory);

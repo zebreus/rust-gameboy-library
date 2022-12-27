@@ -8,7 +8,7 @@ pub struct Memory {
 }
 
 impl Memory {
-    /// Create a new DebugMemory filled with `0`.
+    /// Create a new Memory filled with `0`.
     pub fn new() -> Memory {
         Memory {
             memory: arr![0; 65536],
@@ -16,7 +16,7 @@ impl Memory {
         }
     }
 
-    /// Create a new DebugMemory. `init` will be placed at memory address 0. The remaining memory will be filled with `0`.
+    /// Create a new Memory. `init` will be placed at memory address 0. The remaining memory will be filled with `0`.
     pub fn new_with_init(init: &[u8]) -> Memory {
         let mut memory = Memory {
             memory: arr![0; 65536],
