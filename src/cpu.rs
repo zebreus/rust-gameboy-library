@@ -647,7 +647,7 @@ mod tests {
         let mut cpu = CpuState::new();
         cpu.write_register(Register::A, 100);
 
-        let mut memory = Memory::new_with_init(&[0b01111001u8]);
+        let mut memory = Memory::new_with_init(&[0b01001111u8]);
         let instruction = cpu.load_instruction(&mut memory);
         assert!(matches!(
             instruction,

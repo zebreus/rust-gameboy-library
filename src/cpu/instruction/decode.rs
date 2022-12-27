@@ -89,7 +89,7 @@ macro_rules! decode_arithmetic_immediate {
 /// # use rust_gameboy_library::cpu::instruction::LoadFromRegisterToRegister;
 /// # use rust_gameboy_library::cpu::instruction::decode;
 /// #
-/// let load_a_to_c = 0b01111001u8;
+/// let load_a_to_c = 0b01001111u8;
 /// let instruction = decode(load_a_to_c);
 /// assert!(matches!(
 ///     instruction,

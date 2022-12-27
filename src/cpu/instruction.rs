@@ -268,7 +268,7 @@ pub trait Instruction: Sized {
     /// };
     ///
     /// let encoded: Vec<u8> = instruction.encode();
-    /// assert_eq!(encoded, Vec::from([0b01111001u8]));
+    /// assert_eq!(encoded, Vec::from([0b01001111u8]));
     /// ```
     fn encode(&self) -> Vec<u8>;
 }
