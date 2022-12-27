@@ -44,7 +44,7 @@ mod tests {
     use super::LoadFromRegisterToRegister;
     use crate::cpu::instruction::Instruction;
     use crate::cpu::{Cpu, CpuState, Register};
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
 
     #[test]
     fn load_instruction_works() {
@@ -52,7 +52,7 @@ mod tests {
         cpu.write_register(Register::C, 0);
         cpu.write_register(Register::A, 100);
 
-        let mut memory = DebugMemory::new();
+        let mut memory = Memory::new();
         let instruction = LoadFromRegisterToRegister {
             source: Register::A,
             destination: Register::C,

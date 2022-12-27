@@ -43,12 +43,12 @@ mod tests {
     use super::ToBinaryCodedDecimal;
     use crate::cpu::instruction::Instruction;
     use crate::cpu::{Cpu, CpuState, Register};
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
 
     #[test]
     fn to_binary_coded_decimal_works() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new_with_init(&[1, 1, 1, 1]);
+        let mut memory = Memory::new_with_init(&[1, 1, 1, 1]);
 
         cpu.write_register(Register::A, 56);
 
@@ -62,7 +62,7 @@ mod tests {
     #[test]
     fn to_binary_coded_decimal_works_with_big_number() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new_with_init(&[1, 1, 1, 1]);
+        let mut memory = Memory::new_with_init(&[1, 1, 1, 1]);
 
         cpu.write_register(Register::A, 223);
 

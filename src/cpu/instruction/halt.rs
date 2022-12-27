@@ -33,12 +33,12 @@ mod tests {
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::interrupt_controller::InterruptController;
     use crate::cpu::{Cpu, CpuState, Interrupt};
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
 
     #[test]
     fn halt_works() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new();
+        let mut memory = Memory::new();
 
         cpu.write_interrupt_master_enable(false);
 

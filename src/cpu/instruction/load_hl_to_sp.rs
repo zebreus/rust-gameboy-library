@@ -42,11 +42,11 @@ mod tests {
     use crate::cpu::instruction::phases::TwoPhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, DoubleRegister};
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
     #[test]
     fn load_hl_to_sp_works() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new();
+        let mut memory = Memory::new();
         cpu.write_double_register(DoubleRegister::HL, 0x1234);
 
         let instruction = LoadHlToSp {

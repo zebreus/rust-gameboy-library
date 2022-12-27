@@ -78,12 +78,12 @@ mod tests {
     use crate::cpu::instruction::phases::ThreePhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, Flag};
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
 
     #[test]
     fn jump_by_immediate_offset_conditional_jumps_when_it_should() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new_with_init(&[10]);
+        let mut memory = Memory::new_with_init(&[10]);
 
         cpu.write_flag(Flag::Carry, true);
         let initial_program_counter = cpu.read_program_counter();
@@ -122,7 +122,7 @@ mod tests {
     #[test]
     fn jump_by_immediate_offset_conditional_does_not_jump_when_the_condition_is_not_met() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new_with_init(&[10]);
+        let mut memory = Memory::new_with_init(&[10]);
 
         cpu.write_flag(Flag::Carry, true);
 
@@ -158,7 +158,7 @@ mod tests {
     #[test]
     fn encode_jump_by_immediate_offset_conditional() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new_with_init(&[0x34]);
+        let mut memory = Memory::new_with_init(&[0x34]);
 
         let instruction = JumpByImmediateOffsetConditional {
             condition: crate::cpu::ConditionCode::ZeroFlagSet,

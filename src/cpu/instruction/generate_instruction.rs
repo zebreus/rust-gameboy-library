@@ -237,7 +237,7 @@ macro_rules! generate_instruction {
             use super::$register_instruction_name;
             use crate::cpu::instruction::Instruction;
             use crate::cpu::{Cpu, CpuState, Flag, Register};
-            use crate::debug_memory::DebugMemory;
+            use crate::memory::Memory;
             $(consume_first!{$bit_ident use crate::cpu::Bit;})?
 
             $(
@@ -279,7 +279,7 @@ macro_rules! prepare_generate_instruction {
             (($dollar(A: $accumulator:expr,)? $dollar(B: $operandd:expr,)? $dollar( FLAG: $initial_flags:expr ,)* $dollar( BIT: $select_bit:expr ,)? ), ($dollar(A: $accumulator_result:expr,)? $dollar(B: $operand_result:expr,)? $dollar( FLAG: $flag_result:expr ,)* $dollar( FLAG_UNSET: $flag_unset_result:expr ,)* )) => {
                 {
                 let mut cpu = CpuState::new();
-                let mut memory = DebugMemory::new();
+                let mut memory = Memory::new();
 
                 let accumulator_value = [$dollar($accumulator ,)? 0][0];
                 let operand_value = [$dollar($operandd ,)? 0][0];

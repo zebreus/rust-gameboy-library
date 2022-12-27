@@ -45,14 +45,14 @@ mod tests {
     use crate::cpu::instruction::phases::TwoPhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, Register};
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
     use crate::memory::MemoryDevice;
 
     #[test]
     fn load_from_register_c_offset_to_accumulator_works() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new();
+        let mut memory = Memory::new();
         memory.write(0xFF03, 42);
         cpu.write_register(Register::A, 0);
         cpu.write_register(Register::C, 3);

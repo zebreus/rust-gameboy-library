@@ -76,13 +76,13 @@ mod tests {
     use crate::cpu::instruction::phases::FourPhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, RestartAddress};
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
     use crate::memory::MemoryDevice;
 
     #[test]
     fn instruction_works() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new_with_init(&[0x34, 0x12]);
+        let mut memory = Memory::new_with_init(&[0x34, 0x12]);
         cpu.write_stack_pointer(0xff00);
         let initial_program_counter = cpu.read_program_counter();
 

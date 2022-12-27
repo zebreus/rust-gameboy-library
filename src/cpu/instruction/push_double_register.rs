@@ -75,14 +75,14 @@ mod tests {
     use crate::cpu::instruction::phases::FourPhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, DoubleRegister};
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
     use crate::memory::MemoryDevice;
 
     #[test]
     fn push_double_register_works() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new();
+        let mut memory = Memory::new();
 
         cpu.write_stack_pointer(0x1234);
         cpu.write_double_register(DoubleRegister::BC, 0x1234);

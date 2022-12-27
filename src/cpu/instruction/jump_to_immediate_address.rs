@@ -71,13 +71,13 @@ mod tests {
     use crate::cpu::instruction::phases::FourPhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState};
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
 
     #[test]
     fn jump_by_immediate_address_works() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new_with_init(&[0x34, 0x12]);
+        let mut memory = Memory::new_with_init(&[0x34, 0x12]);
 
         let instruction = JumpToImmediateAddress {
             address: 0,
@@ -114,7 +114,7 @@ mod tests {
     fn encode_jump_by_immediate_address() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new_with_init(&[0x34, 0x12]);
+        let mut memory = Memory::new_with_init(&[0x34, 0x12]);
 
         let instruction = JumpToImmediateAddress {
             address: 0,

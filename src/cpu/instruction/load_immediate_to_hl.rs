@@ -58,12 +58,12 @@ mod tests {
     use crate::cpu::instruction::phases::ThreePhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, DoubleRegister};
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
     use crate::memory::MemoryDevice;
     #[test]
     fn load_immediate_to_hl_works() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new_with_init(&[42]);
+        let mut memory = Memory::new_with_init(&[42]);
         cpu.write_double_register(DoubleRegister::HL, 0x0003);
 
         let instruction = LoadImmediateToHl {

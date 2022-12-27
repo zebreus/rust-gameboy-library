@@ -596,7 +596,7 @@ mod tests {
     use super::Cpu;
     use super::{CpuState, DoubleRegister};
     use crate::cpu::Register;
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
 
     #[test]
     fn read_double_register() {
@@ -626,7 +626,7 @@ mod tests {
     fn cpu_read_program_counter_works() {
         let mut cpu = CpuState::new();
 
-        let memory = DebugMemory::new_with_init(&[0b01000010u8, 8]);
+        let memory = Memory::new_with_init(&[0b01000010u8, 8]);
         let opcode = cpu.load_opcode(&memory);
 
         assert_eq!(opcode, 0b01000010u8);
@@ -640,7 +640,7 @@ mod tests {
         let mut cpu = CpuState::new();
         cpu.write_register(Register::A, 100);
 
-        let mut memory = DebugMemory::new_with_init(&[0b01111001u8]);
+        let mut memory = Memory::new_with_init(&[0b01111001u8]);
         let instruction = cpu.load_instruction(&mut memory);
         assert!(matches!(
             instruction,

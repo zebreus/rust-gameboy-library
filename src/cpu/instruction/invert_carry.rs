@@ -53,12 +53,12 @@ mod tests {
     use super::InvertCarry;
     use crate::cpu::instruction::Instruction;
     use crate::cpu::{Cpu, CpuState, Flag};
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
 
     #[test]
     fn invert_carry_works() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new();
+        let mut memory = Memory::new();
 
         cpu.write_flag(Flag::Carry, false);
         let instruction = InvertCarry {};

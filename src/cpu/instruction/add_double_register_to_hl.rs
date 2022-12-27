@@ -75,12 +75,12 @@ mod tests {
     use crate::cpu::instruction::phases::TwoPhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, DoubleRegister};
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
 
     #[test]
     fn instruction_works() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new();
+        let mut memory = Memory::new();
         cpu.write_double_register(DoubleRegister::HL, 324);
         cpu.write_double_register(DoubleRegister::BC, 788);
 
@@ -106,7 +106,7 @@ mod tests {
     #[test]
     fn instruction_works_with_stackpointer() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new();
+        let mut memory = Memory::new();
         cpu.write_double_register(DoubleRegister::AF, 0b0011110000000000);
         cpu.write_stack_pointer(788);
         cpu.write_double_register(DoubleRegister::HL, 324);

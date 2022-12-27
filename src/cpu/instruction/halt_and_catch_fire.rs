@@ -33,12 +33,12 @@ mod tests {
     use super::HaltAndCatchFire;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::CpuState;
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
 
     #[test]
     fn instruction_works() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new_with_init(&[1, 1, 1, 1]);
+        let mut memory = Memory::new_with_init(&[1, 1, 1, 1]);
 
         let instruction = HaltAndCatchFire { opcode: 0b11110100 };
 

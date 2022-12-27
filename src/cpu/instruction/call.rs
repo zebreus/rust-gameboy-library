@@ -98,13 +98,13 @@ mod tests {
     use crate::cpu::instruction::phases::SixPhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState};
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
     use crate::memory::MemoryDevice;
 
     #[test]
     fn call_works() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new_with_init(&[0x34, 0x12]);
+        let mut memory = Memory::new_with_init(&[0x34, 0x12]);
         cpu.write_stack_pointer(0xff00);
         let initial_program_counter = cpu.read_program_counter();
 
@@ -152,7 +152,7 @@ mod tests {
     #[test]
     fn encode_jump_by_immediate_address() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new_with_init(&[0x34, 0x12]);
+        let mut memory = Memory::new_with_init(&[0x34, 0x12]);
 
         let instruction = Call {
             address: 0,

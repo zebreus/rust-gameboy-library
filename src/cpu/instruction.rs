@@ -276,7 +276,7 @@ pub trait Instruction: Sized {
 mod tests {
     use crate::cpu::instruction::Instruction;
     use crate::cpu::{Cpu, CpuState, Register};
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
 
     #[test]
     fn load_from_hl_works() {
@@ -286,18 +286,8 @@ mod tests {
         cpu.write_register(Register::B, 0);
         cpu.write_register(Register::C, 0);
 
-        let mut memory = DebugMemory::new_with_init(&[
-            0b00100110,
-            0,
-            0b00101110,
-            9,
-            0b01111110u8,
-            0,
-            0,
-            0,
-            0,
-            42,
-        ]);
+        let mut memory =
+            Memory::new_with_init(&[0b00100110, 0, 0b00101110, 9, 0b01111110u8, 0, 0, 0, 0, 42]);
 
         let instruction = cpu.load_instruction(&mut memory);
 

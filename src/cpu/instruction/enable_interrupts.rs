@@ -28,12 +28,12 @@ mod tests {
     use super::EnableInterrupts;
     use crate::cpu::instruction::Instruction;
     use crate::cpu::{Cpu, CpuState};
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
 
     #[test]
     fn enable_interrupts_works() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new();
+        let mut memory = Memory::new();
 
         cpu.write_interrupt_master_enable(false);
 

@@ -30,12 +30,12 @@ mod tests {
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::interrupt_controller::InterruptController;
     use crate::cpu::{CpuState, Interrupt};
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
 
     #[test]
     fn stop_works() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new();
+        let mut memory = Memory::new();
 
         let instruction = Stop {};
 

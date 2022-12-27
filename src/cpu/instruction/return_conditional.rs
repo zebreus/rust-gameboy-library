@@ -96,13 +96,13 @@ mod tests {
     use crate::cpu::instruction::phases::FivePhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{ConditionCode, Cpu, CpuState, Flag};
-    use crate::debug_memory::DebugMemory;
+    use crate::memory::Memory;
     use crate::memory::MemoryDevice;
 
     #[test]
     fn return_conditional_returns_when_it_should() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new();
+        let mut memory = Memory::new();
         cpu.write_flag(Flag::Carry, true);
         cpu.write_stack_pointer(0x1234 - 2);
         memory.write(0x1234 - 2, 0x34);
@@ -135,7 +135,7 @@ mod tests {
     #[test]
     fn return_conditional_does_not_return_when_the_condition_is_not_met() {
         let mut cpu = CpuState::new();
-        let mut memory = DebugMemory::new();
+        let mut memory = Memory::new();
         let initial_program_counter = cpu.read_program_counter();
 
         cpu.write_flag(Flag::Carry, false);
