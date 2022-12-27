@@ -10,4 +10,4 @@ pub mod cpu;
 /// Contains [debug_memory::DebugMemory].
 pub mod debug_memory;
 /// Contains the [memory_device::MemoryDevice] trait.
-pub mod memory_device;
+pub mod memory;

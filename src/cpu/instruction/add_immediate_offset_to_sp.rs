@@ -2,7 +2,7 @@ use super::phases::FourPhases;
 use super::Instruction;
 use crate::{
     cpu::{Cpu, Flag},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Adds a signed offset specified in the byte following the opcode to the stackpointer.

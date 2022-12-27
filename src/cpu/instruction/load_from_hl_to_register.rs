@@ -1,7 +1,7 @@
 use super::{phases::TwoPhases, Instruction};
 use crate::{
     cpu::{Cpu, DoubleRegister, Register},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Loads from memory at the address stored in [DoubleRegister::HL] to a register.

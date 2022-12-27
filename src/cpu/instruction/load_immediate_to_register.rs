@@ -2,7 +2,7 @@ use super::phases::TwoPhases;
 use super::Instruction;
 use crate::{
     cpu::{Cpu, Register},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Loads the byte following the opcode of the instruction to a register

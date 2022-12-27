@@ -1,6 +1,6 @@
 use super::phases::FourPhases;
 use super::Instruction;
-use crate::{cpu::Cpu, memory_device::MemoryDevice};
+use crate::{cpu::Cpu, memory::MemoryDevice};
 
 /// Return from a previous [Call](super::Call) instruction and enable interrupts.
 ///
@@ -69,7 +69,7 @@ mod tests {
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState};
     use crate::debug_memory::DebugMemory;
-    use crate::memory_device::MemoryDevice;
+    use crate::memory::MemoryDevice;
 
     #[test]
     fn instruction_works() {

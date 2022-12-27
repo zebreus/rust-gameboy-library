@@ -1,6 +1,6 @@
 use super::phases::FourPhases;
 use super::Instruction;
-use crate::{cpu::Cpu, memory_device::MemoryDevice};
+use crate::{cpu::Cpu, memory::MemoryDevice};
 
 /// Jumps to the address specified in the two bytes following the opcode
 #[doc(alias = "JP")]

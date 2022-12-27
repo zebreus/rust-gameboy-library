@@ -1,6 +1,6 @@
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
-use crate::memory_device::MemoryDevice;
+use crate::memory::MemoryDevice;
 
 /// Instructions can be executed to modify cpu state and memory
 pub mod instruction;

@@ -1,6 +1,6 @@
 use super::phases::FivePhases;
 use super::Instruction;
-use crate::{cpu::Cpu, memory_device::MemoryDevice};
+use crate::{cpu::Cpu, memory::MemoryDevice};
 
 /// Stores the value of the stackpointer to an address specified by the two bytes following the opcode.
 ///
@@ -87,7 +87,7 @@ mod tests {
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState};
     use crate::debug_memory::DebugMemory;
-    use crate::memory_device::MemoryDevice;
+    use crate::memory::MemoryDevice;
 
     #[test]
     fn load_sp_to_immediate_address_works() {

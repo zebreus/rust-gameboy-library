@@ -1,7 +1,7 @@
 use super::phases::ThreePhases;
 use super::Instruction;
 use crate::cpu::DoubleRegister;
-use crate::{cpu::Cpu, memory_device::MemoryDevice};
+use crate::{cpu::Cpu, memory::MemoryDevice};
 
 /// Loads the two bytes following the opcode of the instruction to a double register
 ///

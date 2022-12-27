@@ -1,7 +1,7 @@
 use super::{phases::FourPhases, Instruction};
 use crate::{
     cpu::{Cpu, Register},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Stores the value of the [accumulator](Register::A) to memory at `the second byte following the opcode + the byte following the opcode` .
@@ -76,7 +76,7 @@ mod tests {
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, Register};
     use crate::debug_memory::DebugMemory;
-    use crate::memory_device::MemoryDevice;
+    use crate::memory::MemoryDevice;
 
     #[test]
     fn load_accumulator_to_immediate_address_works() {

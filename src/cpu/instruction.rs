@@ -1,5 +1,5 @@
 use super::CpuState;
-use crate::memory_device::MemoryDevice;
+use crate::memory::MemoryDevice;
 use enum_dispatch::enum_dispatch;
 
 mod decode;

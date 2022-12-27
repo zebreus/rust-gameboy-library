@@ -2,7 +2,7 @@ use super::phases::ThreePhases;
 use super::Instruction;
 use crate::{
     cpu::{ConditionCode, Cpu},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// If the condition is met it jumps by a signed offset specified in the byte following the opcode.

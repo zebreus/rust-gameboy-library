@@ -1,7 +1,7 @@
 use super::{phases::TwoPhases, Instruction};
 use crate::{
     cpu::{Cpu, DoubleRegister, Register},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Stores the [accumulator](Register::A) to the address specified in the double register.
@@ -54,7 +54,7 @@ mod tests {
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, DoubleRegister, Register};
     use crate::debug_memory::DebugMemory;
-    use crate::memory_device::MemoryDevice;
+    use crate::memory::MemoryDevice;
 
     #[test]
     fn load_accumulator_to_double_register_works() {

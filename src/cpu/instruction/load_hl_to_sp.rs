@@ -1,7 +1,7 @@
 use super::{phases::TwoPhases, Instruction};
 use crate::{
     cpu::{Cpu, DoubleRegister},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Copies the data stored in [DoubleRegister::HL] to the stackpointer register

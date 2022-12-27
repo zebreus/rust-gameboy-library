@@ -1,7 +1,7 @@
 use super::{phases::TwoPhases, Instruction};
 use crate::{
     cpu::{Cpu, DoubleRegister, Register},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Stores the data from a register to the address specified in [HL](DoubleRegister::HL).
@@ -54,7 +54,7 @@ mod tests {
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, DoubleRegister, Register};
     use crate::debug_memory::DebugMemory;
-    use crate::memory_device::MemoryDevice;
+    use crate::memory::MemoryDevice;
     #[test]
     fn load_from_hl_to_register_works() {
         // Write 42 to A and then copy A to C

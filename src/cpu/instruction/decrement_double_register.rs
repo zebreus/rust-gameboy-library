@@ -1,7 +1,7 @@
 use super::phases::TwoPhases;
 use super::Instruction;
 use crate::cpu::DoubleRegister;
-use crate::{cpu::Cpu, memory_device::MemoryDevice};
+use crate::{cpu::Cpu, memory::MemoryDevice};
 
 /// Decrement a [DoubleRegister] by `1`.
 ///

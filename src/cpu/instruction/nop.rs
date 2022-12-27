@@ -1,5 +1,5 @@
 use super::Instruction;
-use crate::memory_device::MemoryDevice;
+use crate::memory::MemoryDevice;
 
 /// Do nothing and load the next instruction.
 #[doc(alias = "NOP")]

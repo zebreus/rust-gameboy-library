@@ -1,7 +1,7 @@
 use super::Instruction;
 use crate::{
     cpu::{Cpu, Flag, Register},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// [Rotate through carry](https://en.wikipedia.org/wiki/Bitwise_operation#Rotate_through_carry) the [accumulator](Register::A) left by one bit.

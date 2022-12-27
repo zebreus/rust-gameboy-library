@@ -2,7 +2,7 @@ use super::phases::TwoPhases;
 use super::Instruction;
 use crate::{
     cpu::{Cpu, DoubleRegister, Flag},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Adds a [DoubleRegister] to [DoubleRegister::HL].

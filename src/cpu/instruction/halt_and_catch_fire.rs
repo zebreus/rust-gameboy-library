@@ -1,5 +1,5 @@
 use super::Instruction;
-use crate::memory_device::MemoryDevice;
+use crate::memory::MemoryDevice;
 
 /// Illegal instruction. Lock up cpu.
 #[doc(alias = "HCF")]

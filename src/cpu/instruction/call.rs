@@ -1,6 +1,6 @@
 use super::phases::SixPhases;
 use super::Instruction;
-use crate::{cpu::Cpu, memory_device::MemoryDevice};
+use crate::{cpu::Cpu, memory::MemoryDevice};
 
 /// Jumps to the address specified in the two bytes following the opcode. Writes the program counter before the jump onto the stack.
 ///
@@ -99,7 +99,7 @@ mod tests {
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState};
     use crate::debug_memory::DebugMemory;
-    use crate::memory_device::MemoryDevice;
+    use crate::memory::MemoryDevice;
 
     #[test]
     fn call_works() {

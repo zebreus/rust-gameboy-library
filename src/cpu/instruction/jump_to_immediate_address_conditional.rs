@@ -2,7 +2,7 @@ use super::phases::FourPhases;
 use super::Instruction;
 use crate::{
     cpu::{ConditionCode, Cpu},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// If the condition is met it jumps to the address specified in the two bytes following the opcode

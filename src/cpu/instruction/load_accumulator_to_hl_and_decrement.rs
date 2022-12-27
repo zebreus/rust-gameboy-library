@@ -1,7 +1,7 @@
 use super::{phases::TwoPhases, Instruction};
 use crate::{
     cpu::{Cpu, DoubleRegister, Register},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Stores the [accumulator](Register::A) to the address specified in [HL](DoubleRegister::HL). Decrements [HL](DoubleRegister::HL) afterwards.

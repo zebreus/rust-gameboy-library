@@ -1,7 +1,7 @@
 use super::Instruction;
 use crate::{
     cpu::{Cpu, Flag},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Set the [Flag::Carry] flag to `true`.

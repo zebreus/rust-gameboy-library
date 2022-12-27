@@ -1,7 +1,7 @@
 use super::{phases::ThreePhases, Instruction};
 use crate::{
     cpu::{Cpu, DoubleRegister},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Stores the byte following the opcode to the address specified in [HL](DoubleRegister::HL).
@@ -59,7 +59,7 @@ mod tests {
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, DoubleRegister};
     use crate::debug_memory::DebugMemory;
-    use crate::memory_device::MemoryDevice;
+    use crate::memory::MemoryDevice;
     #[test]
     fn load_immediate_to_hl_works() {
         let mut cpu = CpuState::new();

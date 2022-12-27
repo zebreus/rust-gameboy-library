@@ -1,5 +1,5 @@
 use super::{decode_cb, Instruction};
-use crate::{cpu::Cpu, memory_device::MemoryDevice};
+use crate::{cpu::Cpu, memory::MemoryDevice};
 
 /// Decode next opcode with [decode_cb](super::decode_cb)
 ///

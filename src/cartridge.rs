@@ -1,7 +1,7 @@
 use arr_macro::arr;
 use std::fs;
 
-use crate::memory_device::MemoryDevice;
+use crate::memory::MemoryDevice;
 
 /// Whether a version of the game is intended to be sold in Japan or elsewhere.
 pub enum Destination {
@@ -232,7 +232,7 @@ impl MemoryDevice for Cartridge {
 
 #[cfg(test)]
 mod tests {
-    use crate::memory_device::MemoryDevice;
+    use crate::memory::MemoryDevice;
 
     use super::Cartridge;
 

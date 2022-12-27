@@ -1,5 +1,5 @@
 use super::Instruction;
-use crate::{cpu::Cpu, memory_device::MemoryDevice};
+use crate::{cpu::Cpu, memory::MemoryDevice};
 
 /// Halt the execution until the next interrupt.
 ///

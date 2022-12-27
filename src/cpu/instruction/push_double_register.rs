@@ -1,7 +1,7 @@
 use super::phases::FourPhases;
 use super::Instruction;
 use crate::cpu::DoubleRegister;
-use crate::{cpu::Cpu, memory_device::MemoryDevice};
+use crate::{cpu::Cpu, memory::MemoryDevice};
 
 /// Store a double register at the stack pointer. Decrement the stackpointer twice
 ///
@@ -76,7 +76,7 @@ mod tests {
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, DoubleRegister};
     use crate::debug_memory::DebugMemory;
-    use crate::memory_device::MemoryDevice;
+    use crate::memory::MemoryDevice;
 
     #[test]
     fn push_double_register_works() {

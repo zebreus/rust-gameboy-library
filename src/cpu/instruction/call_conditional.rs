@@ -2,7 +2,7 @@ use super::phases::SixPhases;
 use super::Instruction;
 use crate::{
     cpu::{ConditionCode, Cpu},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Jumps to the address specified in the two bytes following the opcode. Writes the program counter before the jump onto the stack.
@@ -117,7 +117,7 @@ mod tests {
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{ConditionCode, Cpu, CpuState, Flag};
     use crate::debug_memory::DebugMemory;
-    use crate::memory_device::MemoryDevice;
+    use crate::memory::MemoryDevice;
 
     #[test]
     fn call_conditional_works() {

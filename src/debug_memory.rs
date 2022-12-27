@@ -1,4 +1,4 @@
-use crate::memory_device::MemoryDevice;
+use crate::memory::MemoryDevice;
 use arr_macro::arr;
 
 /// Debug memory does simple reads and writes to 64kb of memory. It also prints every read or write
@@ -43,7 +43,7 @@ impl MemoryDevice for DebugMemory {
 
 #[cfg(test)]
 mod tests {
-    use crate::{debug_memory::DebugMemory, memory_device::MemoryDevice};
+    use crate::{debug_memory::DebugMemory, memory::MemoryDevice};
 
     #[test]
     fn can_read_written_value() {

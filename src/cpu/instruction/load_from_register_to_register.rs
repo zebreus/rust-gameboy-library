@@ -1,5 +1,5 @@
 use super::Instruction;
-use crate::{cpu::Register, memory_device::MemoryDevice};
+use crate::{cpu::Register, memory::MemoryDevice};
 
 /// Copy data from one register to another one.
 ///

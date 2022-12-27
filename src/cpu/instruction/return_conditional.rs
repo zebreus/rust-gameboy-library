@@ -2,7 +2,7 @@ use super::phases::FivePhases;
 use super::Instruction;
 use crate::{
     cpu::{ConditionCode, Cpu},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// ReturnConditional from a previous [Call](super::Call) instruction if the condition is met.
@@ -97,7 +97,7 @@ mod tests {
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{ConditionCode, Cpu, CpuState, Flag};
     use crate::debug_memory::DebugMemory;
-    use crate::memory_device::MemoryDevice;
+    use crate::memory::MemoryDevice;
 
     #[test]
     fn return_conditional_returns_when_it_should() {

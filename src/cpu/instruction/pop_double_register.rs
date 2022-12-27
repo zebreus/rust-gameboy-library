@@ -1,7 +1,7 @@
 use super::phases::ThreePhases;
 use super::Instruction;
 use crate::cpu::DoubleRegister;
-use crate::{cpu::Cpu, memory_device::MemoryDevice};
+use crate::{cpu::Cpu, memory::MemoryDevice};
 
 /// Loads from the address stored in the stack pointer to a double register. Increments the stackpointer twice.
 ///
@@ -68,7 +68,7 @@ mod tests {
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, DoubleRegister};
     use crate::debug_memory::DebugMemory;
-    use crate::memory_device::MemoryDevice;
+    use crate::memory::MemoryDevice;
 
     #[test]
     fn pop_double_register_works() {

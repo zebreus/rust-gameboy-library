@@ -1,7 +1,7 @@
 use super::Instruction;
 use crate::{
     cpu::{Cpu, Flag, Register},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// [Rotate](https://en.wikipedia.org/wiki/Bitwise_operation#Rotate) the [accumulator](Register::A) right by one bit.

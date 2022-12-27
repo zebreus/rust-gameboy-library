@@ -1,7 +1,7 @@
 use super::Instruction;
 use crate::{
     cpu::{Cpu, Flag, Register},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Convert the value in the [accumulator][Register::A] to a binary coded decimal

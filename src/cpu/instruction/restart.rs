@@ -2,7 +2,7 @@ use super::phases::FourPhases;
 use super::Instruction;
 use crate::{
     cpu::{Cpu, RestartAddress},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Jump to the specified [RestartAddress]. Writes the program counter before the jump onto the stack.
@@ -77,7 +77,7 @@ mod tests {
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, RestartAddress};
     use crate::debug_memory::DebugMemory;
-    use crate::memory_device::MemoryDevice;
+    use crate::memory::MemoryDevice;
 
     #[test]
     fn instruction_works() {

@@ -2,7 +2,7 @@ use super::phases::ThreePhases;
 use super::Instruction;
 use crate::{
     cpu::{Cpu, DoubleRegister, Flag},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Copies the stackpointer plus a signed offset specified in the byte following the opcode into [DoubleRegister::HL].

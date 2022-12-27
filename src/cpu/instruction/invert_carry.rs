@@ -1,7 +1,7 @@
 use super::Instruction;
 use crate::{
     cpu::{Cpu, Flag},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Invert the current value of the [Flag::Carry] flag.

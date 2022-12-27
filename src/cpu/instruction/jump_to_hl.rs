@@ -2,7 +2,7 @@ use super::phases::TwoPhases;
 use super::Instruction;
 use crate::{
     cpu::{Cpu, DoubleRegister},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Jumps to the address stored in [DoubleRegister::HL].

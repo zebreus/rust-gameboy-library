@@ -1,7 +1,7 @@
 use super::Instruction;
 use crate::{
     cpu::{Cpu, Flag, Register},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Invert the value of the [accumulator][Register::A].

@@ -1,7 +1,7 @@
 use super::{phases::ThreePhases, Instruction};
 use crate::{
     cpu::{Cpu, Register},
-    memory_device::MemoryDevice,
+    memory::MemoryDevice,
 };
 
 /// Loads from memory at `0xff00 + the byte following the opcode` into the [accumulator](Register::A).
@@ -64,7 +64,7 @@ mod tests {
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, Register};
     use crate::debug_memory::DebugMemory;
-    use crate::memory_device::MemoryDevice;
+    use crate::memory::MemoryDevice;
 
     #[test]
     fn load_from_immediate_offset_to_accumulator_works() {

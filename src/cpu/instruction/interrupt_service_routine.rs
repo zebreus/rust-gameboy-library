@@ -1,6 +1,6 @@
 use super::phases::FivePhases;
 use super::Instruction;
-use crate::{cpu::Cpu, memory_device::MemoryDevice};
+use crate::{cpu::Cpu, memory::MemoryDevice};
 
 /// Waits two phases then pushes the program counter to the stack and jumps to the interrupt handler.
 ///
@@ -89,7 +89,7 @@ mod tests {
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState};
     use crate::debug_memory::DebugMemory;
-    use crate::memory_device::MemoryDevice;
+    use crate::memory::MemoryDevice;
 
     #[test]
     fn interrupt_service_routine_works() {
