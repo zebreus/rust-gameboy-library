@@ -10,3 +10,6 @@ pub mod cpu;
 
 /// Contains the [memory::MemoryDevice] trait.
 pub mod memory;
+
+/// Contains functions to access video ram
+pub mod video;

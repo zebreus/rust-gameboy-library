@@ -2,7 +2,8 @@ use arr_macro::arr;
 
 /// Debug memory does simple reads and writes to 64kb of memory. It also prints every read or write
 pub struct Memory {
-    memory: [u8; 65536],
+    /// The memory
+    pub memory: [u8; 65536],
 }
 
 impl Memory {
@@ -28,14 +29,14 @@ impl Memory {
 impl MemoryDevice for Memory {
     fn read(&self, address: u16) -> u8 {
         let value = self.memory[address as usize];
-        println!("Read {}({:#04x}) from {:#06x}", value, value, address);
+        //println!("Read {}({:#04x}) from {:#06x}", value, value, address);
         return value;
     }
     fn write(&mut self, address: u16, value: u8) -> () {
-        println!(
-            "Write value {}({:#04x}) from {:#06x}",
-            value, value, address
-        );
+        // println!(
+        //     "Write value {}({:#04x}) from {:#06x}",
+        //     value, value, address
+        // );
         self.memory[address as usize] = value;
     }
 }
