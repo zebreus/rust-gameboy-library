@@ -39,7 +39,7 @@ impl Instruction for Restart {
                 let data = cpu.read_program_counter().to_le_bytes()[1];
                 memory.write(cpu.read_stack_pointer(), data);
 
-                cpu.write_stack_pointer(cpu.read_stack_pointer() - 1);
+                cpu.write_stack_pointer(cpu.read_stack_pointer().wrapping_sub(1));
 
                 Self {
                     phase: FourPhases::Third,

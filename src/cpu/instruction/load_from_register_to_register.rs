@@ -20,6 +20,9 @@ impl Instruction for LoadFromRegisterToRegister {
         cpu: &mut crate::cpu::CpuState,
         memory: &mut T,
     ) -> super::InstructionEnum {
+        if (matches!(self.source, Register::B)) && matches!(self.destination, Register::B) {
+            println!("Encountered breakpoint instruction LD B,B");
+        }
         cpu.registers[self.destination as usize] = cpu.registers[self.source as usize];
         return cpu.load_instruction(memory);
     }

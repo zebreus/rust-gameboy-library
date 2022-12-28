@@ -215,7 +215,7 @@ pub trait Cpu {
 impl Cpu for CpuState {
     fn advance_program_counter(&mut self) -> u16 {
         let result = self.program_counter;
-        self.program_counter += 1;
+        self.program_counter = self.program_counter.wrapping_add(1);
         return result;
     }
     fn read_program_counter(&self) -> u16 {
