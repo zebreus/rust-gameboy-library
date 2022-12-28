@@ -53,7 +53,7 @@ mod tests {
     fn load_from_register_c_offset_to_accumulator_works() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new();
+        let mut memory = Memory::new_for_tests();
         memory.write(0xFF03, 42);
         cpu.write_register(Register::A, 0);
         cpu.write_register(Register::C, 3);

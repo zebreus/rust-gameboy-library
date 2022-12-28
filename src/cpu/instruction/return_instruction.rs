@@ -71,7 +71,7 @@ mod tests {
     #[test]
     fn return_works() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new();
+        let mut memory = Memory::new_for_tests();
 
         cpu.write_stack_pointer(0x1234 - 2);
         memory.write(0x1234 - 2, 0x34);

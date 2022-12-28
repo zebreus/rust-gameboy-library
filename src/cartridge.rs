@@ -1,7 +1,7 @@
 use arr_macro::arr;
-use std::fs;
+use std::{cmp::min, fs, mem::take, ops::RangeInclusive};
 
-use crate::memory::MemoryDevice;
+use crate::memory::{Memory, MemoryDevice};
 
 /// Whether a version of the game is intended to be sold in Japan or elsewhere.
 pub enum Destination {
@@ -119,7 +119,7 @@ impl Into<CartridgeType> for u8 {
 
 /// Represents a gameboy cartridge. Currently for debugging only
 pub struct Cartridge {
-    rom: [u8; 65536],
+    rom: Vec<u8>,
     /// The title of the ROm
     pub title: String,
     /// Indicates what kind of hardware is present on the cartridge
@@ -136,7 +136,32 @@ pub struct Cartridge {
     pub header_checksum: u8,
     /// A 16-bit checksum computed from the sum of all bytes in the cartridge
     pub cartridge_checksum: u16,
+
+    /// The current ram bank
+    pub current_ram_bank: usize,
+    /// The current second rom bank
+    pub current_second_rom_bank: u8,
+    /// If advanced banking is enabled
+    pub advanced_banking_enabled: bool,
 }
+
+const ROM_BANK_SIZE: usize = 0x4000;
+const FIRST_ROM_BANK: RangeInclusive<usize> = 0x0000..=0x3FFF;
+const SECOND_ROM_BANK: RangeInclusive<usize> = 0x4000..=0x7FFF;
+const EXTERNAL_RAM_BANK: RangeInclusive<usize> = 0xA000..=0xBFFF;
+
+const CARTRIDGE_HEADER_RANGE: RangeInclusive<usize> = 0x0134..=0x014C;
+/// The memory at this range contains the title of the game.
+/// In older games the next byte is also part of the title.
+const TITLE_RANGE: RangeInclusive<usize> = 0x0134..=0x0142;
+const CARTRIDGE_TYPE_ADDRESS: usize = 0x0147;
+const ROM_SIZE_ADDRESS: usize = 0x0148;
+const RAM_SIZE_ADDRESS: usize = 0x0149;
+const DESTINATION_COUNTRY_ADDRESS: usize = 0x014A;
+const ROM_VERSION_ADDRESS: usize = 0x014C;
+const HEADER_CHECKSUM_ADDRESS: usize = 0x014D;
+const CARTRIDGE_CHECKSUM_MSB_ADDRESS: usize = 0x014E;
+const CARTRIDGE_CHECKSUM_LSB_ADDRESS: usize = 0x014F;
 
 /// Decode the RAM size byte from the cartridge header into the number of RAM bytes.
 fn decode_ram_size(byte: u8) -> usize {
@@ -159,23 +184,22 @@ fn decode_rom_size(byte: u8) -> usize {
 impl Cartridge {
     /// Loads a new test cartridge with a test ROM
     pub fn new() -> Cartridge {
-        let content = fs::read("ld_test.gb").expect("Should exists");
-        let mut memory: [u8; 65536] = arr![0; 65536];
-        // TODO: This code is ugly, learn better rust
-        for (index, byte) in content.iter().enumerate() {
-            memory[index] = *byte;
-        }
+        let mut content = fs::read("ld_test.gb").expect("Should exists");
+        let memory = take(&mut content);
 
-        let title_memory: &[u8] = &memory[0x0134..0x0143];
+        let title_memory: &[u8] = &memory[TITLE_RANGE];
         let title_result = String::from_utf8(title_memory.into());
         let title = title_result.expect("The title should not contain invalid characters");
-        let cartridge_type: CartridgeType = memory[0x0147].into();
-        let rom_size = decode_rom_size(memory[0x0148]);
-        let ram_size = decode_ram_size(memory[0x0149]);
-        let destination: Destination = memory[0x014A].into();
-        let mask_rom_version_number = memory[0x014C];
-        let header_checksum = memory[0x014D];
-        let cartridge_checksum = u16::from_be_bytes([memory[0x014E], memory[0x014F]]);
+        let cartridge_type: CartridgeType = memory[CARTRIDGE_TYPE_ADDRESS].into();
+        let rom_size = decode_rom_size(memory[ROM_SIZE_ADDRESS]);
+        let ram_size = decode_ram_size(memory[RAM_SIZE_ADDRESS]);
+        let destination: Destination = memory[DESTINATION_COUNTRY_ADDRESS].into();
+        let mask_rom_version_number = memory[ROM_VERSION_ADDRESS];
+        let header_checksum = memory[HEADER_CHECKSUM_ADDRESS];
+        let cartridge_checksum = u16::from_be_bytes([
+            memory[CARTRIDGE_CHECKSUM_MSB_ADDRESS],
+            memory[CARTRIDGE_CHECKSUM_LSB_ADDRESS],
+        ]);
 
         Cartridge {
             rom: memory,
@@ -187,11 +211,14 @@ impl Cartridge {
             mask_rom_version_number,
             header_checksum,
             cartridge_checksum,
+            current_ram_bank: 0,
+            current_second_rom_bank: 1,
+            advanced_banking_enabled: false,
         }
     }
     /// Check if the cartridge header is valid
     pub fn check_header_checksum(&self) -> Result<(), ()> {
-        let checksum_bytes = &self.rom[0x0134..0x014C + 1];
+        let checksum_bytes = &self.rom[CARTRIDGE_HEADER_RANGE];
         let checksum = checksum_bytes.iter().fold(0u8, |accumulator, byte| {
             accumulator.wrapping_sub(*byte).wrapping_sub(1)
         });
@@ -214,9 +241,82 @@ impl Cartridge {
         Ok(())
     }
     /// Put the cartridge ROM into memory
-    pub fn place_into_memory<M: MemoryDevice>(&self, memory: &mut M) {
-        for (index, byte) in self.rom[0..=0x7FFF].iter().enumerate() {
-            memory.write(index as u16, *byte);
+    pub fn place_into_memory(&self, memory: &mut Memory) {
+        memory.memory[FIRST_ROM_BANK].copy_from_slice(&self.rom[FIRST_ROM_BANK]);
+        memory.memory[SECOND_ROM_BANK].copy_from_slice(&self.rom[SECOND_ROM_BANK]);
+    }
+    fn load_second_rom_bank(&self, memory: &mut Memory) {
+        let selected_rom_bank = if self.advanced_banking_enabled {
+            self.current_second_rom_bank
+        } else {
+            self.current_second_rom_bank & 0b1111
+        };
+        let rom_bank_chunk = self
+            .rom
+            .chunks_exact(ROM_BANK_SIZE)
+            .nth(selected_rom_bank as usize)
+            .expect("Tried to load a nonexisting ROM bank");
+        memory.memory[SECOND_ROM_BANK].copy_from_slice(rom_bank_chunk)
+    }
+    /// Process writes to the memory
+    pub fn process_writes(&mut self, memory: &mut Memory) {
+        let  Some(writes) = memory.mbc_registers.get_writes() else {return;};
+
+        match self.cartridge_type {
+            CartridgeType::RomRam | CartridgeType::RomRamBattery | CartridgeType::RomOnly => {}
+            CartridgeType::Mbc1 | CartridgeType::Mbc1Ram | CartridgeType::Mbc1RamBattery => {
+                for write in writes.iter() {
+                    let (address, value) = write;
+                    // const RAM_ENABLE: RangeInclusive<u16> = 0x0000..=0x1FFF;
+                    // const ROM_SELECT: RangeInclusive<u16> = 0x2000..=0x3FFF;
+                    // const RAM_SELECT: RangeInclusive<u16> = 0x4000..=0x5FFF;
+                    // const BANKING_MODE_SELECT: RangeInclusive<u16> = 0x4000..=0x5FFF;
+                    match *address {
+                        0x0000..=0x1FFF => {
+                            let enable_external_ram = (value & 0b1111) == 0xA;
+                            memory.enable_external_ram = enable_external_ram
+                        }
+                        0x2000..=0x3FFF => {
+                            let new_rom_bank = min(value & 0b11111, 1)
+                                | (self.current_second_rom_bank as u8 & 0b1100000);
+                            self.current_second_rom_bank = new_rom_bank;
+                            self.load_second_rom_bank(memory);
+                        }
+                        0x4000..=0x5FFF => {
+                            let new_rom_bank =
+                                (value & 0b01100000) | (self.current_second_rom_bank & 0b1111);
+                            self.current_second_rom_bank = new_rom_bank;
+                            self.load_second_rom_bank(memory);
+                        }
+                        0x6000..=0x7FFF => {
+                            self.advanced_banking_enabled = value % 2 != 0;
+                            self.load_second_rom_bank(memory);
+                        }
+                        _ => {
+                            panic!("Should not happen")
+                        }
+                    }
+                }
+            }
+            CartridgeType::Mbc2 | CartridgeType::Mbc2Battery => {}
+            CartridgeType::Mmm01 | CartridgeType::Mmm01Ram | CartridgeType::Mmm01RamBattery => {}
+            CartridgeType::Mbc3TimerBattery
+            | CartridgeType::Mbc3TimerRamBattery
+            | CartridgeType::Mbc3
+            | CartridgeType::Mbc3Ram
+            | CartridgeType::Mbc3RamBattery => {}
+            CartridgeType::Mbc5
+            | CartridgeType::Mbc5Ram
+            | CartridgeType::Mbc5RamBattery
+            | CartridgeType::Mbc5Rumble
+            | CartridgeType::Mbc5RumbleRam
+            | CartridgeType::Mbc5RumbleRamBattery => {}
+            CartridgeType::Mbc6 => {}
+            CartridgeType::Mbc7SensorRumbleRamBattery => {}
+            CartridgeType::PocketCamera => {}
+            CartridgeType::BandaiTama5 => {}
+            CartridgeType::Huc3 => {}
+            CartridgeType::Huc1RamBattery => {}
         }
     }
 }
@@ -251,7 +351,7 @@ mod tests {
     #[test]
     fn test_cartridge_can_be_placed_in_memory() {
         let cartridge = Cartridge::new();
-        let mut memory = Memory::new();
+        let mut memory = Memory::new_for_tests();
         cartridge.place_into_memory(&mut memory);
         assert_eq!(memory.read(0x0100), 0);
         assert_eq!(memory.read(0x0101), 195);

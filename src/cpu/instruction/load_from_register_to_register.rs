@@ -53,7 +53,7 @@ mod tests {
         cpu.write_register(Register::C, 0);
         cpu.write_register(Register::A, 100);
 
-        let mut memory = Memory::new();
+        let mut memory = Memory::new_for_tests();
         let instruction = LoadFromRegisterToRegister {
             source: Register::A,
             destination: Register::C,

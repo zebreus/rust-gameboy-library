@@ -36,7 +36,7 @@ mod tests {
     #[test]
     fn stop_works() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new();
+        let mut memory = Memory::new_for_tests();
 
         let instruction = Stop {};
 

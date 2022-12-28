@@ -50,7 +50,7 @@ mod tests {
     #[test]
     fn jump_to_hl_works() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new();
+        let mut memory = Memory::new_for_tests();
         cpu.write_double_register(DoubleRegister::HL, 0x1234);
 
         let instruction = JumpToHl {

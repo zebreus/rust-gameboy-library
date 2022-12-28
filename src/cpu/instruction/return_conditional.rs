@@ -103,7 +103,7 @@ mod tests {
     #[test]
     fn return_conditional_returns_when_it_should() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new();
+        let mut memory = Memory::new_for_tests();
         cpu.write_flag(Flag::Carry, true);
         cpu.write_stack_pointer(0x1234 - 2);
         memory.write(0x1234 - 2, 0x34);
@@ -136,7 +136,7 @@ mod tests {
     #[test]
     fn return_conditional_does_not_return_when_the_condition_is_not_met() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new();
+        let mut memory = Memory::new_for_tests();
         let initial_program_counter = cpu.read_program_counter();
 
         cpu.write_flag(Flag::Carry, false);

@@ -83,7 +83,7 @@ mod tests {
     fn push_double_register_works() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new();
+        let mut memory = Memory::new_for_tests();
 
         cpu.write_stack_pointer(0x1234);
         cpu.write_double_register(DoubleRegister::BC, 0x1234);

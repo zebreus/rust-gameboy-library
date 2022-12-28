@@ -1,10 +1,50 @@
+use std::mem::take;
+
 use arr_macro::arr;
+
+/// Represents the writable Mbc registers
+pub struct MbcRegisters {
+    writes: Vec<(u16, u8)>,
+    changed: bool,
+}
+
+impl MbcRegisters {
+    /// Create a new MbcRegisters struct with all values set to 0
+    pub fn new() -> MbcRegisters {
+        MbcRegisters {
+            writes: Vec::new(),
+            changed: false,
+        }
+    }
+    /// Log a write to an address
+    pub fn log_write(&mut self, address: u16, new_value: u8) {
+        self.writes.push((address, new_value));
+        self.changed = true;
+    }
+    /// Get all new writes since the last call to this function
+    pub fn get_writes(&mut self) -> Option<Vec<(u16, u8)>> {
+        match self.changed {
+            false => None,
+            true => {
+                self.changed = false;
+                let result: Vec<(u16, u8)> = take(&mut self.writes);
+                Some(result)
+            }
+        }
+    }
+}
 
 /// Debug memory does simple reads and writes to 64kb of memory. It also prints every read or write
 pub struct Memory {
     /// The memory
     pub memory: [u8; 65536],
     serial_line: String,
+    /// Logs all writes to memory between `0x0000` and `0x7fff`
+    pub mbc_registers: MbcRegisters,
+    /// Enable writes between `0xA000` and `0xBFFF`
+    pub enable_external_ram: bool,
+    /// Treat everything as ram
+    pub test_mode: bool,
 }
 
 impl Memory {
@@ -13,6 +53,19 @@ impl Memory {
         Memory {
             memory: arr![0; 65536],
             serial_line: String::new(),
+            mbc_registers: MbcRegisters::new(),
+            enable_external_ram: false,
+            test_mode: false,
+        }
+    }
+    /// Create a new Memory filled with `0`.
+    pub fn new_for_tests() -> Memory {
+        Memory {
+            memory: arr![0; 65536],
+            serial_line: String::new(),
+            mbc_registers: MbcRegisters::new(),
+            enable_external_ram: false,
+            test_mode: true,
         }
     }
 
@@ -21,6 +74,9 @@ impl Memory {
         let mut memory = Memory {
             memory: arr![0; 65536],
             serial_line: String::new(),
+            mbc_registers: MbcRegisters::new(),
+            enable_external_ram: false,
+            test_mode: true,
         };
         for (dst, src) in memory.memory.iter_mut().zip(init) {
             *dst = *src;
@@ -47,19 +103,35 @@ impl MemoryDevice for Memory {
         //     "Write value {}({:#04x}) from {:#06x}",
         //     value, value, address
         // );
-        if address == 0xff01 {
-            let character = value as char;
-            match character {
-                '\n' => {
-                    println!("Serial: {}", self.serial_line);
-                    self.serial_line = String::new();
-                }
-                _ => {
-                    self.serial_line.push(character);
+        if self.test_mode {
+            self.memory[address as usize] = value;
+        }
+        match address {
+            0x0000..=0x7FFF => {
+                self.mbc_registers.log_write(address, value);
+                let _x = 7;
+            }
+            0xA000..=0xBFFF => {
+                if self.enable_external_ram {
+                    self.memory[address as usize] = value;
                 }
             }
+            0xff01 => {
+                let character = value as char;
+                match character {
+                    '\n' => {
+                        println!("Serial: {}", self.serial_line);
+                        self.serial_line = String::new();
+                    }
+                    _ => {
+                        self.serial_line.push(character);
+                    }
+                }
+            }
+            _ => {
+                self.memory[address as usize] = value;
+            }
         }
-        self.memory[address as usize] = value;
     }
 }
 
@@ -91,7 +163,7 @@ mod tests {
 
     #[test]
     fn can_read_written_value() {
-        let mut debug_memory = Memory::new();
+        let mut debug_memory = Memory::new_for_tests();
         debug_memory.write(0, 99);
         let read_value = debug_memory.read(0);
         assert_eq!(read_value, 99);
@@ -99,7 +171,7 @@ mod tests {
 
     #[test]
     fn reads_zero_in_unused_memory() {
-        let debug_memory = Memory::new();
+        let debug_memory = Memory::new_for_tests();
         assert_eq!(debug_memory.read(0), 0);
         assert_eq!(debug_memory.read(65535), 0);
         assert_eq!(debug_memory.read(10), 0);

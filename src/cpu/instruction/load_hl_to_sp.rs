@@ -47,7 +47,7 @@ mod tests {
     #[test]
     fn load_hl_to_sp_works() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new();
+        let mut memory = Memory::new_for_tests();
         cpu.write_double_register(DoubleRegister::HL, 0x1234);
 
         let instruction = LoadHlToSp {

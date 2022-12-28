@@ -94,7 +94,7 @@ mod tests {
     #[test]
     fn instruction_works_with_stackpointer() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new();
+        let mut memory = Memory::new_for_tests();
         cpu.write_stack_pointer(788);
         cpu.write_double_register(DoubleRegister::AF, 0b0011110000000000);
 

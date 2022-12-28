@@ -35,18 +35,15 @@ mod tests {
 
     #[test]
     fn test_cartridge_can_be_placed_in_memory_and_run() {
-        let cartridge = Cartridge::new();
+        let mut cartridge = Cartridge::new();
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new();
+        let mut memory = Memory::new_for_tests();
         cartridge.place_into_memory(&mut memory);
         cpu.write_program_counter(0x0100);
         let mut instruction = cpu.load_instruction(&mut memory);
-        for _id in 1..100000000 {
+        for _id in 1..1000000000 {
             instruction = instruction.execute(&mut cpu, &mut memory);
-            if cpu.read_program_counter() >= 0xc000 {
-                // For breakpoint
-                let _x = 0;
-            }
+            cartridge.process_writes(&mut memory);
         }
         let tiles = memory.get_tile_data();
         assert_eq!(tiles.len(), 256);

@@ -59,7 +59,7 @@ mod tests {
     fn load_from_hl_to_register_works() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new();
+        let mut memory = Memory::new_for_tests();
         cpu.write_register(Register::B, 42);
 
         let instruction = LoadRegisterToHl {

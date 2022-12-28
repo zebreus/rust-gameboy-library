@@ -35,7 +35,7 @@ mod tests {
     #[test]
     fn disable_interrupts_works() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new();
+        let mut memory = Memory::new_for_tests();
 
         cpu.write_interrupt_master_enable(true);
 
