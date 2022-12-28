@@ -76,7 +76,6 @@ impl CpuState {
         //     self.read_program_counter() - 1,
         //     loaded_instruction
         // );
-        // dbg!(loaded_instruction);
         loaded_instruction
     }
 }

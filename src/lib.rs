@@ -13,3 +13,5 @@ pub mod memory;
 
 /// Contains functions to access video ram
 pub mod video;
+
+mod test_roms;

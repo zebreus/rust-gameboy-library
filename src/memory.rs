@@ -45,6 +45,8 @@ pub struct Memory {
     pub enable_external_ram: bool,
     /// Treat everything as ram
     pub test_mode: bool,
+    /// Counts how often `Passed` was printed to serial
+    pub printed_passed: u32,
 }
 
 impl Memory {
@@ -56,6 +58,7 @@ impl Memory {
             mbc_registers: MbcRegisters::new(),
             enable_external_ram: false,
             test_mode: false,
+            printed_passed: 0,
         }
     }
     /// Create a new Memory filled with `0`.
@@ -66,6 +69,7 @@ impl Memory {
             mbc_registers: MbcRegisters::new(),
             enable_external_ram: false,
             test_mode: true,
+            printed_passed: 0,
         }
     }
 
@@ -77,15 +81,12 @@ impl Memory {
             mbc_registers: MbcRegisters::new(),
             enable_external_ram: false,
             test_mode: true,
+            printed_passed: 0,
         };
         for (dst, src) in memory.memory.iter_mut().zip(init) {
             *dst = *src;
         }
         return memory;
-    }
-
-    pub fn get_video_memory(&self) -> &[u8] {
-        return &self.memory[0x8000..=0x9FFF];
     }
 }
 
@@ -120,6 +121,9 @@ impl MemoryDevice for Memory {
                 let character = value as char;
                 match character {
                     '\n' => {
+                        if self.serial_line.contains("Passed") {
+                            self.printed_passed += 1;
+                        }
                         println!("Serial: {}", self.serial_line);
                         self.serial_line = String::new();
                     }
