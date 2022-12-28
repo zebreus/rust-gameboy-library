@@ -184,7 +184,11 @@ fn decode_rom_size(byte: u8) -> usize {
 impl Cartridge {
     /// Loads a new test cartridge with a test ROM
     pub fn new() -> Cartridge {
-        let mut content = fs::read("ld_test.gb").expect("Should exists");
+        Self::load("test_roms/blargg/cpu_instrs/individual/06-ld r,r.gb")
+    }
+    /// Loads a new test cartridge with a ROM from a file
+    pub fn load(path_to_rom: &str) -> Cartridge {
+        let mut content = fs::read(path_to_rom).expect("Should exists");
         let memory = take(&mut content);
 
         let title_memory: &[u8] = &memory[TITLE_RANGE];
