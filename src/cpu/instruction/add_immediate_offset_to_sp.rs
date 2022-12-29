@@ -7,9 +7,20 @@ use crate::{
 
 /// Adds a signed offset specified in the byte following the opcode to the stackpointer.
 ///
-/// | [Zero](Flag::Zero)  | [Subtract](Flag::Subtract) | [HalfCarry](Flag::HalfCarry)        | [Carry](Flag::Carry)       |
-/// |---------------------|----------------------------|-------------------------------------|----------------------------|
-/// | false               | false                      | true if the lower nibble overflowed | true if a overflow occured |
+/// This is actually an addition of two unsigned 16 bit numbers. At least the flags behave that way.
+///
+/// First the offset is converted to its unsigned twos complement representation. Then it is added to the stackpointer.
+///
+/// The flags are set according to the result of the addition of both LSBs.
+///
+/// [Flag::HalfCarry] gets set if the nipple of the LSB overflowed.
+///
+/// For more details on how 16 bit operations affect flags see <https://stackoverflow.com/a/57981912/5392501>.
+///
+///
+/// | [Zero](Flag::Zero)  | [Subtract](Flag::Subtract) | [HalfCarry](Flag::HalfCarry)             | [Carry](Flag::Carry)                  |
+/// |---------------------|----------------------------|------------------------------------------|---------------------------------------|
+/// | false               | false                      | true if the nibble overflowed on the LSB | true if a overflow occured on the LSB |
 #[doc(alias = "ADD")]
 #[doc(alias = "ADD SP,n")]
 #[derive(Debug)]
@@ -39,13 +50,15 @@ impl Instruction for AddImmediateOffsetToSp {
             }
             FourPhases::Second => {
                 let previous_stack_pointer = cpu.read_stack_pointer();
-                let (result, carry_flag) =
-                    previous_stack_pointer.overflowing_add_signed(self.offset.into());
+                let operand: u16 = self.offset as u16;
+                let result = previous_stack_pointer.wrapping_add(operand);
+                let (_, carry_flag) = previous_stack_pointer.to_le_bytes()[0]
+                    .overflowing_add(operand.to_le_bytes()[0]);
                 let zero_flag = false;
                 let subtract_flag = false;
-                let half_carry_flag = (previous_stack_pointer.to_le_bytes()[1]
-                    ^ self.offset.to_ne_bytes()[0]
-                    ^ result.to_le_bytes()[1])
+                let half_carry_flag = (previous_stack_pointer.to_le_bytes()[0]
+                    ^ operand.to_le_bytes()[0]
+                    ^ result.to_le_bytes()[0])
                     & 0b00010000
                     == 0b00010000;
 
@@ -85,8 +98,25 @@ mod tests {
     use super::AddImmediateOffsetToSp;
     use crate::cpu::instruction::phases::FourPhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
-    use crate::cpu::{Cpu, CpuState};
+    use crate::cpu::{Cpu, CpuState, Flag};
     use crate::memory::Memory;
+
+    fn run_instruction(original_stackpointer: u16, offset: i8) -> CpuState {
+        let mut cpu = CpuState::new();
+        let mut memory = Memory::new_with_init(&[(-20 as i8).to_ne_bytes()[0]]);
+
+        cpu.write_stack_pointer(original_stackpointer);
+
+        let instruction = AddImmediateOffsetToSp {
+            offset,
+            phase: FourPhases::Second,
+        };
+        let instruction = instruction.execute(&mut cpu, &mut memory);
+        let instruction = instruction.execute(&mut cpu, &mut memory);
+        instruction.execute(&mut cpu, &mut memory);
+
+        return cpu;
+    }
 
     #[test]
     fn instruction_works() {
@@ -122,5 +152,53 @@ mod tests {
                 offset: -20
             })
         ));
+    }
+
+    #[test]
+    fn basic_addition_works() {
+        let cpu = run_instruction(0, 1);
+        assert_eq!(cpu.read_stack_pointer(), 1);
+        assert_eq!(cpu.read_flag(Flag::HalfCarry), false);
+        assert_eq!(cpu.read_flag(Flag::Carry), false);
+    }
+
+    #[test]
+    fn addition_set_carry_flag_on_lsb_overflow() {
+        let cpu = run_instruction(255, 1);
+        assert_eq!(cpu.read_stack_pointer(), 256);
+        assert_eq!(cpu.read_flag(Flag::HalfCarry), true);
+        assert_eq!(cpu.read_flag(Flag::Carry), true);
+    }
+
+    #[test]
+    fn addition_with_halfcarry_sets_flag() {
+        let cpu = run_instruction(15, 1);
+        assert_eq!(cpu.read_stack_pointer(), 16);
+        assert_eq!(cpu.read_flag(Flag::HalfCarry), true);
+        assert_eq!(cpu.read_flag(Flag::Carry), false);
+    }
+
+    #[test]
+    fn addition_with_overflow_sets_flag() {
+        let cpu = run_instruction(u16::MAX, 1);
+        assert_eq!(cpu.read_stack_pointer(), 0);
+        assert_eq!(cpu.read_flag(Flag::HalfCarry), true);
+        assert_eq!(cpu.read_flag(Flag::Carry), true);
+    }
+
+    #[test]
+    fn subtraction_with_overflow_sets_correct_flags() {
+        let cpu = run_instruction(0xffff, -1);
+        assert_eq!(cpu.read_stack_pointer(), 0xFFFE);
+        assert_eq!(cpu.read_flag(Flag::HalfCarry), true);
+        assert_eq!(cpu.read_flag(Flag::Carry), true);
+    }
+
+    #[test]
+    fn subtraction_with_overflow_sets_flag() {
+        let cpu = run_instruction(0, -1);
+        assert_eq!(cpu.read_stack_pointer(), u16::MAX);
+        assert_eq!(cpu.read_flag(Flag::HalfCarry), false);
+        assert_eq!(cpu.read_flag(Flag::Carry), false);
     }
 }

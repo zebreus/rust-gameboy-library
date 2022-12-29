@@ -45,7 +45,6 @@ impl Instruction for JumpByImmediateOffsetConditional {
                     return cpu.load_instruction(memory);
                 }
 
-                // TODO: Update to wrapping_add_signed once 1.66 releases
                 cpu.write_program_counter(
                     cpu.read_program_counter().wrapping_add(self.offset as u16),
                 );

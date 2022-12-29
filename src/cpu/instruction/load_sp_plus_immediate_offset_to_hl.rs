@@ -7,9 +7,11 @@ use crate::{
 
 /// Copies the stackpointer plus a signed offset specified in the byte following the opcode into [DoubleRegister::HL].
 ///
-/// | [Zero](Flag::Zero)  | [Subtract](Flag::Subtract) | [HalfCarry](Flag::HalfCarry)        | [Carry](Flag::Carry)       |
-/// |---------------------|----------------------------|-------------------------------------|----------------------------|
-/// | false               | false                      | true if the lower nibble overflowed | true if a overflow occured |
+/// For more details on how the addition is performed and how flags are affected see [AddImmediateOffsetToSp](super::AddImmediateOffsetToSp).
+///
+/// | [Zero](Flag::Zero)  | [Subtract](Flag::Subtract) | [HalfCarry](Flag::HalfCarry)             | [Carry](Flag::Carry)                  |
+/// |---------------------|----------------------------|------------------------------------------|---------------------------------------|
+/// | false               | false                      | true if the nibble overflowed on the LSB | true if a overflow occured on the LSB |
 #[doc(alias = "LD")]
 #[doc(alias = "LD HL,SP+n")]
 #[doc(alias = "LDHL")]
@@ -41,13 +43,15 @@ impl Instruction for LoadSpPlusImmediateOffsetToHl {
             }
             ThreePhases::Second => {
                 let previous_stack_pointer = cpu.read_stack_pointer();
-                let (result, carry_flag) =
-                    previous_stack_pointer.overflowing_add_signed(self.offset.into());
+                let operand: u16 = self.offset as u16;
+                let result = previous_stack_pointer.wrapping_add(operand);
+                let (_, carry_flag) = previous_stack_pointer.to_le_bytes()[0]
+                    .overflowing_add(operand.to_le_bytes()[0]);
                 let zero_flag = false;
                 let subtract_flag = false;
-                let half_carry_flag = (previous_stack_pointer.to_le_bytes()[1]
-                    ^ self.offset.to_ne_bytes()[0]
-                    ^ result.to_le_bytes()[1])
+                let half_carry_flag = (previous_stack_pointer.to_le_bytes()[0]
+                    ^ operand.to_le_bytes()[0]
+                    ^ result.to_le_bytes()[0])
                     & 0b00010000
                     == 0b00010000;
 
