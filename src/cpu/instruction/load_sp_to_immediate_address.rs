@@ -45,7 +45,7 @@ impl Instruction for LoadSpToImmediateAddress {
             }
             FivePhases::Third => {
                 let data = cpu.read_stack_pointer().to_le_bytes()[0];
-                memory.write(self.address + 1, data);
+                memory.write(self.address, data);
 
                 Self {
                     phase: FivePhases::Fourth,
@@ -55,7 +55,7 @@ impl Instruction for LoadSpToImmediateAddress {
             }
             FivePhases::Fourth => {
                 let data = cpu.read_stack_pointer().to_le_bytes()[1];
-                memory.write(self.address, data);
+                memory.write(self.address + 1, data);
 
                 Self {
                     phase: FivePhases::Fifth,
