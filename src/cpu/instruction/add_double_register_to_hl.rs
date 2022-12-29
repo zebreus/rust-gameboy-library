@@ -9,9 +9,9 @@ use crate::{
 ///
 /// Setting the operand to DoubleRegister::AF actually means adding the stackpointer the stackpointer
 ///
-/// | [Zero](Flag::Zero)  | [Subtract](Flag::Subtract) | [HalfCarry](Flag::HalfCarry)        | [Carry](Flag::Carry)       |
-/// |---------------------|----------------------------|-------------------------------------|----------------------------|
-/// | unchanged           | false                      | true if the lower nibble overflowed | true if a overflow occured |
+/// | [Zero](Flag::Zero)  | [Subtract](Flag::Subtract) | [HalfCarry](Flag::HalfCarry)             | [Carry](Flag::Carry)                  |
+/// |---------------------|----------------------------|------------------------------------------|---------------------------------------|
+/// | unchanged           | false                      | true if the nibble overflowed on the MSB | true if a overflow occured on the MSB |
 #[doc(alias = "ADD")]
 #[doc(alias = "ADD HL,BC")]
 #[doc(alias = "ADD HL,DE")]
@@ -39,14 +39,13 @@ impl Instruction for AddDoubleRegisterToHl {
                 };
                 let previous_value = cpu.read_double_register(DoubleRegister::HL);
                 let (result, carry_flag) = previous_value.overflowing_add(operand);
-                let subtract_flag = false;
                 let half_carry_flag = (previous_value.to_le_bytes()[1]
                     ^ operand.to_le_bytes()[1]
                     ^ result.to_le_bytes()[1])
                     & 0b00010000
                     == 0b00010000;
 
-                cpu.write_flag(Flag::Subtract, subtract_flag);
+                cpu.write_flag(Flag::Subtract, false);
                 cpu.write_flag(Flag::HalfCarry, half_carry_flag);
                 cpu.write_flag(Flag::Carry, carry_flag);
 
