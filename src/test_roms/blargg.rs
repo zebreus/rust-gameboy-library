@@ -21,21 +21,21 @@ mod tests {
         assert_eq!(memory.printed_passed, 1);
     }
 
-    // #[test]
-    // fn stackpointer_operations_test() {
-    //     let mut cartridge =
-    //         Cartridge::load("test_roms/blargg/cpu_instrs/individual/03-op sp,hl.gb");
-    //     let mut cpu = CpuState::new();
-    //     let mut memory = Memory::new_for_tests();
-    //     cartridge.place_into_memory(&mut memory);
-    //     cpu.write_program_counter(0x0100);
-    //     let mut instruction = cpu.load_instruction(&mut memory);
-    //     for _id in 1..10000000 {
-    //         instruction = instruction.execute(&mut cpu, &mut memory);
-    //         cartridge.process_writes(&mut memory);
-    //     }
-    //     assert_eq!(memory.printed_passed, 1);
-    // }
+    #[test]
+    fn stackpointer_operations_test() {
+        let mut cartridge =
+            Cartridge::load("test_roms/blargg/cpu_instrs/individual/03-op sp,hl.gb");
+        let mut cpu = CpuState::new();
+        let mut memory = Memory::new_for_tests();
+        cartridge.place_into_memory(&mut memory);
+        cpu.write_program_counter(0x0100);
+        let mut instruction = cpu.load_instruction(&mut memory);
+        for _id in 1..10000000 {
+            instruction = instruction.execute(&mut cpu, &mut memory);
+            cartridge.process_writes(&mut memory);
+        }
+        assert_eq!(memory.printed_passed, 1);
+    }
 
     #[test]
     fn load_immediate_to_register_test() {
