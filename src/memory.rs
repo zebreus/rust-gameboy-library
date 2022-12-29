@@ -92,6 +92,9 @@ impl Memory {
 
 impl MemoryDevice for Memory {
     fn read(&self, address: u16) -> u8 {
+        if (address == 0xff44) || (address == 0xff02) {
+            return 0x90;
+        }
         let value = self.memory[address as usize];
         // if (address == 0xff01) || (address == 0xff02) {
         //     println!("Read value {}({:#04x}) from {:#06x}", value, value, address);

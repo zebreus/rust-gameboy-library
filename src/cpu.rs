@@ -1,5 +1,11 @@
+use std::fs;
+use std::fs::File;
+use std::fs::OpenOptions;
+use std::io::prelude::*;
+
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
+use crate::memory::Memory;
 use crate::memory::MemoryDevice;
 
 /// Instructions can be executed to modify cpu state and memory
@@ -38,6 +44,7 @@ impl CpuState {
     /// let cpuState = CpuState::new();
     /// ```
     pub fn new() -> Self {
+        let mut content = fs::write("trace.txt", "").expect("Should be able to create empty trace");
         Self {
             program_counter: 0, // 0x0100
             stack_pointer: 0xFFFE,
@@ -64,6 +71,7 @@ impl CpuState {
     /// Also increments the program counter
     pub fn load_instruction<T: MemoryDevice>(&mut self, memory: &mut T) -> InstructionEnum {
         let pending_interrupt = self.get_pending_interrupt(memory);
+        // self.trace_state(memory);
         let loaded_instruction = match pending_interrupt {
             Some(interrupt) => interrupt,
             None => {
@@ -77,6 +85,25 @@ impl CpuState {
         //     loaded_instruction
         // );
         loaded_instruction
+    }
+
+    #[allow(unused)]
+    fn trace_state<T: MemoryDevice>(&mut self, memory: &mut T) {
+        let mut file = OpenOptions::new()
+            .write(true)
+            .append(true)
+            .open("trace.txt")
+            .unwrap();
+
+        let state = self.summarize_state(memory);
+
+        writeln!(file, "{}", state);
+    }
+
+    fn summarize_state<T: MemoryDevice>(&mut self, memory: &mut T) -> String {
+        // Target:
+        // A: 01 F: B0 B: 00 C: 13 D: 00 E: D8 H: 01 L: 4D SP: FFFE PC: 00:0100 (00 C3 13 02)
+        format!("A: {:02X} F: {:02X} B: {:02X} C: {:02X} D: {:02X} E: {:02X} H: {:02X} L: {:02X} SP: {:04X} PC: 00:{:04X} ({:02X} {:02X} {:02X} {:02X})", self.read_register(Register::A), self.read_register(Register::F) , self.read_register(Register::B),self.read_register(Register::C),self.read_register(Register::D),self.read_register(Register::E),self.read_register(Register::H),self.read_register(Register::L),self.read_stack_pointer(),self.read_program_counter(), memory.read(self.read_program_counter()), memory.read(self.read_program_counter()+1),memory.read(self.read_program_counter()+2),memory.read(self.read_program_counter()+3))
     }
 }
 
