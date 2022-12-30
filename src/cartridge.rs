@@ -1,7 +1,15 @@
 use arr_macro::arr;
 use std::{cmp::min, fs, mem::take, ops::RangeInclusive};
 
-use crate::memory::{Memory, MemoryDevice};
+use crate::memory::{
+    memory_addresses::{
+        CARTRIDGE_CHECKSUM_LSB_ADDRESS, CARTRIDGE_CHECKSUM_MSB_ADDRESS, CARTRIDGE_HEADER_RANGE,
+        CARTRIDGE_TYPE_ADDRESS, DESTINATION_COUNTRY_ADDRESS, FIRST_ROM_BANK,
+        HEADER_CHECKSUM_ADDRESS, RAM_SIZE_ADDRESS, ROM_BANK_SIZE, ROM_SIZE_ADDRESS,
+        ROM_VERSION_ADDRESS, SECOND_ROM_BANK, TITLE_RANGE,
+    },
+    Memory, MemoryDevice,
+};
 
 /// Whether a version of the game is intended to be sold in Japan or elsewhere.
 pub enum Destination {
@@ -145,26 +153,8 @@ pub struct Cartridge {
     pub advanced_banking_enabled: bool,
 }
 
-const ROM_BANK_SIZE: usize = 0x4000;
-const FIRST_ROM_BANK: RangeInclusive<usize> = 0x0000..=0x3FFF;
-const SECOND_ROM_BANK: RangeInclusive<usize> = 0x4000..=0x7FFF;
-const EXTERNAL_RAM_BANK: RangeInclusive<usize> = 0xA000..=0xBFFF;
-
-const CARTRIDGE_HEADER_RANGE: RangeInclusive<usize> = 0x0134..=0x014C;
-/// The memory at this range contains the title of the game.
-/// In older games the next byte is also part of the title.
-const TITLE_RANGE: RangeInclusive<usize> = 0x0134..=0x0142;
-const CARTRIDGE_TYPE_ADDRESS: usize = 0x0147;
-const ROM_SIZE_ADDRESS: usize = 0x0148;
-const RAM_SIZE_ADDRESS: usize = 0x0149;
-const DESTINATION_COUNTRY_ADDRESS: usize = 0x014A;
-const ROM_VERSION_ADDRESS: usize = 0x014C;
-const HEADER_CHECKSUM_ADDRESS: usize = 0x014D;
-const CARTRIDGE_CHECKSUM_MSB_ADDRESS: usize = 0x014E;
-const CARTRIDGE_CHECKSUM_LSB_ADDRESS: usize = 0x014F;
-
 /// Decode the RAM size byte from the cartridge header into the number of RAM bytes.
-fn decode_ram_size(byte: u8) -> usize {
+pub fn decode_ram_size(byte: u8) -> usize {
     match byte {
         0 => 0,
         1 => 0,
@@ -177,7 +167,7 @@ fn decode_ram_size(byte: u8) -> usize {
 }
 
 /// Decode the ROM size byte from the cartridge header into the number of ROM bytes.
-fn decode_rom_size(byte: u8) -> usize {
+pub fn decode_rom_size(byte: u8) -> usize {
     (1 << 15) * (1 << byte)
 }
 
