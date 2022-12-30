@@ -91,7 +91,7 @@ mod tests {
     use crate::memory::MemoryDevice;
 
     #[test]
-    fn load_sp_to_immediate_address_works() {
+    fn instruction_works() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
         let mut memory = Memory::new_with_init(&[0x34, 0x12]);
@@ -124,8 +124,8 @@ mod tests {
             })
         ));
 
-        assert_eq!(memory.read(0x1234), 0x56);
-        assert_eq!(memory.read(0x1235), 0x78);
+        assert_eq!(memory.read(0x1234), 0x78);
+        assert_eq!(memory.read(0x1235), 0x56);
     }
 
     #[test]
