@@ -1,5 +1,4 @@
-use arr_macro::arr;
-use std::{cmp::max, fs, mem::take, ops::RangeInclusive};
+use std::{cmp::max, fs, mem::take};
 
 use crate::memory::{
     memory_addresses::{
@@ -8,7 +7,7 @@ use crate::memory::{
         HEADER_CHECKSUM_ADDRESS, RAM_SIZE_ADDRESS, ROM_BANK_SIZE, ROM_SIZE_ADDRESS,
         ROM_VERSION_ADDRESS, SECOND_ROM_BANK, TITLE_RANGE,
     },
-    Memory, MemoryDevice,
+    Memory,
 };
 
 /// Whether a version of the game is intended to be sold in Japan or elsewhere.

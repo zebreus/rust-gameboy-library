@@ -5,7 +5,7 @@ use self::tile::Tile;
 /// Logic related to tiles
 pub mod tile;
 
-struct TileMap {}
+// struct TileMap {}
 
 /// A collection of functions for video stuff
 pub trait VideoFeatures {

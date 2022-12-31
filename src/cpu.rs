@@ -1,11 +1,9 @@
 use std::fs;
-use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
-use crate::memory::Memory;
 use crate::memory::MemoryDevice;
 
 /// Instructions can be executed to modify cpu state and memory
@@ -44,7 +42,7 @@ impl CpuState {
     /// let cpuState = CpuState::new();
     /// ```
     pub fn new() -> Self {
-        let mut content = fs::write("trace.txt", "").expect("Should be able to create empty trace");
+        fs::write("trace.txt", "").expect("Should be able to create empty trace");
         Self {
             program_counter: 0, // 0x0100
             stack_pointer: 0xFFFE,
