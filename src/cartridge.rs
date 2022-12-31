@@ -1,5 +1,5 @@
 use arr_macro::arr;
-use std::{cmp::min, fs, mem::take, ops::RangeInclusive};
+use std::{cmp::max, fs, mem::take, ops::RangeInclusive};
 
 use crate::memory::{
     memory_addresses::{
@@ -271,7 +271,7 @@ impl Cartridge {
                             memory.enable_external_ram = enable_external_ram
                         }
                         0x2000..=0x3FFF => {
-                            let new_rom_bank = min(value & 0b11111, 1)
+                            let new_rom_bank = max(value & 0b11111, 1)
                                 | (self.current_second_rom_bank as u8 & 0b1100000);
                             self.current_second_rom_bank = new_rom_bank;
                             self.load_second_rom_bank(memory);
