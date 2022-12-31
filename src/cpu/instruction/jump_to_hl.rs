@@ -42,6 +42,6 @@ mod tests {
 
         instruction.execute(&mut cpu, &mut memory);
 
-        assert_eq!(cpu.read_program_counter(), 0x1234);
+        assert_eq!(cpu.read_program_counter(), 0x1234 + 1);
     }
 }
