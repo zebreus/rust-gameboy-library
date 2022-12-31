@@ -4,7 +4,7 @@ mod tests {
 
     #[test]
     fn all_instructions_test() {
-        test_blargg_rom("test_roms/blargg/cpu_instrs/cpu_instrs.gb", 1000000000);
+        test_blargg_rom("test_roms/blargg/cpu_instrs/cpu_instrs.gb", 100000000);
     }
 
     #[test]
