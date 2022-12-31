@@ -177,10 +177,7 @@ pub fn decode(byte: u8) -> InstructionEnum {
             phase: ThreePhases::First,
         }
         .into(),
-        "11101001" => JumpToHl {
-            phase: TwoPhases::First,
-        }
-        .into(),
+        "11101001" => (JumpToHl {}).into(),
         "11001001" => Return {
             phase: FourPhases::First,
         }
