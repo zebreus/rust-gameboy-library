@@ -23,7 +23,7 @@ macro_rules! generate_instruction {
             memory::MemoryDevice,
         };
         $(consume_first!{$accumulator use super::phases::TwoPhases;})?
-        $(consume_first!{$target_operand use super::phases::ThreePhases;})?
+        use super::phases::ThreePhases;
 
         use super::Instruction;
 
@@ -87,11 +87,13 @@ pub struct $register_instruction_name {
         #[derive(Debug)]
 pub struct $hl_instruction_name {
             /// The current phase of the instruction.
-            pub phase: $(consume_first!($accumulator TwoPhases))? $(consume_first!($target_operand ThreePhases))? ,
+            pub phase: ThreePhases,
             $(
                 /// The selected bit.
-                pub bit: consume_first!($bit_ident Bit)
+                pub bit: consume_first!($bit_ident Bit),
             )?
+            /// The operand will be loaded from HL. Stored here for correct memory timing.
+            pub operand: u8
         }
 
 
@@ -101,47 +103,10 @@ pub struct $hl_instruction_name {
                 $cpu: &mut crate::cpu::CpuState,
                 $memory: &mut T,
             ) -> super::InstructionEnum {
-                $(consume_first!($accumulator
-                    macro_rules! first_phase {
-                        () => { _ }
-                    }
-                    macro_rules! second_phase {
-                        () => { TwoPhases::First }
-                    }
-                    macro_rules! third_phase {
-                        () => { TwoPhases::Second }
-                    }
-                );)?
-                $(consume_first!($target_operand
-                    macro_rules! first_phase {
-                        () => { ThreePhases::First }
-                    }
-                    macro_rules! second_phase {
-                        () => { ThreePhases::Second }
-                    }
-                    macro_rules! third_phase {
-                        () => { ThreePhases::Third }
-                    }
-                );)?
+                match self.phase {
+                    ThreePhases::Second => {
 
-                // $(consume_first!($dont_write
-                //     macro_rules! first_phase {
-                //         () => { ThreePhases::Third }
-                //     }
-                //     macro_rules! second_phase {
-                //         () => { ThreePhases::First }
-                //     }
-                //     macro_rules! third_phase {
-                //         () => { ThreePhases::Second }
-                //     }
-                // );)?
-
-                let phase = [$(consume_first!($dont_write if matches!(self.phase, ThreePhases::First) {&(ThreePhases::Second {})} else {&self.phase}) ,)? &self.phase][0];
-
-                match phase {
-                     second_phase!() => {
-                        let address = $cpu.read_double_register(DoubleRegister::HL);
-                        let $operand = $memory.read(address);
+                        let $operand = self.operand;
                         $(
                             let $accumulator = $cpu.read_register(Register::A);
                         )?
@@ -152,30 +117,50 @@ pub struct $hl_instruction_name {
                         #[deny(unused)]
                         let result: u8 = $content;
 
+                        #[allow(unused)]
+                        let next_phase_instruction = Self {
+                            phase: ThreePhases::Third,
+                            $(
+                                bit: consume_first!($bit_ident self.bit),
+                            )?
+                            operand: self.operand
+                        };
+
                         $(consume_first!($accumulator
                             $cpu.write_register(Register::A, result);
+                            return $cpu.load_instruction($memory);
                         );)?
-                        $(consume_first!($target_operand
-                            $memory.write(address, result);
+                        $(consume_first!($dont_write
+                            if true {
+                                let _unused = result;
+                                return $cpu.load_instruction($memory);
+                            }
                         );)?
 
-                        Self {
-                            phase: third_phase!(),
-                            $(
-                                bit: consume_first!($bit_ident self.bit)
-                            )?
-                        }.into()
+
+                        $(consume_first!($target_operand
+                            let address = $cpu.read_double_register(DoubleRegister::HL);
+                            $memory.write(address, result);
+                            return next_phase_instruction.into()
+                        );)?
+
+
+
                     },
-                    third_phase!() => {
+                    ThreePhases::Third  => {
+
                         return $cpu.load_instruction($memory);
                     },
                     #[allow(unreachable_patterns)]
-                    first_phase!() => {
+                    ThreePhases::First  => {
+                        let address = $cpu.read_double_register(DoubleRegister::HL);
+                        let operand = $memory.read(address);
                         Self {
-                            phase: second_phase!(),
+                            phase: ThreePhases::Second,
                             $(
-                                bit: consume_first!($bit_ident self.bit)
+                                bit: consume_first!($bit_ident self.bit),
                             )?
+                            operand: operand,
                         }.into()
                     }
                 }

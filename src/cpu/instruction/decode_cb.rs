@@ -9,6 +9,7 @@ macro_rules! decode_operand_arithmetic {
         match $a {
             0b00000110 => super::$hl_instruction {
                 phase: ThreePhases::First,
+                operand: 0,
             }
             .into(),
             _ => super::$register_instruction {
@@ -25,6 +26,7 @@ macro_rules! decode_operand_arithmetic_with_bit {
         match $a {
             0b00000110 => super::$hl_instruction {
                 phase: ThreePhases::First,
+                operand: 0,
                 bit: $b.into(),
             }
             .into(),

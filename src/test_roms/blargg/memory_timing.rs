@@ -17,11 +17,11 @@ mod tests {
             10000000,
         );
     }
-    // #[test]
-    // fn memory_modify_timing_test() {
-    //     test_blargg_rom(
-    //         "test_roms/blargg/mem_timing/individual/03-modify_timing.gb",
-    //         10000000,
-    //     );
-    // }
+    #[test]
+    fn memory_modify_timing_test() {
+        test_blargg_rom(
+            "test_roms/blargg/mem_timing/individual/03-modify_timing.gb",
+            10000000,
+        );
+    }
 }
