@@ -12,10 +12,10 @@ use super::{
 #[derive(TryFromPrimitive, Debug, IntoPrimitive)]
 #[repr(u8)]
 enum InputClock {
-    Hz4096 = 0x00,
-    Hz262144 = 0x01,
-    Hz65536 = 0x10,
-    Hz16384 = 0x11,
+    Hz4096 = 0b00,
+    Hz262144 = 0b01,
+    Hz65536 = 0b10,
+    Hz16384 = 0b11,
 }
 
 impl InputClock {
