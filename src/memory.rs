@@ -2,6 +2,14 @@ use std::mem::take;
 
 use arr_macro::arr;
 
+/// Contains named memory addresses as constants
+pub mod memory_addresses;
+
+/// Contains functionality related to the timer
+pub mod timer;
+
+use timer::Timer;
+
 /// Represents the writable Mbc registers
 pub struct MbcRegisters {
     writes: Vec<(u16, u8)>,
@@ -47,6 +55,8 @@ pub struct Memory {
     pub test_mode: bool,
     /// Counts how often `Passed` was printed to serial
     pub printed_passed: u32,
+    /// The timer is stored here because it is probably the best place for it.
+    pub timer: Timer,
 }
 
 impl Memory {
@@ -59,6 +69,7 @@ impl Memory {
             enable_external_ram: false,
             test_mode: false,
             printed_passed: 0,
+            timer: Timer::new(),
         }
     }
     /// Create a new Memory filled with `0`.
@@ -70,6 +81,7 @@ impl Memory {
             enable_external_ram: false,
             test_mode: true,
             printed_passed: 0,
+            timer: Timer::new(),
         }
     }
 
@@ -82,11 +94,17 @@ impl Memory {
             enable_external_ram: false,
             test_mode: true,
             printed_passed: 0,
+            timer: Timer::new(),
         };
         for (dst, src) in memory.memory.iter_mut().zip(init) {
             *dst = *src;
         }
         return memory;
+    }
+
+    /// Should be called on every cycle
+    pub fn process_cycle(&mut self) {
+        timer::Timer::process_cycle(self);
     }
 }
 
@@ -109,6 +127,10 @@ impl MemoryDevice for Memory {
         // );
         if self.test_mode {
             self.memory[address as usize] = value;
+        }
+        let write_timer_result = timer::Timer::write(self, address, value);
+        if write_timer_result.is_some() {
+            return;
         }
         match address {
             0x0000..=0x7FFF => {

@@ -170,48 +170,8 @@ pub trait Cpu {
     fn read_interrupt_master_enable(&mut self) -> bool;
     // TODO: Understand HALT and STOP wakeup conditions.
     /// Get the instruction of a pending interrupt if there is one.
-    fn get_pending_interrupt<M: MemoryDevice>(
-        &mut self,
-        memory: &mut M,
-    ) -> Option<InstructionEnum> {
-        if !self.read_interrupt_master_enable() {
-            return None;
-        }
-
-        let triggered_interrupts =
-            memory.read_interrupt_enable_register() & memory.read_interrupt_flag_register();
-
-        if triggered_interrupts == 0 {
-            return None;
-        }
-
-        if (triggered_interrupts & (Interrupt::VBlank as u8)) != 0 {
-            memory.write_interrupt_flag(Interrupt::VBlank, false);
-            return Some(InterruptServiceRoutine::create(0x0040).into());
-        }
-
-        if (triggered_interrupts & (Interrupt::LcdStat as u8)) != 0 {
-            memory.write_interrupt_flag(Interrupt::LcdStat, false);
-            return Some(InterruptServiceRoutine::create(0x0048).into());
-        }
-
-        if (triggered_interrupts & (Interrupt::Timer as u8)) != 0 {
-            memory.write_interrupt_flag(Interrupt::Timer, false);
-            return Some(InterruptServiceRoutine::create(0x0050).into());
-        }
-
-        if (triggered_interrupts & (Interrupt::Serial as u8)) != 0 {
-            memory.write_interrupt_flag(Interrupt::Serial, false);
-            return Some(InterruptServiceRoutine::create(0x0058).into());
-        }
-
-        if (triggered_interrupts & (Interrupt::Joypad as u8)) != 0 {
-            memory.write_interrupt_flag(Interrupt::Joypad, false);
-            return Some(InterruptServiceRoutine::create(0x0060).into());
-        }
-
-        return None;
-    }
+    fn get_pending_interrupt<M: MemoryDevice>(&mut self, memory: &mut M)
+        -> Option<InstructionEnum>;
     /// Similar to [Cpu::get_pending_interrupt()]
     ///
     /// Used to check if we should wakeup from stop.
@@ -312,6 +272,52 @@ impl Cpu for CpuState {
     }
     fn read_interrupt_master_enable(&mut self) -> bool {
         self.interrupt_master_enable
+    }
+    fn get_pending_interrupt<M: MemoryDevice>(
+        &mut self,
+        memory: &mut M,
+    ) -> Option<InstructionEnum> {
+        let enabled_interrupts = memory.read_interrupt_enable_register();
+        let requested_interrupts = memory.read_interrupt_flag_register();
+
+        let triggered_interrupts = enabled_interrupts & requested_interrupts;
+
+        if triggered_interrupts == 0 {
+            return None;
+        }
+
+        if !self.read_interrupt_master_enable() {
+            let opcode = self.load_opcode(memory);
+            return Some(decode(opcode));
+            // return Some((Nop {}).execute(self, memory));
+        }
+
+        if (triggered_interrupts & (Interrupt::VBlank as u8)) != 0 {
+            memory.write_interrupt_flag(Interrupt::VBlank, false);
+            return Some(InterruptServiceRoutine::create(0x0040).into());
+        }
+
+        if (triggered_interrupts & (Interrupt::LcdStat as u8)) != 0 {
+            memory.write_interrupt_flag(Interrupt::LcdStat, false);
+            return Some(InterruptServiceRoutine::create(0x0048).into());
+        }
+
+        if (triggered_interrupts & (Interrupt::Timer as u8)) != 0 {
+            memory.write_interrupt_flag(Interrupt::Timer, false);
+            return Some(InterruptServiceRoutine::create(0x0050).into());
+        }
+
+        if (triggered_interrupts & (Interrupt::Serial as u8)) != 0 {
+            memory.write_interrupt_flag(Interrupt::Serial, false);
+            return Some(InterruptServiceRoutine::create(0x0058).into());
+        }
+
+        if (triggered_interrupts & (Interrupt::Joypad as u8)) != 0 {
+            memory.write_interrupt_flag(Interrupt::Joypad, false);
+            return Some(InterruptServiceRoutine::create(0x0060).into());
+        }
+
+        return None;
     }
 }
 

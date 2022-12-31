@@ -49,4 +49,4 @@ pub const TIMER_COUNTER_ADDRESS: usize = 0xFF05;
 pub const TIMER_MODULO_ADDRESS: usize = 0xFF06;
 /// See [Timer](super::Timer) for details
 #[doc(alias = "TCA")]
-pub const TIMER_CONTROL_ADDRESS: usize = 0xFF06;
+pub const TIMER_CONTROL_ADDRESS: usize = 0xFF07;
