@@ -1,3 +1,4 @@
+mod instruction_timing;
 mod instructions;
 
 #[cfg(test)]
