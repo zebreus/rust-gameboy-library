@@ -50,3 +50,10 @@ pub const TIMER_MODULO_ADDRESS: usize = 0xFF06;
 /// See [Timer](super::Timer) for details
 #[doc(alias = "TCA")]
 pub const TIMER_CONTROL_ADDRESS: usize = 0xFF07;
+
+/// This address should always read `0xff`.
+///
+/// I got that info from https://www.reddit.com/r/EmuDev/comments/ipap0w/comment/g76m04i
+///
+/// Apparently there are tests in the mooneye test suite that verify the correct values for all IO registers.
+pub const ALWAYS_RETURNS_FF_ADDRESS: usize = 0xFF4D;

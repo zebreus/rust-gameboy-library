@@ -10,6 +10,8 @@ pub mod timer;
 
 use timer::Timer;
 
+use self::memory_addresses::ALWAYS_RETURNS_FF_ADDRESS;
+
 /// Represents the writable Mbc registers
 pub struct MbcRegisters {
     writes: Vec<(u16, u8)>,
@@ -110,15 +112,16 @@ impl Memory {
 
 impl MemoryDevice for Memory {
     fn read(&self, address: u16) -> u8 {
-        if (address == 0xff44) || (address == 0xff02) {
-            return 0x90;
+        match address as usize {
+            0xFF44 => 0x90,
+            0xFF02 => 0x90,
+            ALWAYS_RETURNS_FF_ADDRESS => 0xFF,
+            _ => self.memory[address as usize],
         }
-        let value = self.memory[address as usize];
         // if (address == 0xff01) || (address == 0xff02) {
         //     println!("Read value {}({:#04x}) from {:#06x}", value, value, address);
         // }
         // println!("Read {}({:#04x}) from {:#06x}", value, value, address);
-        return value;
     }
     fn write(&mut self, address: u16, value: u8) -> () {
         // println!(
