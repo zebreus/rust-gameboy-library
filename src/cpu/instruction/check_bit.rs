@@ -29,6 +29,7 @@ generate_instruction!(
     memory,
     operand,
     (bit),
+    [dont_write],
     "store into operand",
     {
         let zero_flag = (operand & bit.get_mask()) == 0;

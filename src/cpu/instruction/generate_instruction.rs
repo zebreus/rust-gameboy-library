@@ -13,6 +13,7 @@ macro_rules! generate_instruction {
     $operand:ident,
     $($accumulator:ident ,)?
     $( (  $bit_ident:ident ) ,)?
+    $( [  $dont_write:ident ] ,)?
     $($target_operand:literal ,)?
     $content:block,
     $(fn $test_name:ident() $test_content:block),*) => {
@@ -122,7 +123,22 @@ pub struct $hl_instruction_name {
                         () => { ThreePhases::Third }
                     }
                 );)?
-                match self.phase {
+
+                // $(consume_first!($dont_write
+                //     macro_rules! first_phase {
+                //         () => { ThreePhases::Third }
+                //     }
+                //     macro_rules! second_phase {
+                //         () => { ThreePhases::First }
+                //     }
+                //     macro_rules! third_phase {
+                //         () => { ThreePhases::Second }
+                //     }
+                // );)?
+
+                let phase = [$(consume_first!($dont_write if matches!(self.phase, ThreePhases::First) {&(ThreePhases::Second {})} else {&self.phase}) ,)? &self.phase][0];
+
+                match phase {
                      second_phase!() => {
                         let address = $cpu.read_double_register(DoubleRegister::HL);
                         let $operand = $memory.read(address);
