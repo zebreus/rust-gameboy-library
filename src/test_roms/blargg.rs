@@ -1,5 +1,6 @@
 mod instruction_timing;
 mod instructions;
+mod memory_timing;
 
 #[cfg(test)]
 use crate::{
