@@ -36,6 +36,16 @@ pub const CARTRIDGE_CHECKSUM_MSB_ADDRESS: usize = 0x014E;
 /// The checksum is computed as the sum of all the bytes of the cartridge ROM (except these two checksum bytes). Our implementation of that is at [Cartridge::check_cartridge_checksum]
 pub const CARTRIDGE_CHECKSUM_LSB_ADDRESS: usize = 0x014F;
 
+/// Contains the serial data.
+///
+/// Before a transfer it contains the data being send, which is replaced with the received data during/after transfer.
+#[doc(alias = "SB")]
+pub const SERIAL_DATA_ADDRESS: usize = 0xFF01;
+/// Control the serial connection.
+///
+/// See <https://gbdev.io/pandocs/Serial_Data_Transfer_(Link_Cable).html#ff02--sc-serial-transfer-control> for more details.
+#[doc(alias = "SC")]
+pub const SERIAL_CONTROL_ADDRESS: usize = 0xFF02;
 /// The timer divider register is stored at this address.
 ///
 /// See [Timer](super::Timer) for details

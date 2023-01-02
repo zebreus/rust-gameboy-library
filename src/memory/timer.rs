@@ -6,6 +6,7 @@ use super::{
     memory_addresses::{
         TIMER_CONTROL_ADDRESS, TIMER_COUNTER_ADDRESS, TIMER_DIVIDER_ADDRESS, TIMER_MODULO_ADDRESS,
     },
+    serial::serial_connection::SerialConnection,
     Memory,
 };
 
@@ -60,7 +61,7 @@ impl Timer {
     }
 
     /// Read an address
-    pub fn read(_memory: &Memory, address: u16) -> Option<u8> {
+    pub fn read<T: SerialConnection>(_memory: &Memory<T>, address: u16) -> Option<u8> {
         match address as usize {
             TIMER_DIVIDER_ADDRESS => None,
             TIMER_COUNTER_ADDRESS => None,
@@ -71,7 +72,11 @@ impl Timer {
     }
 
     ///Write to an address
-    pub fn write(memory: &mut Memory, address: u16, value: u8) -> Option<()> {
+    pub fn write<T: SerialConnection>(
+        memory: &mut Memory<T>,
+        address: u16,
+        value: u8,
+    ) -> Option<()> {
         let timer = &mut memory.timer;
         match address as usize {
             TIMER_DIVIDER_ADDRESS => {
@@ -97,7 +102,7 @@ impl Timer {
     }
 
     /// Should be called on every cycle
-    pub fn process_cycle(memory: &mut Memory) {
+    pub fn process_cycle<T: SerialConnection>(memory: &mut Memory<T>) {
         let timer = &mut memory.timer;
         timer.counter = timer.counter.wrapping_add(1);
         if timer.counter % 64 == 0 {

@@ -8,9 +8,22 @@ pub mod memory_addresses;
 /// Contains functionality related to the timer
 pub mod timer;
 
+/// Contains cartridge functionality
+pub mod cartridge;
+
+/// Contains the serial connection
+pub mod serial;
+
 use timer::Timer;
 
-use self::memory_addresses::ALWAYS_RETURNS_FF_ADDRESS;
+use self::{
+    cartridge::Cartridge,
+    memory_addresses::ALWAYS_RETURNS_FF_ADDRESS,
+    serial::{
+        serial_connection::{LoggerSerialConnection, SerialConnection},
+        Serial,
+    },
+};
 
 /// Represents the writable Mbc registers
 pub struct MbcRegisters {
@@ -45,10 +58,9 @@ impl MbcRegisters {
 }
 
 /// Debug memory does simple reads and writes to 64kb of memory. It also prints every read or write
-pub struct Memory {
+pub struct Memory<T: SerialConnection> {
     /// The memory
     pub memory: [u8; 65536],
-    serial_line: String,
     /// Logs all writes to memory between `0x0000` and `0x7fff`
     pub mbc_registers: MbcRegisters,
     /// Enable writes between `0xA000` and `0xBFFF`
@@ -59,62 +71,85 @@ pub struct Memory {
     pub printed_passed: u32,
     /// The timer is stored here because it is probably the best place for it.
     pub timer: Timer,
+    /// Contains data related to the serial connection
+    pub serial: Serial<T>,
+    /// Contains a cartridge
+    pub cartridge: Cartridge,
 }
 
-impl Memory {
+impl<T: SerialConnection> Memory<T> {
     /// Create a new Memory filled with `0`.
-    pub fn new() -> Memory {
+    pub fn new_with_connections(connection: Option<T>) -> Memory<T> {
         Memory {
             memory: arr![0; 65536],
-            serial_line: String::new(),
             mbc_registers: MbcRegisters::new(),
             enable_external_ram: false,
             test_mode: false,
             printed_passed: 0,
             timer: Timer::new(),
+            serial: Serial::new(connection),
+            cartridge: Cartridge::new(),
+        }
+    }
+
+    /// Should be called on every cycle
+    pub fn process_cycle(&mut self) {
+        timer::Timer::process_cycle(self);
+        serial::Serial::process_cycle(self);
+    }
+}
+
+impl Memory<LoggerSerialConnection> {
+    /// Create a new Memory filled with `0`.
+    pub fn new() -> Memory<LoggerSerialConnection> {
+        Memory {
+            memory: arr![0; 65536],
+            mbc_registers: MbcRegisters::new(),
+            enable_external_ram: false,
+            test_mode: false,
+            printed_passed: 0,
+            timer: Timer::new(),
+            serial: Serial::new(Some(LoggerSerialConnection::new())),
+            cartridge: Cartridge::new(),
         }
     }
     /// Create a new Memory filled with `0`.
-    pub fn new_for_tests() -> Memory {
+    pub fn new_for_tests() -> Memory<LoggerSerialConnection> {
         Memory {
             memory: arr![0; 65536],
-            serial_line: String::new(),
             mbc_registers: MbcRegisters::new(),
             enable_external_ram: false,
             test_mode: true,
             printed_passed: 0,
             timer: Timer::new(),
+            serial: Serial::new(Some(LoggerSerialConnection::new())),
+            cartridge: Cartridge::new(),
         }
     }
 
     /// Create a new Memory. `init` will be placed at memory address 0. The remaining memory will be filled with `0`.
-    pub fn new_with_init(init: &[u8]) -> Memory {
+    pub fn new_with_init(init: &[u8]) -> Memory<LoggerSerialConnection> {
         let mut memory = Memory {
             memory: arr![0; 65536],
-            serial_line: String::new(),
             mbc_registers: MbcRegisters::new(),
             enable_external_ram: false,
             test_mode: true,
             printed_passed: 0,
             timer: Timer::new(),
+            serial: Serial::new(Some(LoggerSerialConnection::new())),
+            cartridge: Cartridge::new(),
         };
         for (dst, src) in memory.memory.iter_mut().zip(init) {
             *dst = *src;
         }
         return memory;
     }
-
-    /// Should be called on every cycle
-    pub fn process_cycle(&mut self) {
-        timer::Timer::process_cycle(self);
-    }
 }
 
-impl MemoryDevice for Memory {
+impl<T: SerialConnection> MemoryDevice for Memory<T> {
     fn read(&self, address: u16) -> u8 {
         match address as usize {
-            0xFF44 => 0x90,
-            0xFF02 => 0x90,
+            0xFF44 => 0xFF,
             ALWAYS_RETURNS_FF_ADDRESS => 0xFF,
             _ => self.memory[address as usize],
         }
@@ -135,6 +170,14 @@ impl MemoryDevice for Memory {
         if write_timer_result.is_some() {
             return;
         }
+        let write_serial_result = serial::Serial::write(self, address, value);
+        if write_serial_result.is_some() {
+            return;
+        }
+        let write_cartridge_result = self.write_cartridge(address, value);
+        if write_cartridge_result.is_some() {
+            return;
+        }
         match address {
             0x0000..=0x7FFF => {
                 self.mbc_registers.log_write(address, value);
@@ -145,21 +188,21 @@ impl MemoryDevice for Memory {
                     self.memory[address as usize] = value;
                 }
             }
-            0xff01 => {
-                let character = value as char;
-                match character {
-                    '\n' => {
-                        if self.serial_line.contains("Passed") {
-                            self.printed_passed += 1;
-                        }
-                        println!("Serial: {}", self.serial_line);
-                        self.serial_line = String::new();
-                    }
-                    _ => {
-                        self.serial_line.push(character);
-                    }
-                }
-            }
+            // 0xff01 => {
+            //     let character = value as char;
+            //     match character {
+            //         '\n' => {
+            //             if self.serial_line.contains("Passed") {
+            //                 self.printed_passed += 1;
+            //             }
+            //             println!("Serial: {}", self.serial_line);
+            //             self.serial_line = String::new();
+            //         }
+            //         _ => {
+            //             self.serial_line.push(character);
+            //         }
+            //     }
+            // }
             _ => {
                 self.memory[address as usize] = value;
             }

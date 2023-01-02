@@ -1,4 +1,4 @@
-use crate::memory::Memory;
+use crate::memory::{serial::serial_connection::SerialConnection, Memory};
 
 use self::tile::Tile;
 
@@ -13,7 +13,7 @@ pub trait VideoFeatures {
     fn get_tile_data(&self) -> Vec<Tile>;
 }
 
-impl VideoFeatures for Memory {
+impl<T: SerialConnection> VideoFeatures for Memory<T> {
     fn get_tile_data(&self) -> Vec<Tile> {
         let video_ram = &self.memory[0x8000..=0x8FFF];
         let chunks = video_ram

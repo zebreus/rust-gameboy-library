@@ -10,119 +10,14 @@ use crate::memory::{
     Memory,
 };
 
-/// Whether a version of the game is intended to be sold in Japan or elsewhere.
-pub enum Destination {
-    /// Japan (and possibly overseas)
-    Japan,
-    /// Overseas only
-    OverseasOnly,
-}
+use self::{cartridge_type::CartridgeType, destination::Destination};
 
-impl Into<Destination> for u8 {
-    fn into(self) -> Destination {
-        match self {
-            0 => Destination::Japan,
-            1 => Destination::OverseasOnly,
-            _ => panic!("Invalid value for the cartridge destination"),
-        }
-    }
-}
+use super::serial::serial_connection::SerialConnection;
 
-/// Indicates what kind of hardware is present on the cartridge
-pub enum CartridgeType {
-    /// RomOnly
-    RomOnly,
-    /// Mbc1
-    Mbc1,
-    /// Mbc1 Ram
-    Mbc1Ram,
-    /// Mbc1 Ram Battery
-    Mbc1RamBattery,
-    /// Mbc2
-    Mbc2,
-    /// Mbc2 Battery
-    Mbc2Battery,
-    /// Rom Ram
-    RomRam,
-    /// RomRamBattery
-    RomRamBattery,
-    /// Mmm01
-    Mmm01,
-    /// Mmm01 Ram
-    Mmm01Ram,
-    /// Mmm01 Ram Battery
-    Mmm01RamBattery,
-    /// Mbc3 Timer Battery
-    Mbc3TimerBattery,
-    /// Mbc3 Timer Ram Battery
-    Mbc3TimerRamBattery,
-    /// Mbc3
-    Mbc3,
-    /// Mbc3 Ram
-    Mbc3Ram,
-    /// Mbc3 Ram Battery
-    Mbc3RamBattery,
-    /// Mbc5
-    Mbc5,
-    /// Mbc5 Ram
-    Mbc5Ram,
-    /// Mbc5 Ram Battery
-    Mbc5RamBattery,
-    /// Mbc5 Rumble
-    Mbc5Rumble,
-    /// Mbc5 Rumble Ram
-    Mbc5RumbleRam,
-    /// Mbc5 Rumble Ram Battery
-    Mbc5RumbleRamBattery,
-    /// Mbc6
-    Mbc6,
-    /// Mbc7 Sensor Rumble Ram Battery
-    Mbc7SensorRumbleRamBattery,
-    /// Pocket Camera
-    PocketCamera,
-    /// Bandai Tama5
-    BandaiTama5,
-    /// Huc3
-    Huc3,
-    /// Huc1 Ram Battery
-    Huc1RamBattery,
-}
-
-impl Into<CartridgeType> for u8 {
-    fn into(self) -> CartridgeType {
-        match self {
-            0x00 => CartridgeType::RomOnly,
-            0x01 => CartridgeType::Mbc1,
-            0x02 => CartridgeType::Mbc1Ram,
-            0x03 => CartridgeType::Mbc1RamBattery,
-            0x05 => CartridgeType::Mbc2,
-            0x06 => CartridgeType::Mbc2Battery,
-            0x08 => CartridgeType::RomRam,
-            0x09 => CartridgeType::RomRamBattery,
-            0x0B => CartridgeType::Mmm01,
-            0x0C => CartridgeType::Mmm01Ram,
-            0x0D => CartridgeType::Mmm01RamBattery,
-            0x0F => CartridgeType::Mbc3TimerBattery,
-            0x10 => CartridgeType::Mbc3TimerRamBattery,
-            0x11 => CartridgeType::Mbc3,
-            0x12 => CartridgeType::Mbc3Ram,
-            0x13 => CartridgeType::Mbc3RamBattery,
-            0x19 => CartridgeType::Mbc5,
-            0x1A => CartridgeType::Mbc5Ram,
-            0x1B => CartridgeType::Mbc5RamBattery,
-            0x1C => CartridgeType::Mbc5Rumble,
-            0x1D => CartridgeType::Mbc5RumbleRam,
-            0x1E => CartridgeType::Mbc5RumbleRamBattery,
-            0x20 => CartridgeType::Mbc6,
-            0x22 => CartridgeType::Mbc7SensorRumbleRamBattery,
-            0xFC => CartridgeType::PocketCamera,
-            0xFD => CartridgeType::BandaiTama5,
-            0xFE => CartridgeType::Huc3,
-            0xFF => CartridgeType::Huc1RamBattery,
-            _ => panic!("Invalid value for the cartridge type"),
-        }
-    }
-}
+/// Contains information about cartridge types
+pub mod cartridge_type;
+/// Contains information about destination regions
+pub mod destination;
 
 /// Represents a gameboy cartridge. Currently for debugging only
 pub struct Cartridge {
@@ -234,11 +129,11 @@ impl Cartridge {
         Ok(())
     }
     /// Put the cartridge ROM into memory
-    pub fn place_into_memory(&self, memory: &mut Memory) {
-        memory.memory[FIRST_ROM_BANK].copy_from_slice(&self.rom[FIRST_ROM_BANK]);
-        memory.memory[SECOND_ROM_BANK].copy_from_slice(&self.rom[SECOND_ROM_BANK]);
+    pub fn place_into_memory(&self, memory: &mut [u8; 65536]) {
+        memory[FIRST_ROM_BANK].copy_from_slice(&self.rom[FIRST_ROM_BANK]);
+        memory[SECOND_ROM_BANK].copy_from_slice(&self.rom[SECOND_ROM_BANK]);
     }
-    fn load_second_rom_bank(&self, memory: &mut Memory) {
+    fn load_second_rom_bank(&self, memory: &mut [u8; 65536]) {
         let selected_rom_bank = if self.advanced_banking_enabled {
             self.current_second_rom_bank
         } else {
@@ -249,46 +144,42 @@ impl Cartridge {
             .chunks_exact(ROM_BANK_SIZE)
             .nth(selected_rom_bank as usize)
             .expect("Tried to load a nonexisting ROM bank");
-        memory.memory[SECOND_ROM_BANK].copy_from_slice(rom_bank_chunk)
+        memory[SECOND_ROM_BANK].copy_from_slice(rom_bank_chunk)
     }
-    /// Process writes to the memory
-    pub fn process_writes(&mut self, memory: &mut Memory) {
-        let  Some(writes) = memory.mbc_registers.get_writes() else {return;};
+}
 
-        match self.cartridge_type {
+impl<T: SerialConnection> Memory<T> {
+    /// Process writes to the memory
+    pub fn write_cartridge(&mut self, address: u16, value: u8) -> Option<()> {
+        match self.cartridge.cartridge_type {
             CartridgeType::RomRam | CartridgeType::RomRamBattery | CartridgeType::RomOnly => {}
             CartridgeType::Mbc1 | CartridgeType::Mbc1Ram | CartridgeType::Mbc1RamBattery => {
-                for write in writes.iter() {
-                    let (address, value) = write;
-                    // const RAM_ENABLE: RangeInclusive<u16> = 0x0000..=0x1FFF;
-                    // const ROM_SELECT: RangeInclusive<u16> = 0x2000..=0x3FFF;
-                    // const RAM_SELECT: RangeInclusive<u16> = 0x4000..=0x5FFF;
-                    // const BANKING_MODE_SELECT: RangeInclusive<u16> = 0x4000..=0x5FFF;
-                    match *address {
-                        0x0000..=0x1FFF => {
-                            let enable_external_ram = (value & 0b1111) == 0xA;
-                            memory.enable_external_ram = enable_external_ram
-                        }
-                        0x2000..=0x3FFF => {
-                            let new_rom_bank = max(value & 0b11111, 1)
-                                | (self.current_second_rom_bank as u8 & 0b1100000);
-                            self.current_second_rom_bank = new_rom_bank;
-                            self.load_second_rom_bank(memory);
-                        }
-                        0x4000..=0x5FFF => {
-                            let new_rom_bank =
-                                (value & 0b01100000) | (self.current_second_rom_bank & 0b1111);
-                            self.current_second_rom_bank = new_rom_bank;
-                            self.load_second_rom_bank(memory);
-                        }
-                        0x6000..=0x7FFF => {
-                            self.advanced_banking_enabled = value % 2 != 0;
-                            self.load_second_rom_bank(memory);
-                        }
-                        _ => {
-                            panic!("Should not happen")
-                        }
+                // const RAM_ENABLE: RangeInclusive<u16> = 0x0000..=0x1FFF;
+                // const ROM_SELECT: RangeInclusive<u16> = 0x2000..=0x3FFF;
+                // const RAM_SELECT: RangeInclusive<u16> = 0x4000..=0x5FFF;
+                // const BANKING_MODE_SELECT: RangeInclusive<u16> = 0x4000..=0x5FFF;
+                match address {
+                    0x0000..=0x1FFF => {
+                        let enable_external_ram = (value & 0b1111) == 0xA;
+                        self.enable_external_ram = enable_external_ram
                     }
+                    0x2000..=0x3FFF => {
+                        let new_rom_bank = max(value & 0b11111, 1)
+                            | (self.cartridge.current_second_rom_bank as u8 & 0b1100000);
+                        self.cartridge.current_second_rom_bank = new_rom_bank;
+                        self.cartridge.load_second_rom_bank(&mut self.memory);
+                    }
+                    0x4000..=0x5FFF => {
+                        let new_rom_bank = (value & 0b01100000)
+                            | (self.cartridge.current_second_rom_bank & 0b1111);
+                        self.cartridge.current_second_rom_bank = new_rom_bank;
+                        self.cartridge.load_second_rom_bank(&mut self.memory);
+                    }
+                    0x6000..=0x7FFF => {
+                        self.cartridge.advanced_banking_enabled = value % 2 != 0;
+                        self.cartridge.load_second_rom_bank(&mut self.memory);
+                    }
+                    _ => {}
                 }
             }
             CartridgeType::Mbc2 | CartridgeType::Mbc2Battery => {}
@@ -310,6 +201,10 @@ impl Cartridge {
             CartridgeType::BandaiTama5 => {}
             CartridgeType::Huc3 => {}
             CartridgeType::Huc1RamBattery => {}
+        };
+        match address {
+            0x0000..=0x7FFF => Some(()),
+            0x8000..=0xFFFF => None,
         }
     }
 }
@@ -345,7 +240,7 @@ mod tests {
     fn test_cartridge_can_be_placed_in_memory() {
         let cartridge = Cartridge::new();
         let mut memory = Memory::new_for_tests();
-        cartridge.place_into_memory(&mut memory);
+        cartridge.place_into_memory(&mut memory.memory);
         assert_eq!(memory.read(0x0100), 0);
         assert_eq!(memory.read(0x0101), 195);
     }
