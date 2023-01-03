@@ -94,8 +94,8 @@ impl<T: SerialConnection> Memory<T> {
 
     /// Should be called on every cycle
     pub fn process_cycle(&mut self) {
-        timer::Timer::process_cycle(self);
-        serial::Serial::process_cycle(self);
+        self.cycle_timer();
+        self.cycle_serial();
     }
 }
 
@@ -166,11 +166,11 @@ impl<T: SerialConnection> MemoryDevice for Memory<T> {
         if self.test_mode {
             self.memory[address as usize] = value;
         }
-        let write_timer_result = timer::Timer::write(self, address, value);
+        let write_timer_result = self.write_timer(address, value);
         if write_timer_result.is_some() {
             return;
         }
-        let write_serial_result = serial::Serial::write(self, address, value);
+        let write_serial_result = self.write_serial(address, value);
         if write_serial_result.is_some() {
             return;
         }

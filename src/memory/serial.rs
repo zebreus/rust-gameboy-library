@@ -50,14 +50,12 @@ impl<T: SerialConnection> Serial<T> {
             cycles_until_next_bit: CYCLES_PER_BIT,
         }
     }
-    /// Read an address
-    pub fn read(_memory: &Memory<T>, _address: u16) -> Option<u8> {
-        return None;
-    }
+}
 
-    ///Write to an address
-    pub fn write(memory: &mut Memory<T>, address: u16, value: u8) -> Option<()> {
-        let serial = &mut memory.serial;
+impl<T: SerialConnection> Memory<T> {
+    /// Process writes to the memory
+    pub fn write_serial(&mut self, address: u16, value: u8) -> Option<()> {
+        let serial = &mut self.serial;
         match address as usize {
             SERIAL_DATA_ADDRESS => None,
             SERIAL_CONTROL_ADDRESS => {
@@ -69,16 +67,15 @@ impl<T: SerialConnection> Serial<T> {
                 serial.transaction_state = transfer_in_progress_bit
                     .try_into()
                     .expect("Transfer in progress bit should always be in range");
-                memory.memory[SERIAL_CONTROL_ADDRESS] = value;
+                self.memory[SERIAL_CONTROL_ADDRESS] = value;
                 Some(())
             }
             _ => None,
         }
     }
-
     /// Should be called on every cycle
-    pub fn process_cycle(memory: &mut Memory<T>) {
-        let serial = &mut memory.serial;
+    pub fn cycle_serial(&mut self) {
+        let serial = &mut self.serial;
         if !(serial.clock_source == ClockType::Internal
             && serial.transaction_state == TransactionState::InProgress)
         {
@@ -92,24 +89,24 @@ impl<T: SerialConnection> Serial<T> {
 
         serial.cycles_until_next_bit = CYCLES_PER_BIT;
 
-        let send_bit = (memory.memory[SERIAL_DATA_ADDRESS] & 0b10000000) == 0b10000000;
-        let received_bit = memory
+        let send_bit = (self.memory[SERIAL_DATA_ADDRESS] & 0b10000000) == 0b10000000;
+        let received_bit = self
             .serial
             .connection
             .as_mut()
             .map(|connection| connection.exchange_bit(send_bit))
             .unwrap_or(true);
-        memory.memory[SERIAL_DATA_ADDRESS] =
-            (memory.memory[SERIAL_DATA_ADDRESS] << 1) | (if received_bit { 1 } else { 0 });
+        self.memory[SERIAL_DATA_ADDRESS] =
+            (self.memory[SERIAL_DATA_ADDRESS] << 1) | (if received_bit { 1 } else { 0 });
 
-        memory.serial.transferred_bits += 1;
-        if memory.serial.transferred_bits < 8 {
+        self.serial.transferred_bits += 1;
+        if self.serial.transferred_bits < 8 {
             return;
         }
 
-        memory.memory[SERIAL_CONTROL_ADDRESS] = memory.memory[SERIAL_CONTROL_ADDRESS] & 0b01111111;
-        memory.serial.transaction_state = TransactionState::Nothing;
-        memory.write_interrupt_flag(Interrupt::Serial, true);
-        memory.serial.transferred_bits = 0;
+        self.memory[SERIAL_CONTROL_ADDRESS] = self.memory[SERIAL_CONTROL_ADDRESS] & 0b01111111;
+        self.serial.transaction_state = TransactionState::Nothing;
+        self.write_interrupt_flag(Interrupt::Serial, true);
+        self.serial.transferred_bits = 0;
     }
 }
