@@ -1,3 +1,5 @@
+mod acceptance;
+
 #[cfg(test)]
 use crate::{
     cpu::{instruction::Instruction, Cpu, CpuState},
@@ -37,14 +39,4 @@ fn test_mooneye_rom(path: &str, cycles: usize) {
     assert_eq!(cpu.read_register(Register::E), 13);
     assert_eq!(cpu.read_register(Register::H), 21);
     assert_eq!(cpu.read_register(Register::L), 34);
-}
-
-#[cfg(test)]
-mod tests {
-    use super::test_mooneye_rom;
-
-    #[test]
-    fn daa_test() {
-        test_mooneye_rom("test_roms/mooneye/acceptance/instr/daa.gb", 1000000);
-    }
 }
