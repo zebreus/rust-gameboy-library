@@ -5,6 +5,8 @@ use self::tile::Tile;
 /// Logic related to tiles
 pub mod tile;
 
+mod display_connection;
+
 // struct TileMap {}
 
 /// A collection of functions for video stuff
