@@ -1,3 +1,10 @@
+use std::ops::RangeInclusive;
+
+use crate::memory::memory_addresses::{
+    FIRST_BG_TILE_DATA_AREA, FIRST_BG_TILE_MAP_AREA, SECOND_BG_TILE_DATA_AREA,
+    SECOND_BG_TILE_MAP_AREA,
+};
+
 /// Which background map is used for rendering.
 #[derive(Debug, PartialEq)]
 pub enum BackgroundTilemapArea {
@@ -7,6 +14,16 @@ pub enum BackgroundTilemapArea {
     Second,
 }
 
+impl BackgroundTilemapArea {
+    /// Get the corresponding memory area
+    pub fn get_memory_area(&self) -> RangeInclusive<usize> {
+        match self {
+            BackgroundTilemapArea::First => FIRST_BG_TILE_MAP_AREA,
+            BackgroundTilemapArea::Second => SECOND_BG_TILE_MAP_AREA,
+        }
+    }
+}
+
 /// Which tile data is used for rendering the background and window.
 #[derive(Debug, PartialEq)]
 pub enum BackgroundTileDataArea {
@@ -14,6 +31,16 @@ pub enum BackgroundTileDataArea {
     First,
     /// Use [SECOND_BG_TILE_DATA_AREA] as the source for the tilemap
     Second,
+}
+
+impl BackgroundTileDataArea {
+    /// Get the corresponding memory area
+    pub fn get_memory_area(&self) -> RangeInclusive<usize> {
+        match self {
+            BackgroundTileDataArea::First => FIRST_BG_TILE_DATA_AREA,
+            BackgroundTileDataArea::Second => SECOND_BG_TILE_DATA_AREA,
+        }
+    }
 }
 
 /// The size of the objects

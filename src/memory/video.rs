@@ -12,6 +12,9 @@ use super::memory_addresses::{
 /// Logic related to tiles
 pub mod tile;
 
+/// Logic related to tilemaps
+pub mod tile_map;
+
 /// Contains a trait for the connection to an actual display
 pub mod display_connection;
 
@@ -34,7 +37,7 @@ pub trait VideoFeatures {
 
 impl<T: SerialConnection, D: DisplayConnection> VideoFeatures for Memory<T, D> {
     fn get_tile_data(&self) -> Vec<Tile> {
-        let video_ram = &self.memory[0x8000..=0x8FFF];
+        let video_ram = &self.memory[0x8000..=0x97FF];
         let chunks = video_ram
             .chunks_exact(16)
             .map(|chunk| Tile::from(chunk.try_into().unwrap()))
