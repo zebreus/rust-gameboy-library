@@ -12,6 +12,9 @@ use super::memory_addresses::{
 /// Logic related to tiles
 pub mod tile;
 
+/// Contains logic related to object attributes
+pub mod object_attributes;
+
 /// Logic related to tilemaps
 pub mod tile_map;
 

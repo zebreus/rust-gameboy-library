@@ -1,0 +1,78 @@
+use crate::memory::{
+    memory_addresses::OBJECT_ATTRIBUTE_MEMORY_AREA, serial::serial_connection::SerialConnection,
+    Memory,
+};
+
+use super::display_connection::DisplayConnection;
+
+/// Which color palette should be used for an object
+pub enum ObjectPalette {
+    /// The one from [FIRST_OBJECT_PALETTE_ADDRESS]
+    First,
+    /// The one from [SECOND_OBJECT_PALETTE_ADDRESS]
+    Second,
+}
+
+/// Represents an entry in the object attribute memory
+pub struct ObjectAttributes {
+    /// The x position on screen
+    pub x_position: u8,
+    /// The y position on screen
+    pub y_position: u8,
+    /// The index of the tile in the tile data from [OBJECT_TILE_DATA_AREA]
+    pub tile: u8,
+    /// Draw the object below background and window if this is set to true.
+    pub draw_under_bg_and_window: bool,
+    /// Flip horizontally
+    pub x_flip: bool,
+    /// Flip vertically
+    pub y_flip: bool,
+    /// Select the color palette for this object
+    pub palette: ObjectPalette,
+}
+
+impl Into<ObjectAttributes> for &[u8] {
+    fn into(self) -> ObjectAttributes {
+        let array: [u8; 4] = self.try_into().unwrap();
+        let object_attributes = array.into();
+        object_attributes
+    }
+}
+
+impl Into<ObjectAttributes> for [u8; 4] {
+    fn into(self) -> ObjectAttributes {
+        let x_position = self[0];
+        let y_position = self[1];
+        let tile = self[2];
+        let draw_under_bg_and_window = (self[3] & 0b10000000) != 0;
+        let x_flip = (self[3] & 0b01000000) != 0;
+        let y_flip = (self[3] & 0b00100000) != 0;
+        let palette = if (self[3] & 0b00010000) != 0 {
+            ObjectPalette::Second
+        } else {
+            ObjectPalette::First
+        };
+
+        ObjectAttributes {
+            x_position,
+            y_position,
+            tile,
+            draw_under_bg_and_window,
+            x_flip,
+            y_flip,
+            palette,
+        }
+    }
+}
+
+impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
+    /// Get the object attributes from object attribute memory
+    pub fn get_object_attributes(&self) -> Vec<ObjectAttributes> {
+        let object_attribute_memory = &self.memory[OBJECT_ATTRIBUTE_MEMORY_AREA];
+        let chunks = object_attribute_memory
+            .chunks_exact(4)
+            .map(|chunk| chunk.into())
+            .collect::<Vec<ObjectAttributes>>();
+        return chunks;
+    }
+}

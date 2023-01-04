@@ -14,6 +14,13 @@ pub const FIRST_BG_TILE_DATA_AREA: RangeInclusive<usize> = 0x8800..=0x97FF;
 /// The second area that can be used as tile data for the window and background layer
 pub const SECOND_BG_TILE_DATA_AREA: RangeInclusive<usize> = 0x8000..=0x8FFF;
 
+/// The area containing the tile data for the objects layer
+pub const OBJECT_TILE_DATA_AREA: RangeInclusive<usize> = 0x8000..=0x8FFF;
+
+/// The area containing the object attribute memory
+#[doc(alias = "OAM")]
+pub const OBJECT_ATTRIBUTE_MEMORY_AREA: RangeInclusive<usize> = 0xFE00..=0xFE9F;
+
 /// The first area that can be used as a tilemap for the window or background
 pub const FIRST_BG_TILE_MAP_AREA: RangeInclusive<usize> = 0x9800..=0x9BFF;
 /// The second area that can be used as a tilemap for the window or background
