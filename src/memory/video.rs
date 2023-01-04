@@ -2,6 +2,10 @@ use crate::memory::{serial::serial_connection::SerialConnection, Memory};
 
 use self::{display_connection::DisplayConnection, palette::Palette, tile::Tile};
 
+use super::memory_addresses::{
+    BACKGROUND_PALETTE_ADDRESS, FIRST_OBJECT_PALETTE_ADDRESS, SECOND_OBJECT_PALETTE_ADDRESS,
+};
+
 /// Logic related to tiles
 pub mod tile;
 
@@ -65,4 +69,30 @@ impl<T: DisplayConnection> Video<T> {
             second_object_palette: Palette::from_object_register(0),
         }
     }
+}
+
+impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
+    /// Process writes to the memory
+    pub fn write_video(&mut self, address: u16, value: u8) -> Option<()> {
+        match address as usize {
+            BACKGROUND_PALETTE_ADDRESS => {
+                self.graphics.background_palette = Palette::from_background_register(value);
+                self.memory[BACKGROUND_PALETTE_ADDRESS] = value;
+                return Some(());
+            }
+            FIRST_OBJECT_PALETTE_ADDRESS => {
+                self.graphics.first_object_palette = Palette::from_object_register(value);
+                self.memory[FIRST_OBJECT_PALETTE_ADDRESS] = value;
+                return Some(());
+            }
+            SECOND_OBJECT_PALETTE_ADDRESS => {
+                self.graphics.second_object_palette = Palette::from_object_register(value);
+                self.memory[SECOND_OBJECT_PALETTE_ADDRESS] = value;
+                return Some(());
+            }
+            _ => None,
+        }
+    }
+    /// Will be called on every cycle
+    pub fn cycle_video(&mut self) {}
 }

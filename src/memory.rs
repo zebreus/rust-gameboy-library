@@ -66,6 +66,7 @@ impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
     pub fn process_cycle(&mut self) {
         self.cycle_timer();
         self.cycle_serial();
+        self.cycle_video();
     }
 }
 
@@ -154,6 +155,10 @@ impl<T: SerialConnection, D: DisplayConnection> MemoryDevice for Memory<T, D> {
         }
         let write_cartridge_result = self.write_cartridge(address, value);
         if write_cartridge_result.is_some() {
+            return;
+        }
+        let write_video_result = self.write_video(address, value);
+        if write_video_result.is_some() {
             return;
         }
 
