@@ -15,6 +15,9 @@ pub mod display_connection;
 /// Contains a struct for color palettes.
 pub mod palette;
 
+/// Contains the lcd control register.
+pub mod lcd_control;
+
 // struct TileMap {}
 
 /// A collection of functions for video stuff
