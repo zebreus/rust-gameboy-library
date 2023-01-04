@@ -32,8 +32,6 @@ pub struct Memory<T: SerialConnection> {
     pub memory: [u8; 65536],
     /// Treat everything as ram
     pub test_mode: bool,
-    /// Counts how often `Passed` was printed to serial
-    pub printed_passed: u32,
     /// The timer is stored here because it is probably the best place for it.
     pub timer: Timer,
     /// Contains data related to the serial connection
@@ -48,7 +46,6 @@ impl<T: SerialConnection> Memory<T> {
         Memory {
             memory: arr![0; 65536],
             test_mode: false,
-            printed_passed: 0,
             timer: Timer::new(),
             serial: Serial::new(connection),
             cartridge: Cartridge::new(),
@@ -68,7 +65,6 @@ impl Memory<LoggerSerialConnection> {
         Memory {
             memory: arr![0; 65536],
             test_mode: false,
-            printed_passed: 0,
             timer: Timer::new(),
             serial: Serial::new(Some(LoggerSerialConnection::new())),
             cartridge: Cartridge::new(),
@@ -79,7 +75,6 @@ impl Memory<LoggerSerialConnection> {
         Memory {
             memory: arr![0; 65536],
             test_mode: true,
-            printed_passed: 0,
             timer: Timer::new(),
             serial: Serial::new(Some(LoggerSerialConnection::new())),
             cartridge: Cartridge::new(),
@@ -91,7 +86,6 @@ impl Memory<LoggerSerialConnection> {
         let mut memory = Memory {
             memory: arr![0; 65536],
             test_mode: true,
-            printed_passed: 0,
             timer: Timer::new(),
             serial: Serial::new(Some(LoggerSerialConnection::new())),
             cartridge: Cartridge::new(),
