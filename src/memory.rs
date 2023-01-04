@@ -25,44 +25,10 @@ use self::{
     },
 };
 
-/// Represents the writable Mbc registers
-pub struct MbcRegisters {
-    writes: Vec<(u16, u8)>,
-    changed: bool,
-}
-
-impl MbcRegisters {
-    /// Create a new MbcRegisters struct with all values set to 0
-    pub fn new() -> MbcRegisters {
-        MbcRegisters {
-            writes: Vec::new(),
-            changed: false,
-        }
-    }
-    /// Log a write to an address
-    pub fn log_write(&mut self, address: u16, new_value: u8) {
-        self.writes.push((address, new_value));
-        self.changed = true;
-    }
-    /// Get all new writes since the last call to this function
-    pub fn get_writes(&mut self) -> Option<Vec<(u16, u8)>> {
-        match self.changed {
-            false => None,
-            true => {
-                self.changed = false;
-                let result: Vec<(u16, u8)> = take(&mut self.writes);
-                Some(result)
-            }
-        }
-    }
-}
-
 /// Debug memory does simple reads and writes to 64kb of memory. It also prints every read or write
 pub struct Memory<T: SerialConnection> {
     /// The memory
     pub memory: [u8; 65536],
-    /// Logs all writes to memory between `0x0000` and `0x7fff`
-    pub mbc_registers: MbcRegisters,
     /// Enable writes between `0xA000` and `0xBFFF`
     pub enable_external_ram: bool,
     /// Treat everything as ram
@@ -82,7 +48,6 @@ impl<T: SerialConnection> Memory<T> {
     pub fn new_with_connections(connection: Option<T>) -> Memory<T> {
         Memory {
             memory: arr![0; 65536],
-            mbc_registers: MbcRegisters::new(),
             enable_external_ram: false,
             test_mode: false,
             printed_passed: 0,
@@ -104,7 +69,6 @@ impl Memory<LoggerSerialConnection> {
     pub fn new() -> Memory<LoggerSerialConnection> {
         Memory {
             memory: arr![0; 65536],
-            mbc_registers: MbcRegisters::new(),
             enable_external_ram: false,
             test_mode: false,
             printed_passed: 0,
@@ -117,7 +81,6 @@ impl Memory<LoggerSerialConnection> {
     pub fn new_for_tests() -> Memory<LoggerSerialConnection> {
         Memory {
             memory: arr![0; 65536],
-            mbc_registers: MbcRegisters::new(),
             enable_external_ram: false,
             test_mode: true,
             printed_passed: 0,
@@ -131,7 +94,6 @@ impl Memory<LoggerSerialConnection> {
     pub fn new_with_init(init: &[u8]) -> Memory<LoggerSerialConnection> {
         let mut memory = Memory {
             memory: arr![0; 65536],
-            mbc_registers: MbcRegisters::new(),
             enable_external_ram: false,
             test_mode: true,
             printed_passed: 0,
@@ -179,30 +141,11 @@ impl<T: SerialConnection> MemoryDevice for Memory<T> {
             return;
         }
         match address {
-            0x0000..=0x7FFF => {
-                self.mbc_registers.log_write(address, value);
-                let _x = 7;
-            }
             0xA000..=0xBFFF => {
                 if self.enable_external_ram {
                     self.memory[address as usize] = value;
                 }
             }
-            // 0xff01 => {
-            //     let character = value as char;
-            //     match character {
-            //         '\n' => {
-            //             if self.serial_line.contains("Passed") {
-            //                 self.printed_passed += 1;
-            //             }
-            //             println!("Serial: {}", self.serial_line);
-            //             self.serial_line = String::new();
-            //         }
-            //         _ => {
-            //             self.serial_line.push(character);
-            //         }
-            //     }
-            // }
             _ => {
                 self.memory[address as usize] = value;
             }
