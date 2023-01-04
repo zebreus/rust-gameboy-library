@@ -24,11 +24,14 @@ use self::{
         serial_connection::{LoggerSerialConnection, SerialConnection},
         Serial,
     },
-    video::Video,
+    video::{
+        display_connection::{DisplayConnection, DummyDisplayConnection},
+        Video,
+    },
 };
 
 /// Debug memory does simple reads and writes to 64kb of memory. It also prints every read or write
-pub struct Memory<T: SerialConnection> {
+pub struct Memory<T: SerialConnection, D: DisplayConnection> {
     /// The memory
     pub memory: [u8; 65536],
     /// Treat everything as ram
@@ -40,19 +43,22 @@ pub struct Memory<T: SerialConnection> {
     /// Contains a cartridge
     pub cartridge: Cartridge,
     /// Contains the video stuff
-    pub graphics: Video,
+    pub graphics: Video<D>,
 }
 
-impl<T: SerialConnection> Memory<T> {
+impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
     /// Create a new Memory filled with `0`.
-    pub fn new_with_connections(connection: Option<T>) -> Memory<T> {
+    pub fn new_with_video_connections(
+        connection: Option<T>,
+        display_connection: D,
+    ) -> Memory<T, D> {
         Memory {
             memory: arr![0; 65536],
             test_mode: false,
             timer: Timer::new(),
             serial: Serial::new(connection),
             cartridge: Cartridge::new(),
-            graphics: Video::new(),
+            graphics: Video::new(display_connection),
         }
     }
 
@@ -63,39 +69,53 @@ impl<T: SerialConnection> Memory<T> {
     }
 }
 
-impl Memory<LoggerSerialConnection> {
+impl<T: SerialConnection> Memory<T, DummyDisplayConnection> {
     /// Create a new Memory filled with `0`.
-    pub fn new() -> Memory<LoggerSerialConnection> {
+    pub fn new_with_connections(connection: Option<T>) -> Self {
+        Self {
+            memory: arr![0; 65536],
+            test_mode: false,
+            timer: Timer::new(),
+            serial: Serial::new(connection),
+            cartridge: Cartridge::new(),
+            graphics: Video::new(DummyDisplayConnection {}),
+        }
+    }
+}
+
+impl Memory<LoggerSerialConnection, DummyDisplayConnection> {
+    /// Create a new Memory filled with `0`.
+    pub fn new() -> Self {
         Memory {
             memory: arr![0; 65536],
             test_mode: false,
             timer: Timer::new(),
             serial: Serial::new(Some(LoggerSerialConnection::new())),
             cartridge: Cartridge::new(),
-            graphics: Video::new(),
+            graphics: Video::new(DummyDisplayConnection {}),
         }
     }
     /// Create a new Memory filled with `0`.
-    pub fn new_for_tests() -> Memory<LoggerSerialConnection> {
+    pub fn new_for_tests() -> Self {
         Memory {
             memory: arr![0; 65536],
             test_mode: true,
             timer: Timer::new(),
             serial: Serial::new(Some(LoggerSerialConnection::new())),
             cartridge: Cartridge::new(),
-            graphics: Video::new(),
+            graphics: Video::new(DummyDisplayConnection {}),
         }
     }
 
     /// Create a new Memory. `init` will be placed at memory address 0. The remaining memory will be filled with `0`.
-    pub fn new_with_init(init: &[u8]) -> Memory<LoggerSerialConnection> {
+    pub fn new_with_init(init: &[u8]) -> Self {
         let mut memory = Memory {
             memory: arr![0; 65536],
             test_mode: true,
             timer: Timer::new(),
             serial: Serial::new(Some(LoggerSerialConnection::new())),
             cartridge: Cartridge::new(),
-            graphics: Video::new(),
+            graphics: Video::new(DummyDisplayConnection {}),
         };
         for (dst, src) in memory.memory.iter_mut().zip(init) {
             *dst = *src;
@@ -104,7 +124,7 @@ impl Memory<LoggerSerialConnection> {
     }
 }
 
-impl<T: SerialConnection> MemoryDevice for Memory<T> {
+impl<T: SerialConnection, D: DisplayConnection> MemoryDevice for Memory<T, D> {
     fn read(&self, address: u16) -> u8 {
         match address as usize {
             0xFF44 => 0xFF,

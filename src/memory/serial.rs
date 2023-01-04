@@ -6,6 +6,7 @@ use self::serial_connection::SerialConnection;
 
 use super::{
     memory_addresses::{SERIAL_CONTROL_ADDRESS, SERIAL_DATA_ADDRESS},
+    video::display_connection::DisplayConnection,
     Memory,
 };
 
@@ -52,7 +53,7 @@ impl<T: SerialConnection> Serial<T> {
     }
 }
 
-impl<T: SerialConnection> Memory<T> {
+impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
     /// Process writes to the memory
     pub fn write_serial(&mut self, address: u16, value: u8) -> Option<()> {
         let serial = &mut self.serial;

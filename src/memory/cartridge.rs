@@ -12,7 +12,9 @@ use crate::memory::{
 
 use self::{cartridge_type::CartridgeType, destination::Destination};
 
-use super::serial::serial_connection::SerialConnection;
+use super::{
+    serial::serial_connection::SerialConnection, video::display_connection::DisplayConnection,
+};
 
 /// Contains information about cartridge types
 pub mod cartridge_type;
@@ -152,7 +154,7 @@ impl Cartridge {
     }
 }
 
-impl<T: SerialConnection> Memory<T> {
+impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
     /// Process writes to the memory
     pub fn write_cartridge(&mut self, address: u16, value: u8) -> Option<()> {
         match self.cartridge.cartridge_type {

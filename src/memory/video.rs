@@ -1,11 +1,12 @@
 use crate::memory::{serial::serial_connection::SerialConnection, Memory};
 
-use self::{palette::Palette, tile::Tile};
+use self::{display_connection::DisplayConnection, palette::Palette, tile::Tile};
 
 /// Logic related to tiles
 pub mod tile;
 
-mod display_connection;
+/// Contains a trait for the connection to an actual display
+pub mod display_connection;
 
 /// Contains a struct for color palettes.
 pub mod palette;
@@ -18,7 +19,7 @@ pub trait VideoFeatures {
     fn get_tile_data(&self) -> Vec<Tile>;
 }
 
-impl<T: SerialConnection> VideoFeatures for Memory<T> {
+impl<T: SerialConnection, D: DisplayConnection> VideoFeatures for Memory<T, D> {
     fn get_tile_data(&self) -> Vec<Tile> {
         let video_ram = &self.memory[0x8000..=0x8FFF];
         let chunks = video_ram
@@ -43,7 +44,9 @@ mod tests {
 }
 
 /// Represents the gpu
-pub struct Video {
+pub struct Video<T: DisplayConnection> {
+    /// Pixels get drawn onto this display
+    pub display_connection: T,
     /// The current background color palette
     pub background_palette: Palette,
     /// The current first object color palette
@@ -52,10 +55,11 @@ pub struct Video {
     pub second_object_palette: Palette,
 }
 
-impl Video {
+impl<T: DisplayConnection> Video<T> {
     /// Create a new grapics struct
-    pub fn new() -> Video {
-        Video {
+    pub fn new(display_connection: T) -> Self {
+        Self {
+            display_connection,
             background_palette: Palette::from_background_register(0),
             first_object_palette: Palette::from_object_register(0),
             second_object_palette: Palette::from_object_register(0),

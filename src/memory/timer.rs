@@ -7,6 +7,7 @@ use super::{
         TIMER_CONTROL_ADDRESS, TIMER_COUNTER_ADDRESS, TIMER_DIVIDER_ADDRESS, TIMER_MODULO_ADDRESS,
     },
     serial::serial_connection::SerialConnection,
+    video::display_connection::DisplayConnection,
     Memory,
 };
 
@@ -59,20 +60,9 @@ impl Timer {
         let is_enabled = (value & 0b00000100) == 0b00000100;
         self.enabled = is_enabled;
     }
-
-    /// Read an address
-    pub fn read<T: SerialConnection>(_memory: &Memory<T>, address: u16) -> Option<u8> {
-        match address as usize {
-            TIMER_DIVIDER_ADDRESS => None,
-            TIMER_COUNTER_ADDRESS => None,
-            TIMER_MODULO_ADDRESS => None,
-            TIMER_CONTROL_ADDRESS => None,
-            _ => None,
-        }
-    }
 }
 
-impl<T: SerialConnection> Memory<T> {
+impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
     /// Process writes to the memory
     pub fn write_timer(&mut self, address: u16, value: u8) -> Option<()> {
         let timer = &mut self.timer;
