@@ -45,6 +45,9 @@ pub struct Cartridge {
     pub current_second_rom_bank: u8,
     /// If advanced banking is enabled
     pub advanced_banking_enabled: bool,
+    /// Whether external RAM is enabled
+    /// Enable writes between `0xA000` and `0xBFFF`
+    pub external_ram_enabled: bool,
 }
 
 /// Decode the RAM size byte from the cartridge header into the number of RAM bytes.
@@ -102,6 +105,7 @@ impl Cartridge {
             current_ram_bank: 0,
             current_second_rom_bank: 1,
             advanced_banking_enabled: false,
+            external_ram_enabled: false,
         }
     }
     /// Check if the cartridge header is valid
@@ -161,7 +165,7 @@ impl<T: SerialConnection> Memory<T> {
                 match address {
                     0x0000..=0x1FFF => {
                         let enable_external_ram = (value & 0b1111) == 0xA;
-                        self.enable_external_ram = enable_external_ram
+                        self.cartridge.external_ram_enabled = enable_external_ram
                     }
                     0x2000..=0x3FFF => {
                         let new_rom_bank = max(value & 0b11111, 1)
@@ -178,6 +182,12 @@ impl<T: SerialConnection> Memory<T> {
                     0x6000..=0x7FFF => {
                         self.cartridge.advanced_banking_enabled = value % 2 != 0;
                         self.cartridge.load_second_rom_bank(&mut self.memory);
+                    }
+                    0xA000..=0xBFFF => {
+                        if self.cartridge.external_ram_enabled {
+                            self.memory[address as usize] = value;
+                        }
+                        return Some(());
                     }
                     _ => {}
                 }

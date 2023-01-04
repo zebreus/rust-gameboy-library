@@ -1,5 +1,3 @@
-use std::mem::take;
-
 use arr_macro::arr;
 
 /// Contains named memory addresses as constants
@@ -32,8 +30,6 @@ use self::{
 pub struct Memory<T: SerialConnection> {
     /// The memory
     pub memory: [u8; 65536],
-    /// Enable writes between `0xA000` and `0xBFFF`
-    pub enable_external_ram: bool,
     /// Treat everything as ram
     pub test_mode: bool,
     /// Counts how often `Passed` was printed to serial
@@ -51,7 +47,6 @@ impl<T: SerialConnection> Memory<T> {
     pub fn new_with_connections(connection: Option<T>) -> Memory<T> {
         Memory {
             memory: arr![0; 65536],
-            enable_external_ram: false,
             test_mode: false,
             printed_passed: 0,
             timer: Timer::new(),
@@ -72,7 +67,6 @@ impl Memory<LoggerSerialConnection> {
     pub fn new() -> Memory<LoggerSerialConnection> {
         Memory {
             memory: arr![0; 65536],
-            enable_external_ram: false,
             test_mode: false,
             printed_passed: 0,
             timer: Timer::new(),
@@ -84,7 +78,6 @@ impl Memory<LoggerSerialConnection> {
     pub fn new_for_tests() -> Memory<LoggerSerialConnection> {
         Memory {
             memory: arr![0; 65536],
-            enable_external_ram: false,
             test_mode: true,
             printed_passed: 0,
             timer: Timer::new(),
@@ -97,7 +90,6 @@ impl Memory<LoggerSerialConnection> {
     pub fn new_with_init(init: &[u8]) -> Memory<LoggerSerialConnection> {
         let mut memory = Memory {
             memory: arr![0; 65536],
-            enable_external_ram: false,
             test_mode: true,
             printed_passed: 0,
             timer: Timer::new(),
@@ -143,16 +135,8 @@ impl<T: SerialConnection> MemoryDevice for Memory<T> {
         if write_cartridge_result.is_some() {
             return;
         }
-        match address {
-            0xA000..=0xBFFF => {
-                if self.enable_external_ram {
-                    self.memory[address as usize] = value;
-                }
-            }
-            _ => {
-                self.memory[address as usize] = value;
-            }
-        }
+
+        self.memory[address as usize] = value;
     }
 }
 
