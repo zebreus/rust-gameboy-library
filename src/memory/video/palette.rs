@@ -71,3 +71,38 @@ impl Palette {
             .expect("The index should be no bigger than 3");
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{Color, Palette};
+
+    #[test]
+    fn palette_from_background_returns_expected_colors() {
+        let palette = Palette::from_background_register(0b00000000);
+        assert_eq!(*palette.get_color(0), Color::White);
+        assert_eq!(*palette.get_color(1), Color::White);
+        assert_eq!(*palette.get_color(2), Color::White);
+        assert_eq!(*palette.get_color(3), Color::White);
+
+        let palette = Palette::from_background_register(0b11100100);
+        assert_eq!(*palette.get_color(0), Color::White);
+        assert_eq!(*palette.get_color(1), Color::LightGray);
+        assert_eq!(*palette.get_color(2), Color::DarkGray);
+        assert_eq!(*palette.get_color(3), Color::Black);
+    }
+
+    #[test]
+    fn palette_from_object_returns_expected_colors() {
+        let palette = Palette::from_object_register(0b00000000);
+        assert_eq!(*palette.get_color(0), Color::Transparent);
+        assert_eq!(*palette.get_color(1), Color::White);
+        assert_eq!(*palette.get_color(2), Color::White);
+        assert_eq!(*palette.get_color(3), Color::White);
+
+        let palette = Palette::from_object_register(0b11100100);
+        assert_eq!(*palette.get_color(0), Color::Transparent);
+        assert_eq!(*palette.get_color(1), Color::LightGray);
+        assert_eq!(*palette.get_color(2), Color::DarkGray);
+        assert_eq!(*palette.get_color(3), Color::Black);
+    }
+}
