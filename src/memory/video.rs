@@ -1,9 +1,12 @@
 use crate::memory::{serial::serial_connection::SerialConnection, Memory};
 
-use self::{display_connection::DisplayConnection, palette::Palette, tile::Tile};
+use self::{
+    display_connection::DisplayConnection, lcd_control::LcdControl, palette::Palette, tile::Tile,
+};
 
 use super::memory_addresses::{
-    BACKGROUND_PALETTE_ADDRESS, FIRST_OBJECT_PALETTE_ADDRESS, SECOND_OBJECT_PALETTE_ADDRESS,
+    BACKGROUND_PALETTE_ADDRESS, FIRST_OBJECT_PALETTE_ADDRESS, LCD_CONTROL_ADDRESS,
+    LCD_STATUS_ADDRESS, SECOND_OBJECT_PALETTE_ADDRESS,
 };
 
 /// Logic related to tiles
@@ -15,8 +18,11 @@ pub mod display_connection;
 /// Contains a struct for color palettes.
 pub mod palette;
 
-/// Contains the lcd control register.
+/// Contains logic for decoding the lcd control register.
 pub mod lcd_control;
+
+/// Contains logic for decoding the lcd status register.
+pub mod lcd_status;
 
 // struct TileMap {}
 
@@ -60,6 +66,10 @@ pub struct Video<T: DisplayConnection> {
     pub first_object_palette: Palette,
     /// The current second object color palette
     pub second_object_palette: Palette,
+    /// The current state of the LCD control register
+    pub current_lcd_control: LcdControl,
+    /// The current state of the LCD status register
+    pub current_lcd_status: LcdControl,
 }
 
 impl<T: DisplayConnection> Video<T> {
@@ -70,6 +80,8 @@ impl<T: DisplayConnection> Video<T> {
             background_palette: Palette::from_background_register(0),
             first_object_palette: Palette::from_object_register(0),
             second_object_palette: Palette::from_object_register(0),
+            current_lcd_control: 0.into(),
+            current_lcd_status: 0.into(),
         }
     }
 }
@@ -78,6 +90,18 @@ impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
     /// Process writes to the memory
     pub fn write_video(&mut self, address: u16, value: u8) -> Option<()> {
         match address as usize {
+            LCD_CONTROL_ADDRESS => {
+                self.graphics.current_lcd_control = value.into();
+                self.memory[LCD_CONTROL_ADDRESS] = value;
+                return Some(());
+            }
+            LCD_STATUS_ADDRESS => {
+                let old_value = self.memory[LCD_STATUS_ADDRESS];
+                let new_value = (value & 0b11111000) | (old_value & 0b00000111);
+                self.graphics.current_lcd_status = new_value.into();
+                self.memory[LCD_STATUS_ADDRESS] = new_value;
+                return Some(());
+            }
             BACKGROUND_PALETTE_ADDRESS => {
                 self.graphics.background_palette = Palette::from_background_register(value);
                 self.memory[BACKGROUND_PALETTE_ADDRESS] = value;
