@@ -61,6 +61,16 @@ pub const TIMER_MODULO_ADDRESS: usize = 0xFF06;
 #[doc(alias = "TCA")]
 pub const TIMER_CONTROL_ADDRESS: usize = 0xFF07;
 
+/// Write here to set the [Palette] for the background and the window layer
+#[doc(alias = "BGP")]
+pub const BACKGROUND_PALETTE_ADDRESS: usize = 0xFF47;
+/// Write here to set the first [Palette] for the object layer
+#[doc(alias = "OBP1")]
+pub const FIRST_OBJECT_PALETTE_ADDRESS: usize = 0xFF48;
+/// Write here to set the second [Palette] for the object layer
+#[doc(alias = "OBP2")]
+pub const SECOND_OBJECT_PALETTE_ADDRESS: usize = 0xFF49;
+
 /// This address should always read `0xff`.
 ///
 /// I got that info from https://www.reddit.com/r/EmuDev/comments/ipap0w/comment/g76m04i

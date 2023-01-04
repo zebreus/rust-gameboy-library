@@ -7,6 +7,9 @@ pub mod tile;
 
 mod display_connection;
 
+/// Contains a struct for color palettes.
+pub mod palette;
+
 // struct TileMap {}
 
 /// A collection of functions for video stuff
