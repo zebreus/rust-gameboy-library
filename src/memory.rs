@@ -14,6 +14,9 @@ pub mod cartridge;
 /// Contains the serial connection
 pub mod serial;
 
+/// Contains the GPU and video memory
+pub mod video;
+
 use timer::Timer;
 
 use self::{

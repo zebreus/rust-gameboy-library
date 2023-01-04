@@ -26,7 +26,8 @@ impl<T: SerialConnection> VideoFeatures for Memory<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{memory::Memory, video::VideoFeatures};
+
+    use crate::memory::{video::VideoFeatures, Memory};
 
     #[test]
     fn the_number_of_returned_tiles_looks_correct() {
