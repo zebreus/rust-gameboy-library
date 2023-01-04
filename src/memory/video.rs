@@ -5,8 +5,9 @@ use self::{
 };
 
 use super::memory_addresses::{
-    BACKGROUND_PALETTE_ADDRESS, FIRST_OBJECT_PALETTE_ADDRESS, LCD_CONTROL_ADDRESS,
-    LCD_STATUS_ADDRESS, SECOND_OBJECT_PALETTE_ADDRESS,
+    BACKGROUND_PALETTE_ADDRESS, FIRST_OBJECT_PALETTE_ADDRESS,
+    INITIATE_OBJECT_ATTRIBUTE_MEMORY_TRANSFER_ADDRESS, LCD_CONTROL_ADDRESS, LCD_STATUS_ADDRESS,
+    SECOND_OBJECT_PALETTE_ADDRESS,
 };
 
 /// Logic related to tiles
@@ -62,6 +63,14 @@ mod tests {
     }
 }
 
+/// A running object attribute memory transfer
+pub struct ObjectAttributeMemoryTransfer {
+    /// The current source address
+    pub current_source_address: usize,
+    /// The current target address in the object attribute memory
+    pub current_target_address: usize,
+}
+
 /// Represents the gpu
 pub struct Video<T: DisplayConnection> {
     /// Pixels get drawn onto this display
@@ -76,6 +85,8 @@ pub struct Video<T: DisplayConnection> {
     pub current_lcd_control: LcdControl,
     /// The current state of the LCD status register
     pub current_lcd_status: LcdControl,
+    /// Set to a None if no transfer is in progress.
+    pub current_transfer: Option<ObjectAttributeMemoryTransfer>,
 }
 
 impl<T: DisplayConnection> Video<T> {
@@ -88,6 +99,7 @@ impl<T: DisplayConnection> Video<T> {
             second_object_palette: Palette::from_object_register(0),
             current_lcd_control: 0.into(),
             current_lcd_status: 0.into(),
+            current_transfer: None,
         }
     }
 }
@@ -123,9 +135,30 @@ impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
                 self.memory[SECOND_OBJECT_PALETTE_ADDRESS] = value;
                 return Some(());
             }
+            INITIATE_OBJECT_ATTRIBUTE_MEMORY_TRANSFER_ADDRESS => {
+                self.graphics.current_transfer = Some(ObjectAttributeMemoryTransfer {
+                    current_source_address: u16::from_be_bytes([value, 0]) as usize,
+                    current_target_address: 0xFF00,
+                });
+                self.memory[SECOND_OBJECT_PALETTE_ADDRESS] = value;
+                return Some(());
+            }
             _ => None,
         }
     }
     /// Will be called on every cycle
-    pub fn cycle_video(&mut self) {}
+    pub fn cycle_video(&mut self) {
+        match &mut self.graphics.current_transfer {
+            Some(transfer) => {
+                self.memory[transfer.current_target_address] =
+                    self.memory[transfer.current_source_address];
+                transfer.current_source_address += 1;
+                transfer.current_target_address += 1;
+                if transfer.current_target_address > 0xFF9F {
+                    self.graphics.current_transfer = None;
+                }
+            }
+            None => {}
+        }
+    }
 }

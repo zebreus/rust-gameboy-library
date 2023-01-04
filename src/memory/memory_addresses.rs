@@ -84,6 +84,11 @@ pub const LCD_CONTROL_ADDRESS: usize = 0xFF40;
 /// The current LCD status is stored here
 #[doc(alias = "STAT")]
 pub const LCD_STATUS_ADDRESS: usize = 0xFF41;
+/// Write a value 0xNN here to start copying the area `0xNN00..=0xNN9F` to `0xFE00..=0xFE9F` ([OBJECT_ATTRIBUTE_MEMORY_AREA])
+///
+/// The transfer takes 160 cycles. While the transfer is running the CPU can only access HRAM.
+#[doc(alias = "DMA")]
+pub const INITIATE_OBJECT_ATTRIBUTE_MEMORY_TRANSFER_ADDRESS: usize = 0xFF46;
 /// Write here to set the [Palette] for the background and the window layer
 #[doc(alias = "BGP")]
 pub const BACKGROUND_PALETTE_ADDRESS: usize = 0xFF47;
