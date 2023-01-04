@@ -24,6 +24,7 @@ use self::{
         serial_connection::{LoggerSerialConnection, SerialConnection},
         Serial,
     },
+    video::Video,
 };
 
 /// Debug memory does simple reads and writes to 64kb of memory. It also prints every read or write
@@ -38,6 +39,8 @@ pub struct Memory<T: SerialConnection> {
     pub serial: Serial<T>,
     /// Contains a cartridge
     pub cartridge: Cartridge,
+    /// Contains the video stuff
+    pub graphics: Video,
 }
 
 impl<T: SerialConnection> Memory<T> {
@@ -49,6 +52,7 @@ impl<T: SerialConnection> Memory<T> {
             timer: Timer::new(),
             serial: Serial::new(connection),
             cartridge: Cartridge::new(),
+            graphics: Video::new(),
         }
     }
 
@@ -68,6 +72,7 @@ impl Memory<LoggerSerialConnection> {
             timer: Timer::new(),
             serial: Serial::new(Some(LoggerSerialConnection::new())),
             cartridge: Cartridge::new(),
+            graphics: Video::new(),
         }
     }
     /// Create a new Memory filled with `0`.
@@ -78,6 +83,7 @@ impl Memory<LoggerSerialConnection> {
             timer: Timer::new(),
             serial: Serial::new(Some(LoggerSerialConnection::new())),
             cartridge: Cartridge::new(),
+            graphics: Video::new(),
         }
     }
 
@@ -89,6 +95,7 @@ impl Memory<LoggerSerialConnection> {
             timer: Timer::new(),
             serial: Serial::new(Some(LoggerSerialConnection::new())),
             cartridge: Cartridge::new(),
+            graphics: Video::new(),
         };
         for (dst, src) in memory.memory.iter_mut().zip(init) {
             *dst = *src;

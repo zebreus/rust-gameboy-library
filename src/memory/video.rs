@@ -1,6 +1,6 @@
 use crate::memory::{serial::serial_connection::SerialConnection, Memory};
 
-use self::tile::Tile;
+use self::{palette::Palette, tile::Tile};
 
 /// Logic related to tiles
 pub mod tile;
@@ -39,5 +39,26 @@ mod tests {
         let memory = Memory::new_for_tests();
         let tiles = memory.get_tile_data();
         assert_eq!(tiles.len(), 256);
+    }
+}
+
+/// Represents the gpu
+pub struct Video {
+    /// The current background color palette
+    pub background_palette: Palette,
+    /// The current first object color palette
+    pub first_object_palette: Palette,
+    /// The current second object color palette
+    pub second_object_palette: Palette,
+}
+
+impl Video {
+    /// Create a new grapics struct
+    pub fn new() -> Video {
+        Video {
+            background_palette: Palette::from_background_register(0),
+            first_object_palette: Palette::from_object_register(0),
+            second_object_palette: Palette::from_object_register(0),
+        }
     }
 }
