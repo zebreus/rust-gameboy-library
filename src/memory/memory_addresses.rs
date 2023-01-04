@@ -9,6 +9,16 @@ pub const SECOND_ROM_BANK: RangeInclusive<usize> = 0x4000..=0x7FFF;
 /// The cartridge RAM is accessible here.
 pub const EXTERNAL_RAM_BANK: RangeInclusive<usize> = 0xA000..=0xBFFF;
 
+/// The first area that can be used as tile data for the window and background layer
+pub const FIRST_BG_TILE_DATA_AREA: RangeInclusive<usize> = 0x8800..=0x97FF;
+/// The second area that can be used as tile data for the window and background layer
+pub const SECOND_BG_TILE_DATA_AREA: RangeInclusive<usize> = 0x8000..=0x8FFF;
+
+/// The first area that can be used as a tilemap for the window or background
+pub const FIRST_BG_TILE_MAP_AREA: RangeInclusive<usize> = 0x9800..=0x9BFF;
+/// The second area that can be used as a tilemap for the window or background
+pub const SECOND_BG_TILE_MAP_AREA: RangeInclusive<usize> = 0x9C00..=0x9FFF;
+
 /// Each cartridge contains a header, located here. The cartridge header provides the following information about the game itself and the hardware it expects to run on.
 pub const CARTRIDGE_HEADER_RANGE: RangeInclusive<usize> = 0x0134..=0x014C;
 /// The memory at this range contains the title of the game.
@@ -61,6 +71,12 @@ pub const TIMER_MODULO_ADDRESS: usize = 0xFF06;
 #[doc(alias = "TCA")]
 pub const TIMER_CONTROL_ADDRESS: usize = 0xFF07;
 
+/// The main lcd control register
+#[doc(alias = "LCDC")]
+pub const LCD_CONTROL_ADDRESS: usize = 0xFF40;
+/// The current LCD status is stored here
+#[doc(alias = "STAT")]
+pub const LCD_STATUS_ADDRESS: usize = 0xFF41;
 /// Write here to set the [Palette] for the background and the window layer
 #[doc(alias = "BGP")]
 pub const BACKGROUND_PALETTE_ADDRESS: usize = 0xFF47;
