@@ -15,9 +15,9 @@ pub enum ObjectPalette {
 
 /// Represents an entry in the object attribute memory
 pub struct ObjectAttributes {
-    /// The x position on screen
+    /// The x position on screen + 8
     pub x_position: u8,
-    /// The y position on screen
+    /// The y position on screen + 16
     pub y_position: u8,
     /// The index of the tile in the tile data from [OBJECT_TILE_DATA_AREA]
     pub tile: u8,
@@ -74,5 +74,22 @@ impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
             .map(|chunk| chunk.into())
             .collect::<Vec<ObjectAttributes>>();
         return chunks;
+    }
+
+    // TODO: Add tests
+    /// Get the [ObjectAttributes] for all objects that are visible on a given line.
+    pub fn get_relevant_object_attributes(&self, line: u8) -> Vec<ObjectAttributes> {
+        let object_attributes = self.get_object_attributes();
+        let object_height = self.graphics.current_lcd_control.object_size.get_height();
+        let filtered_object_attributes = object_attributes
+            .into_iter()
+            .filter(|attributes| {
+                let first_line_visible = attributes.y_position <= (line + 16);
+                let last_line_visible = (attributes.y_position + object_height) > (line + 16);
+                // let x_visible = (attributes.x_position != 0) && (attributes.x_position < 168);
+                return first_line_visible && last_line_visible /* && x_visible */;
+            })
+            .collect::<Vec<ObjectAttributes>>();
+        return filtered_object_attributes;
     }
 }

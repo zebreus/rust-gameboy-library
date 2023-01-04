@@ -52,6 +52,20 @@ pub enum ObjectSize {
     EightBySixteen,
 }
 
+impl ObjectSize {
+    /// Get the current object height
+    pub fn get_height(&self) -> u8 {
+        match self {
+            ObjectSize::EightByEight => 8,
+            ObjectSize::EightBySixteen => 16,
+        }
+    }
+    /// Get the current object width
+    pub fn get_width(&self) -> u8 {
+        8
+    }
+}
+
 /// Represents the LCD control register
 pub struct LcdControl {
     /// Controls whether the LCD is on and the PPU is active
