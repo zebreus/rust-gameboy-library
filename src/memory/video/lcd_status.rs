@@ -64,3 +64,62 @@ impl Into<LcdStatus> for u8 {
         }
     }
 }
+
+impl Into<u8> for LcdStatus {
+    fn into(self) -> u8 {
+        let line_y_stat_interrupt_enable: u8 = if self.line_y_stat_interrupt_enable {
+            0b01000000
+        } else {
+            0
+        };
+        let oam_stat_interrupt_enable: u8 = if self.oam_stat_interrupt_enable {
+            0b00100000
+        } else {
+            0
+        };
+        let vblank_stat_interrupt_enable: u8 = if self.vblank_stat_interrupt_enable {
+            0b00010000
+        } else {
+            0
+        };
+        let hblank_stat_interrupt_enable: u8 = if self.hblank_stat_interrupt_enable {
+            0b00001000
+        } else {
+            0
+        };
+        let line_y_equal_flag: u8 = if self.line_y_equal_flag {
+            0b00000100
+        } else {
+            0
+        };
+        let ppu_mode: u8 = (self.ppu_mode).into();
+
+        return ppu_mode
+            | line_y_equal_flag
+            | hblank_stat_interrupt_enable
+            | vblank_stat_interrupt_enable
+            | oam_stat_interrupt_enable
+            | line_y_stat_interrupt_enable;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::memory::video::lcd_status::LcdStatus;
+
+    #[test]
+    fn lcd_status_converts_back_to_the_same_value() {
+        let original = 0b01010101u8;
+        let lcd_status: LcdStatus = original.into();
+        let reencoded: u8 = lcd_status.into();
+        assert_eq!(original, reencoded);
+    }
+
+    #[test]
+    fn lcd_status_always_encodes_with_bit_7_as_zero() {
+        let original = 0b11111111u8;
+        let lcd_status: LcdStatus = original.into();
+        let reencoded: u8 = lcd_status.into();
+        assert_eq!(0b01111111, reencoded);
+    }
+}
