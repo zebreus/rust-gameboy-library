@@ -19,6 +19,7 @@ impl DisplayConnection for DummyDisplayConnection {
 /// A display connection that creates a png for each frame
 pub struct PngDisplayConnection {
     image: RgbaImage,
+    id: u32,
 }
 
 impl PngDisplayConnection {
@@ -26,6 +27,7 @@ impl PngDisplayConnection {
     pub fn new() -> PngDisplayConnection {
         PngDisplayConnection {
             image: ImageBuffer::new(160, 144),
+            id: 0,
         }
     }
 }
@@ -39,8 +41,10 @@ impl DisplayConnection for PngDisplayConnection {
     }
     /// Notify the display that the current frame has finished drawing
     fn finish_frame(&mut self) {
-        self.image.save("test.png").unwrap();
+        let name = format!("images/{}.png", self.id);
+        self.image.save(name).unwrap();
         self.image = ImageBuffer::new(160, 144);
+        self.id += 1;
     }
 }
 

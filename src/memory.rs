@@ -128,7 +128,6 @@ impl Memory<LoggerSerialConnection, DummyDisplayConnection> {
 impl<T: SerialConnection, D: DisplayConnection> MemoryDevice for Memory<T, D> {
     fn read(&self, address: u16) -> u8 {
         match address as usize {
-            0xFF44 => 0xFF,
             ALWAYS_RETURNS_FF_ADDRESS => 0xFF,
             _ => self.memory[address as usize],
         }

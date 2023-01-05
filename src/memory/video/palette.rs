@@ -14,6 +14,19 @@ pub enum Color {
     Transparent,
 }
 
+impl Color {
+    /// Get the color as rgba tuple
+    pub fn get_rgba(&self) -> (u8, u8, u8, u8) {
+        match self {
+            Color::White => (0xFF, 0xFF, 0xFF, 0xFF),
+            Color::LightGray => (0xB0, 0xB0, 0xB0, 0xFF),
+            Color::DarkGray => (0x60, 0x60, 0x60, 0xFF),
+            Color::Black => (0x00, 0x00, 0x00, 0xFF),
+            Color::Transparent => (0x00, 0x00, 0x00, 0x00),
+        }
+    }
+}
+
 impl Into<Color> for u8 {
     fn into(self) -> Color {
         match self {

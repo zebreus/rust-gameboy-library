@@ -9,10 +9,12 @@ pub const SECOND_ROM_BANK: RangeInclusive<usize> = 0x4000..=0x7FFF;
 /// The cartridge RAM is accessible here.
 pub const EXTERNAL_RAM_BANK: RangeInclusive<usize> = 0xA000..=0xBFFF;
 
-/// The first area that can be used as tile data for the window and background layer
-pub const FIRST_BG_TILE_DATA_AREA: RangeInclusive<usize> = 0x8800..=0x97FF;
+/// The first area that can be used as tile data for the window and background layer.
+///
+/// It is always used as the tile data for the object layer.
+pub const FIRST_BG_TILE_DATA_AREA: RangeInclusive<usize> = 0x8000..=0x8FFF;
 /// The second area that can be used as tile data for the window and background layer
-pub const SECOND_BG_TILE_DATA_AREA: RangeInclusive<usize> = 0x8000..=0x8FFF;
+pub const SECOND_BG_TILE_DATA_AREA: RangeInclusive<usize> = 0x8800..=0x97FF;
 
 /// The area containing the tile data for the objects layer
 pub const OBJECT_TILE_DATA_AREA: RangeInclusive<usize> = 0x8000..=0x8FFF;
@@ -84,6 +86,12 @@ pub const LCD_CONTROL_ADDRESS: usize = 0xFF40;
 /// The current LCD status is stored here
 #[doc(alias = "STAT")]
 pub const LCD_STATUS_ADDRESS: usize = 0xFF41;
+/// The currently rendering line is stored here. Read only.
+#[doc(alias = "LY")]
+pub const CURRENT_LINE_ADDRESS: usize = 0xFF44;
+/// Set this to get a [Interrupt::Stat] when rendering enters the current line.
+#[doc(alias = "LYC")]
+pub const INTERRUPT_LINE_ADDRESS: usize = 0xFF45;
 /// Write a value 0xNN here to start copying the area `0xNN00..=0xNN9F` to `0xFE00..=0xFE9F` ([OBJECT_ATTRIBUTE_MEMORY_AREA])
 ///
 /// The transfer takes 160 cycles. While the transfer is running the CPU can only access HRAM.

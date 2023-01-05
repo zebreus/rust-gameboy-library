@@ -26,19 +26,21 @@ impl BackgroundTilemapArea {
 
 /// Which tile data is used for rendering the background and window.
 #[derive(Debug, PartialEq)]
-pub enum BackgroundTileDataArea {
+pub enum TileDataArea {
     /// Use [FIRST_BG_TILE_DATA_AREA] as the source for the tilemap
+    ///
+    /// This area is always used for object tile data
     First,
     /// Use [SECOND_BG_TILE_DATA_AREA] as the source for the tilemap
     Second,
 }
 
-impl BackgroundTileDataArea {
+impl TileDataArea {
     /// Get the corresponding memory area
     pub fn get_memory_area(&self) -> RangeInclusive<usize> {
         match self {
-            BackgroundTileDataArea::First => FIRST_BG_TILE_DATA_AREA,
-            BackgroundTileDataArea::Second => SECOND_BG_TILE_DATA_AREA,
+            TileDataArea::First => FIRST_BG_TILE_DATA_AREA,
+            TileDataArea::Second => SECOND_BG_TILE_DATA_AREA,
         }
     }
 }
@@ -79,7 +81,7 @@ pub struct LcdControl {
     /// Changing the value mid-frame triggers a more complex behaviour: See <https://gbdev.io/pandocs/Scrolling.html#ff4aff4b--wy-wx-window-y-position-x-position-plus-7>
     pub window_enable: bool,
     /// Controls which addressing mode the window and background use for their tiles.
-    pub window_bg_tile_data: BackgroundTileDataArea,
+    pub window_bg_tile_data: TileDataArea,
     /// Controls which memory area is used as the tilemap for rendering the background layer
     pub background_tilemap: BackgroundTilemapArea,
     /// Controls whether sprites consist of one tile or two tiles stacked vertically.
@@ -87,7 +89,7 @@ pub struct LcdControl {
     /// Controls whether sprites are displayed or not.
     pub object_enable: bool,
     /// Controls whether the background and window are drawn or not.
-    pub only_sprites: bool,
+    pub background_window_enable: bool,
 }
 
 impl Into<LcdControl> for u8 {
@@ -100,9 +102,9 @@ impl Into<LcdControl> for u8 {
         };
         let window_enable = (self & 0b00100000) != 0;
         let window_bg_tile_data = if (self & 0b00010000) != 0 {
-            BackgroundTileDataArea::Second
+            TileDataArea::First
         } else {
-            BackgroundTileDataArea::First
+            TileDataArea::Second
         };
         let background_tilemap = if (self & 0b00001000) != 0 {
             BackgroundTilemapArea::Second
@@ -115,7 +117,7 @@ impl Into<LcdControl> for u8 {
             ObjectSize::EightByEight
         };
         let object_enable = (self & 0b00000010) != 0;
-        let only_sprites = (self & 0b00000001) != 0;
+        let background_window_enable = (self & 0b00000001) != 0;
 
         LcdControl {
             lcd_ppu_enable,
@@ -125,7 +127,7 @@ impl Into<LcdControl> for u8 {
             background_tilemap,
             object_size,
             object_enable,
-            only_sprites,
+            background_window_enable,
         }
     }
 }
@@ -133,7 +135,7 @@ impl Into<LcdControl> for u8 {
 #[cfg(test)]
 mod tests {
     use crate::memory::video::lcd_control::{
-        BackgroundTileDataArea, BackgroundTilemapArea, LcdControl, ObjectSize,
+        BackgroundTilemapArea, LcdControl, ObjectSize, TileDataArea,
     };
 
     #[test]
@@ -142,17 +144,14 @@ mod tests {
         assert_eq!(lcd_control.lcd_ppu_enable, true);
         assert_eq!(lcd_control.window_tilemap, BackgroundTilemapArea::First);
         assert_eq!(lcd_control.window_enable, true);
-        assert_eq!(
-            lcd_control.window_bg_tile_data,
-            BackgroundTileDataArea::First
-        );
+        assert_eq!(lcd_control.window_bg_tile_data, TileDataArea::First);
         assert_eq!(
             lcd_control.background_tilemap,
             BackgroundTilemapArea::Second
         );
         assert_eq!(lcd_control.object_size, ObjectSize::EightByEight);
         assert_eq!(lcd_control.object_enable, true);
-        assert_eq!(lcd_control.only_sprites, false);
+        assert_eq!(lcd_control.background_window_enable, false);
     }
 
     #[test]
@@ -161,13 +160,10 @@ mod tests {
         assert_eq!(lcd_control.lcd_ppu_enable, false);
         assert_eq!(lcd_control.window_tilemap, BackgroundTilemapArea::Second);
         assert_eq!(lcd_control.window_enable, false);
-        assert_eq!(
-            lcd_control.window_bg_tile_data,
-            BackgroundTileDataArea::Second
-        );
+        assert_eq!(lcd_control.window_bg_tile_data, TileDataArea::Second);
         assert_eq!(lcd_control.background_tilemap, BackgroundTilemapArea::First);
         assert_eq!(lcd_control.object_size, ObjectSize::EightBySixteen);
         assert_eq!(lcd_control.object_enable, false);
-        assert_eq!(lcd_control.only_sprites, true);
+        assert_eq!(lcd_control.background_window_enable, true);
     }
 }

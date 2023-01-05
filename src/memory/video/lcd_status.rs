@@ -1,7 +1,7 @@
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
 /// A mode that the ppu can be in
-#[derive(TryFromPrimitive, Debug, IntoPrimitive, PartialEq)]
+#[derive(TryFromPrimitive, Debug, IntoPrimitive, PartialEq, Clone, Copy)]
 #[repr(u8)]
 pub enum PpuMode {
     /// Pause after every line
@@ -65,7 +65,7 @@ impl Into<LcdStatus> for u8 {
     }
 }
 
-impl Into<u8> for LcdStatus {
+impl Into<u8> for &LcdStatus {
     fn into(self) -> u8 {
         let line_y_stat_interrupt_enable: u8 = if self.line_y_stat_interrupt_enable {
             0b01000000
@@ -111,7 +111,7 @@ mod tests {
     fn lcd_status_converts_back_to_the_same_value() {
         let original = 0b01010101u8;
         let lcd_status: LcdStatus = original.into();
-        let reencoded: u8 = lcd_status.into();
+        let reencoded: u8 = (&lcd_status).into();
         assert_eq!(original, reencoded);
     }
 
@@ -119,7 +119,7 @@ mod tests {
     fn lcd_status_always_encodes_with_bit_7_as_zero() {
         let original = 0b11111111u8;
         let lcd_status: LcdStatus = original.into();
-        let reencoded: u8 = lcd_status.into();
+        let reencoded: u8 = (&lcd_status).into();
         assert_eq!(0b01111111, reencoded);
     }
 }

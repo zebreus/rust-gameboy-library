@@ -8,13 +8,16 @@ use crate::{
 
 #[cfg(test)]
 fn test_mooneye_rom(path: &str, cycles: usize) {
-    use crate::cpu::Register;
+    use crate::{cpu::Register, memory::video::display_connection::PngDisplayConnection};
 
     let cartridge = Cartridge::load(path);
     let mut cpu = CpuState::new();
     let mut closure = |line: &String| println!("Serial: {}", line);
 
-    let mut memory = Memory::new_with_connections(Some(LineBasedConnection::new(&mut closure)));
+    let mut memory = Memory::new_with_video_connections(
+        Some(LineBasedConnection::new(&mut closure)),
+        PngDisplayConnection::new(),
+    );
     cartridge.place_into_memory(&mut memory.memory);
     memory.cartridge = cartridge;
     cpu.write_program_counter(0x0100);
@@ -29,7 +32,7 @@ fn test_mooneye_rom(path: &str, cycles: usize) {
             && (cpu.read_register(Register::H) == 21)
             && (cpu.read_register(Register::L) == 34)
         {
-            break;
+            // break;
         }
     }
 
