@@ -17,3 +17,6 @@ Cargo.lock
 
 # Generate traces
 trace.txt
+
+# Output images
+*.png
