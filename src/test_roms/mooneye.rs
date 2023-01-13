@@ -3,7 +3,9 @@ mod acceptance;
 #[cfg(test)]
 use crate::{
     cpu::{instruction::Instruction, Cpu, CpuState},
-    memory::{cartridge::Cartridge, serial::serial_connection::LineBasedConnection, Memory},
+    memory::{
+        cartridge::Cartridge, serial::serial_connection::LineBasedConnection, MemoryController,
+    },
 };
 
 #[cfg(test)]
@@ -14,7 +16,7 @@ fn test_mooneye_rom(path: &str, cycles: usize) {
     let mut cpu = CpuState::new();
     let mut closure = |line: &String| println!("Serial: {}", line);
 
-    let mut memory = Memory::new_with_video_connections(
+    let mut memory = MemoryController::new_with_video_connections(
         Some(LineBasedConnection::new(&mut closure)),
         PngDisplayConnection::new(),
     );

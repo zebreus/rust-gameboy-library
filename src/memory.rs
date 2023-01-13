@@ -31,7 +31,7 @@ use self::{
 };
 
 /// Debug memory does simple reads and writes to 64kb of memory. It also prints every read or write
-pub struct Memory<T: SerialConnection, D: DisplayConnection> {
+pub struct MemoryController<T: SerialConnection, D: DisplayConnection> {
     /// The memory
     pub memory: [u8; 65536],
     /// Treat everything as ram
@@ -46,13 +46,13 @@ pub struct Memory<T: SerialConnection, D: DisplayConnection> {
     pub graphics: Video<D>,
 }
 
-impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
+impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
     /// Create a new Memory filled with `0`.
     pub fn new_with_video_connections(
         connection: Option<T>,
         display_connection: D,
-    ) -> Memory<T, D> {
-        Memory {
+    ) -> MemoryController<T, D> {
+        MemoryController {
             memory: arr![0; 65536],
             test_mode: false,
             timer: Timer::new(),
@@ -70,7 +70,7 @@ impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
     }
 }
 
-impl<T: SerialConnection> Memory<T, DummyDisplayConnection> {
+impl<T: SerialConnection> MemoryController<T, DummyDisplayConnection> {
     /// Create a new Memory filled with `0`.
     pub fn new_with_connections(connection: Option<T>) -> Self {
         Self {
@@ -84,10 +84,10 @@ impl<T: SerialConnection> Memory<T, DummyDisplayConnection> {
     }
 }
 
-impl Memory<LoggerSerialConnection, DummyDisplayConnection> {
+impl MemoryController<LoggerSerialConnection, DummyDisplayConnection> {
     /// Create a new Memory filled with `0`.
     pub fn new() -> Self {
-        Memory {
+        MemoryController {
             memory: arr![0; 65536],
             test_mode: false,
             timer: Timer::new(),
@@ -98,7 +98,7 @@ impl Memory<LoggerSerialConnection, DummyDisplayConnection> {
     }
     /// Create a new Memory filled with `0`.
     pub fn new_for_tests() -> Self {
-        Memory {
+        MemoryController {
             memory: arr![0; 65536],
             test_mode: true,
             timer: Timer::new(),
@@ -110,7 +110,7 @@ impl Memory<LoggerSerialConnection, DummyDisplayConnection> {
 
     /// Create a new Memory. `init` will be placed at memory address 0. The remaining memory will be filled with `0`.
     pub fn new_with_init(init: &[u8]) -> Self {
-        let mut memory = Memory {
+        let mut memory = MemoryController {
             memory: arr![0; 65536],
             test_mode: true,
             timer: Timer::new(),
@@ -125,7 +125,7 @@ impl Memory<LoggerSerialConnection, DummyDisplayConnection> {
     }
 }
 
-impl<T: SerialConnection, D: DisplayConnection> MemoryDevice for Memory<T, D> {
+impl<T: SerialConnection, D: DisplayConnection> MemoryDevice for MemoryController<T, D> {
     fn read(&self, address: u16) -> u8 {
         match address as usize {
             ALWAYS_RETURNS_FF_ADDRESS => 0xFF,
@@ -189,11 +189,11 @@ pub trait MemoryDevice {
 
 #[cfg(test)]
 mod tests {
-    use crate::{memory::Memory, memory::MemoryDevice};
+    use crate::{memory::MemoryController, memory::MemoryDevice};
 
     #[test]
     fn can_read_written_value() {
-        let mut debug_memory = Memory::new_for_tests();
+        let mut debug_memory = MemoryController::new_for_tests();
         debug_memory.write(0, 99);
         let read_value = debug_memory.read(0);
         assert_eq!(read_value, 99);
@@ -201,7 +201,7 @@ mod tests {
 
     #[test]
     fn reads_zero_in_unused_memory() {
-        let debug_memory = Memory::new_for_tests();
+        let debug_memory = MemoryController::new_for_tests();
         assert_eq!(debug_memory.read(0), 0);
         assert_eq!(debug_memory.read(65535), 0);
         assert_eq!(debug_memory.read(10), 0);
@@ -211,7 +211,7 @@ mod tests {
 
     #[test]
     fn initializing_memory_works() {
-        let debug_memory = Memory::new_with_init(&[7, 5, 0, 255]);
+        let debug_memory = MemoryController::new_with_init(&[7, 5, 0, 255]);
         assert_eq!(debug_memory.read(0), 7);
         assert_eq!(debug_memory.read(1), 5);
         assert_eq!(debug_memory.read(2), 0);

@@ -8,7 +8,7 @@ use super::{
     },
     serial::serial_connection::SerialConnection,
     video::display_connection::DisplayConnection,
-    Memory,
+    MemoryController,
 };
 
 #[derive(TryFromPrimitive, Debug, IntoPrimitive)]
@@ -62,7 +62,7 @@ impl Timer {
     }
 }
 
-impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
+impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
     /// Process writes to the memory
     pub fn write_timer(&mut self, address: u16, value: u8) -> Option<()> {
         let timer = &mut self.timer;

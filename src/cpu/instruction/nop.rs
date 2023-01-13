@@ -23,12 +23,12 @@ mod tests {
     use super::Nop;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::CpuState;
-    use crate::memory::Memory;
+    use crate::memory::MemoryController;
 
     #[test]
     fn nop_works() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[1, 1, 1, 1]);
+        let mut memory = MemoryController::new_with_init(&[1, 1, 1, 1]);
 
         let instruction = Nop {};
 

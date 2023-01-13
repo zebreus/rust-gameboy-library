@@ -63,14 +63,14 @@ mod tests {
     use crate::cpu::instruction::phases::ThreePhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, Register};
-    use crate::memory::Memory;
+    use crate::memory::MemoryController;
     use crate::memory::MemoryDevice;
 
     #[test]
     fn load_accumulator_to_immediate_offset_works() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[03]);
+        let mut memory = MemoryController::new_with_init(&[03]);
         cpu.write_register(Register::A, 42);
 
         let instruction = LoadAccumulatorToImmediateOffset {

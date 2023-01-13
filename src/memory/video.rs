@@ -1,6 +1,6 @@
 use crate::{
     cpu::{interrupt_controller::InterruptController, Interrupt},
-    memory::{serial::serial_connection::SerialConnection, Memory},
+    memory::{serial::serial_connection::SerialConnection, MemoryController},
 };
 
 use self::{
@@ -112,7 +112,7 @@ impl<T: DisplayConnection> Video<T> {
     }
 }
 
-impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
+impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
     /// Process writes to the memory
     pub fn write_video(&mut self, address: u16, value: u8) -> Option<()> {
         match address as usize {

@@ -87,12 +87,12 @@ mod tests {
     use crate::cpu::instruction::phases::ThreePhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, DoubleRegister};
-    use crate::memory::Memory;
+    use crate::memory::MemoryController;
 
     #[test]
     fn instruction_works() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[(-20 as i8).to_ne_bytes()[0]]);
+        let mut memory = MemoryController::new_with_init(&[(-20 as i8).to_ne_bytes()[0]]);
 
         cpu.write_stack_pointer(0x0f00);
 

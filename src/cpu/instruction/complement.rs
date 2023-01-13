@@ -60,12 +60,12 @@ mod tests {
     use super::Complement;
     use crate::cpu::instruction::Instruction;
     use crate::cpu::{Cpu, CpuState, Flag, Register};
-    use crate::memory::Memory;
+    use crate::memory::MemoryController;
 
     #[test]
     fn complement_works() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_for_tests();
+        let mut memory = MemoryController::new_for_tests();
 
         cpu.write_register(Register::A, 0b01010101);
 

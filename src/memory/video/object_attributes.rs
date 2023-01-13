@@ -1,6 +1,6 @@
 use crate::memory::{
     memory_addresses::OBJECT_ATTRIBUTE_MEMORY_AREA, serial::serial_connection::SerialConnection,
-    Memory,
+    MemoryController,
 };
 
 use super::display_connection::DisplayConnection;
@@ -65,7 +65,7 @@ impl Into<ObjectAttributes> for [u8; 4] {
     }
 }
 
-impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
+impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
     /// Get the object attributes from object attribute memory
     pub fn get_object_attributes(&self) -> Vec<ObjectAttributes> {
         let object_attribute_memory = &self.memory[OBJECT_ATTRIBUTE_MEMORY_AREA];

@@ -81,13 +81,13 @@ mod tests {
     use crate::cpu::instruction::phases::ThreePhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, DoubleRegister};
-    use crate::memory::Memory;
+    use crate::memory::MemoryController;
 
     #[test]
     fn load_immediate_to_double_register_works() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[0x34, 0x12]);
+        let mut memory = MemoryController::new_with_init(&[0x34, 0x12]);
 
         let instruction = LoadImmediateToDoubleRegister {
             destination: DoubleRegister::BC,
@@ -124,7 +124,7 @@ mod tests {
     fn encode_load_immediate_to_register() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[0x34, 0x12]);
+        let mut memory = MemoryController::new_with_init(&[0x34, 0x12]);
 
         let instruction = LoadImmediateToDoubleRegister {
             destination: DoubleRegister::DE,

@@ -92,13 +92,13 @@ mod tests {
     use crate::cpu::instruction::phases::FourPhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, Flag};
-    use crate::memory::Memory;
+    use crate::memory::MemoryController;
 
     #[test]
     fn jump_by_immediate_address_conditional_jumps_when_it_should() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[0x34, 0x12]);
+        let mut memory = MemoryController::new_with_init(&[0x34, 0x12]);
 
         cpu.write_flag(Flag::Carry, true);
 
@@ -138,7 +138,7 @@ mod tests {
     fn jump_by_immediate_address_conditional_does_not_jump_when_the_condition_is_not_met() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[0x34, 0x12]);
+        let mut memory = MemoryController::new_with_init(&[0x34, 0x12]);
 
         let initial_pc = cpu.read_program_counter();
 
@@ -176,7 +176,7 @@ mod tests {
     fn encode_jump_by_immediate_address_conditional() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[0x34, 0x12]);
+        let mut memory = MemoryController::new_with_init(&[0x34, 0x12]);
 
         let instruction = JumpToImmediateAddressConditional {
             condition: crate::cpu::ConditionCode::ZeroFlagSet,

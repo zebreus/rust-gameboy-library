@@ -59,12 +59,12 @@ mod tests {
     use crate::cpu::instruction::phases::ThreePhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState};
-    use crate::memory::Memory;
+    use crate::memory::MemoryController;
 
     #[test]
     fn jump_by_immediate_offset_works() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[10]);
+        let mut memory = MemoryController::new_with_init(&[10]);
 
         let initial_program_counter = cpu.read_program_counter();
 
@@ -100,7 +100,7 @@ mod tests {
     fn encode_jump_by_immediate_address() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[0x34]);
+        let mut memory = MemoryController::new_with_init(&[0x34]);
 
         let instruction = JumpByImmediateOffset {
             offset: 0,

@@ -69,13 +69,13 @@ mod tests {
     use crate::cpu::instruction::phases::FourPhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState};
-    use crate::memory::Memory;
+    use crate::memory::MemoryController;
     use crate::memory::MemoryDevice;
 
     #[test]
     fn instruction_works() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_for_tests();
+        let mut memory = MemoryController::new_for_tests();
         cpu.write_interrupt_master_enable(false);
         cpu.write_stack_pointer(0x1234 - 2);
         memory.write(0x1234 - 2, 0x34);

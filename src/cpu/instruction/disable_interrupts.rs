@@ -30,12 +30,12 @@ mod tests {
     use super::DisableInterrupts;
     use crate::cpu::instruction::Instruction;
     use crate::cpu::{Cpu, CpuState};
-    use crate::memory::Memory;
+    use crate::memory::MemoryController;
 
     #[test]
     fn disable_interrupts_works() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_for_tests();
+        let mut memory = MemoryController::new_for_tests();
 
         cpu.write_interrupt_master_enable(true);
 

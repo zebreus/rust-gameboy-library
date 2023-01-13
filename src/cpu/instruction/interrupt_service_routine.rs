@@ -89,13 +89,13 @@ mod tests {
     use crate::cpu::instruction::phases::FivePhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState};
-    use crate::memory::Memory;
+    use crate::memory::MemoryController;
     use crate::memory::MemoryDevice;
 
     #[test]
     fn interrupt_service_routine_works() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[0x34, 0x12]);
+        let mut memory = MemoryController::new_with_init(&[0x34, 0x12]);
         cpu.write_stack_pointer(0xff00);
         let initial_program_counter = cpu.read_program_counter();
 

@@ -48,13 +48,13 @@ mod tests {
     use crate::cpu::instruction::phases::TwoPhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, DoubleRegister, Register};
-    use crate::memory::Memory;
+    use crate::memory::MemoryController;
 
     #[test]
     fn load_accumulator_to_hl_and_increment_works() {
         // Write 42 to A and then copy A to C
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[]);
+        let mut memory = MemoryController::new_with_init(&[]);
 
         let instruction = LoadAccumulatorToHlAndIncrement {
             phase: TwoPhases::First,

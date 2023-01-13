@@ -7,7 +7,7 @@ use crate::memory::{
         HEADER_CHECKSUM_ADDRESS, RAM_SIZE_ADDRESS, ROM_BANK_SIZE, ROM_SIZE_ADDRESS,
         ROM_VERSION_ADDRESS, SECOND_ROM_BANK, TITLE_RANGE,
     },
-    Memory,
+    MemoryController,
 };
 
 use self::{cartridge_type::CartridgeType, destination::Destination};
@@ -154,7 +154,7 @@ impl Cartridge {
     }
 }
 
-impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
+impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
     /// Process writes to the memory
     pub fn write_cartridge(&mut self, address: u16, value: u8) -> Option<()> {
         match self.cartridge.cartridge_type {
@@ -223,7 +223,7 @@ impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{memory::Memory, memory::MemoryDevice};
+    use crate::{memory::MemoryController, memory::MemoryDevice};
 
     use super::Cartridge;
 
@@ -251,7 +251,7 @@ mod tests {
     #[test]
     fn test_cartridge_can_be_placed_in_memory() {
         let cartridge = Cartridge::new();
-        let mut memory = Memory::new_for_tests();
+        let mut memory = MemoryController::new_for_tests();
         cartridge.place_into_memory(&mut memory.memory);
         assert_eq!(memory.read(0x0100), 0);
         assert_eq!(memory.read(0x0101), 195);

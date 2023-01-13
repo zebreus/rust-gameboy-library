@@ -5,7 +5,9 @@ mod memory_timing;
 #[cfg(test)]
 use crate::{
     cpu::{instruction::Instruction, Cpu, CpuState},
-    memory::{cartridge::Cartridge, serial::serial_connection::LineBasedConnection, Memory},
+    memory::{
+        cartridge::Cartridge, serial::serial_connection::LineBasedConnection, MemoryController,
+    },
 };
 use std::cell::RefCell;
 
@@ -23,7 +25,8 @@ fn test_blargg_rom(path: &str, cycles: usize) {
         println!("Serial: {}", line)
     };
 
-    let mut memory = Memory::new_with_connections(Some(LineBasedConnection::new(&mut closure)));
+    let mut memory =
+        MemoryController::new_with_connections(Some(LineBasedConnection::new(&mut closure)));
     cartridge.place_into_memory(&mut memory.memory);
     memory.cartridge = cartridge;
     cpu.write_program_counter(0x0100);

@@ -28,12 +28,12 @@ mod tests {
     use super::PrefixCb;
     use crate::cpu::instruction::Instruction;
     use crate::cpu::CpuState;
-    use crate::memory::Memory;
+    use crate::memory::MemoryController;
 
     #[test]
     fn instruction_works() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[1, 1, 1, 1]);
+        let mut memory = MemoryController::new_with_init(&[1, 1, 1, 1]);
 
         let instruction = PrefixCb {};
 

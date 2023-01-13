@@ -65,12 +65,12 @@ mod tests {
     use crate::cpu::instruction::phases::TwoPhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, DoubleRegister};
-    use crate::memory::Memory;
+    use crate::memory::MemoryController;
 
     #[test]
     fn instruction_works() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[0x34, 0x12]);
+        let mut memory = MemoryController::new_with_init(&[0x34, 0x12]);
         cpu.write_double_register(DoubleRegister::BC, 788);
 
         let instruction = IncrementDoubleRegister {
@@ -94,7 +94,7 @@ mod tests {
     #[test]
     fn instruction_works_with_stackpointer() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_for_tests();
+        let mut memory = MemoryController::new_for_tests();
         cpu.write_stack_pointer(788);
         cpu.write_double_register(DoubleRegister::AF, 0b0011110000000000);
 

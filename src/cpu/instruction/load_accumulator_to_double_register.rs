@@ -54,13 +54,13 @@ mod tests {
     use crate::cpu::instruction::phases::TwoPhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, DoubleRegister, Register};
-    use crate::memory::Memory;
+    use crate::memory::MemoryController;
     use crate::memory::MemoryDevice;
 
     #[test]
     fn load_accumulator_to_double_register_works() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[]);
+        let mut memory = MemoryController::new_with_init(&[]);
 
         let instruction = LoadAccumulatorToDoubleRegister {
             address_register: DoubleRegister::BC,

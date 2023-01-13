@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use crate::memory::{serial::serial_connection::SerialConnection, Memory};
+use crate::memory::{serial::serial_connection::SerialConnection, MemoryController};
 
 use super::{display_connection::DisplayConnection, lcd_control::BackgroundTilemapArea};
 
@@ -23,7 +23,7 @@ impl TileMap {
     }
 }
 
-impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
+impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
     /// Get the [TileMap] from a memory area.
     pub fn get_tile_map(&self, area: &BackgroundTilemapArea) -> TileMap {
         let memory_area = area.get_memory_area();

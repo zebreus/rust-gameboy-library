@@ -1,4 +1,4 @@
-use crate::memory::{serial::serial_connection::SerialConnection, Memory};
+use crate::memory::{serial::serial_connection::SerialConnection, MemoryController};
 
 use super::{display_connection::DisplayConnection, lcd_control::TileDataArea};
 use std::ops::Range;
@@ -86,7 +86,7 @@ mod tests {
     }
 }
 
-impl<T: SerialConnection, D: DisplayConnection> Memory<T, D> {
+impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
     /// Get tile data for an area
     pub fn get_tile_data(&self, area: &TileDataArea) -> Vec<TileData> {
         let video_ram = &self.memory[area.get_memory_area()];

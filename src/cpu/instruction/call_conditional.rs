@@ -117,13 +117,13 @@ mod tests {
     use crate::cpu::instruction::phases::SixPhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{ConditionCode, Cpu, CpuState, Flag};
-    use crate::memory::Memory;
+    use crate::memory::MemoryController;
     use crate::memory::MemoryDevice;
 
     #[test]
     fn call_conditional_works() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[0x34, 0x12]);
+        let mut memory = MemoryController::new_with_init(&[0x34, 0x12]);
         cpu.write_stack_pointer(0xff00);
         cpu.write_flag(Flag::Carry, true);
         let initial_program_counter = cpu.read_program_counter();
@@ -175,7 +175,7 @@ mod tests {
     #[test]
     fn call_conditional_does_not_jump_when_the_condition_is_not_met() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[0x34, 0x12]);
+        let mut memory = MemoryController::new_with_init(&[0x34, 0x12]);
         cpu.write_stack_pointer(0xff00);
         cpu.write_flag(Flag::Carry, false);
         let initial_program_counter = cpu.read_program_counter();
@@ -210,7 +210,7 @@ mod tests {
     #[test]
     fn encode_call_conditional() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[0x34, 0x12]);
+        let mut memory = MemoryController::new_with_init(&[0x34, 0x12]);
 
         let instruction = CallConditional {
             condition: crate::cpu::ConditionCode::ZeroFlagSet,

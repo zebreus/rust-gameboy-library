@@ -61,11 +61,11 @@ mod tests {
     use super::ToBinaryCodedDecimal;
     use crate::cpu::instruction::{AddRegister, Instruction, SubtractRegister};
     use crate::cpu::{Cpu, CpuState, Register};
-    use crate::memory::Memory;
+    use crate::memory::MemoryController;
 
     fn add_and_use_instruction(a: u8, b: u8) -> u8 {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new();
+        let mut memory = MemoryController::new();
 
         cpu.write_register(Register::A, a);
         cpu.write_register(Register::B, b);
@@ -85,7 +85,7 @@ mod tests {
 
     fn subtract_and_use_instruction(a: u8, b: u8) -> u8 {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new();
+        let mut memory = MemoryController::new();
 
         cpu.write_register(Register::A, a);
         cpu.write_register(Register::B, b);

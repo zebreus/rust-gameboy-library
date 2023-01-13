@@ -99,11 +99,11 @@ mod tests {
     use crate::cpu::instruction::phases::FourPhases;
     use crate::cpu::instruction::{Instruction, InstructionEnum};
     use crate::cpu::{Cpu, CpuState, Flag};
-    use crate::memory::Memory;
+    use crate::memory::MemoryController;
 
     fn run_instruction(original_stackpointer: u16, offset: i8) -> CpuState {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[(-20 as i8).to_ne_bytes()[0]]);
+        let mut memory = MemoryController::new_with_init(&[(-20 as i8).to_ne_bytes()[0]]);
 
         cpu.write_stack_pointer(original_stackpointer);
 
@@ -121,7 +121,7 @@ mod tests {
     #[test]
     fn instruction_works() {
         let mut cpu = CpuState::new();
-        let mut memory = Memory::new_with_init(&[(-20 as i8).to_ne_bytes()[0]]);
+        let mut memory = MemoryController::new_with_init(&[(-20 as i8).to_ne_bytes()[0]]);
 
         cpu.write_stack_pointer(0x0f00);
 
