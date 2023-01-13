@@ -1,8 +1,8 @@
 use std::ops::Range;
 
-use crate::memory::{serial::serial_connection::SerialConnection, MemoryController};
+use crate::memory::Memory;
 
-use super::{display_connection::DisplayConnection, lcd_control::BackgroundTilemapArea};
+use super::lcd_control::BackgroundTilemapArea;
 
 /// A tile map represents a 32x32 grid of tiles
 pub struct TileMap {
@@ -23,11 +23,11 @@ impl TileMap {
     }
 }
 
-impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
+impl Memory {
     /// Get the [TileMap] from a memory area.
     pub fn get_tile_map(&self, area: &BackgroundTilemapArea) -> TileMap {
         let memory_area = area.get_memory_area();
-        let tiles: [u8; 1024] = self.memory[memory_area]
+        let tiles: [u8; 1024] = self.data[memory_area]
             .try_into()
             .expect("Incorrect length. Should not happen.");
         TileMap { tiles }

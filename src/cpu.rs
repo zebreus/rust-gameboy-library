@@ -8,7 +8,7 @@ use crate::memory::MemoryDevice;
 
 /// Instructions can be executed to modify cpu state and memory
 pub mod instruction;
-/// Adds functions to memory to read and access interrupt flags
+/// Adds functions to memory to read and access interrupt flags from memory
 pub mod interrupt_controller;
 
 use self::instruction::decode;
@@ -102,24 +102,6 @@ impl CpuState {
         // Target:
         // A: 01 F: B0 B: 00 C: 13 D: 00 E: D8 H: 01 L: 4D SP: FFFE PC: 00:0100 (00 C3 13 02)
         format!("A: {:02X} F: {:02X} B: {:02X} C: {:02X} D: {:02X} E: {:02X} H: {:02X} L: {:02X} SP: {:04X} PC: 00:{:04X} ({:02X} {:02X} {:02X} {:02X})", self.read_register(Register::A), self.read_register(Register::F) , self.read_register(Register::B),self.read_register(Register::C),self.read_register(Register::D),self.read_register(Register::E),self.read_register(Register::H),self.read_register(Register::L),self.read_stack_pointer(),self.read_program_counter(), memory.read(self.read_program_counter()), memory.read(self.read_program_counter()+1),memory.read(self.read_program_counter()+2),memory.read(self.read_program_counter()+3))
-    }
-}
-
-impl MemoryDevice for CpuState {
-    fn read(&self, address: u16) -> u8 {
-        match address {
-            0xFFFF => self.read_interrupt_enable_register(),
-            0xFF0F => self.read_interrupt_flag_register(),
-            _ => panic!("CPU memory should only be accessed at 0xFFFF and 0xFF0F"),
-        }
-    }
-
-    fn write(&mut self, address: u16, value: u8) -> () {
-        match address {
-            0xFFFF => self.write_interrupt_enable_register(value),
-            0xFF0F => self.write_interrupt_flag_register(value),
-            _ => panic!("CPU memory should only be accessed at 0xFFFF and 0xFF0F"),
-        }
     }
 }
 

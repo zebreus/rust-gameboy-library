@@ -1,9 +1,6 @@
-use crate::memory::{
-    memory_addresses::OBJECT_ATTRIBUTE_MEMORY_AREA, serial::serial_connection::SerialConnection,
-    MemoryController,
-};
+use crate::memory::{memory_addresses::OBJECT_ATTRIBUTE_MEMORY_AREA, Memory};
 
-use super::display_connection::DisplayConnection;
+use super::{display_connection::DisplayConnection, Video};
 
 /// Which color palette should be used for an object
 pub enum ObjectPalette {
@@ -65,10 +62,10 @@ impl Into<ObjectAttributes> for [u8; 4] {
     }
 }
 
-impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
+impl Memory {
     /// Get the object attributes from object attribute memory
     pub fn get_object_attributes(&self) -> Vec<ObjectAttributes> {
-        let object_attribute_memory = &self.memory[OBJECT_ATTRIBUTE_MEMORY_AREA];
+        let object_attribute_memory = &self.data[OBJECT_ATTRIBUTE_MEMORY_AREA];
         let chunks = object_attribute_memory
             .chunks_exact(4)
             .map(|chunk| chunk.into())
@@ -78,9 +75,13 @@ impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
 
     // TODO: Add tests
     /// Get the [ObjectAttributes] for all objects that are visible on a given line.
-    pub fn get_relevant_object_attributes(&self, line: u8) -> Vec<ObjectAttributes> {
+    pub fn get_relevant_object_attributes<T: DisplayConnection>(
+        &self,
+        video: &Video<T>,
+        line: u8,
+    ) -> Vec<ObjectAttributes> {
         let object_attributes = self.get_object_attributes();
-        let object_height = self.graphics.current_lcd_control.object_size.get_height();
+        let object_height = video.current_lcd_control.object_size.get_height();
         let filtered_object_attributes = object_attributes
             .into_iter()
             .filter(|attributes| {

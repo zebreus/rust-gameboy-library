@@ -30,10 +30,25 @@ use self::{
     },
 };
 
+/// The backing memory that will be used for all reads
+pub struct Memory {
+    /// The raw memory array
+    pub data: [u8; 65536],
+}
+
+impl Memory {
+    /// Create a new empty instance of memory
+    pub fn new() -> Self {
+        Self {
+            data: arr![0; 65536],
+        }
+    }
+}
+
 /// Debug memory does simple reads and writes to 64kb of memory. It also prints every read or write
 pub struct MemoryController<T: SerialConnection, D: DisplayConnection> {
     /// The memory
-    pub memory: [u8; 65536],
+    pub memory: Memory,
     /// Treat everything as ram
     pub test_mode: bool,
     /// The timer is stored here because it is probably the best place for it.
@@ -53,7 +68,7 @@ impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
         display_connection: D,
     ) -> MemoryController<T, D> {
         MemoryController {
-            memory: arr![0; 65536],
+            memory: Memory::new(),
             test_mode: false,
             timer: Timer::new(),
             serial: Serial::new(connection),
@@ -64,9 +79,9 @@ impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
 
     /// Should be called on every cycle
     pub fn process_cycle(&mut self) {
-        self.cycle_timer();
-        self.cycle_serial();
-        self.cycle_video();
+        self.timer.cycle(&mut self.memory);
+        self.serial.cycle(&mut self.memory);
+        self.graphics.cycle(&mut self.memory);
     }
 }
 
@@ -74,7 +89,7 @@ impl<T: SerialConnection> MemoryController<T, DummyDisplayConnection> {
     /// Create a new Memory filled with `0`.
     pub fn new_with_connections(connection: Option<T>) -> Self {
         Self {
-            memory: arr![0; 65536],
+            memory: Memory::new(),
             test_mode: false,
             timer: Timer::new(),
             serial: Serial::new(connection),
@@ -88,7 +103,7 @@ impl MemoryController<LoggerSerialConnection, DummyDisplayConnection> {
     /// Create a new Memory filled with `0`.
     pub fn new() -> Self {
         MemoryController {
-            memory: arr![0; 65536],
+            memory: Memory::new(),
             test_mode: false,
             timer: Timer::new(),
             serial: Serial::new(Some(LoggerSerialConnection::new())),
@@ -99,7 +114,7 @@ impl MemoryController<LoggerSerialConnection, DummyDisplayConnection> {
     /// Create a new Memory filled with `0`.
     pub fn new_for_tests() -> Self {
         MemoryController {
-            memory: arr![0; 65536],
+            memory: Memory::new(),
             test_mode: true,
             timer: Timer::new(),
             serial: Serial::new(Some(LoggerSerialConnection::new())),
@@ -111,14 +126,14 @@ impl MemoryController<LoggerSerialConnection, DummyDisplayConnection> {
     /// Create a new Memory. `init` will be placed at memory address 0. The remaining memory will be filled with `0`.
     pub fn new_with_init(init: &[u8]) -> Self {
         let mut memory = MemoryController {
-            memory: arr![0; 65536],
+            memory: Memory::new(),
             test_mode: true,
             timer: Timer::new(),
             serial: Serial::new(Some(LoggerSerialConnection::new())),
             cartridge: Cartridge::new(),
             graphics: Video::new(DummyDisplayConnection {}),
         };
-        for (dst, src) in memory.memory.iter_mut().zip(init) {
+        for (dst, src) in memory.memory.data.iter_mut().zip(init) {
             *dst = *src;
         }
         return memory;
@@ -129,7 +144,7 @@ impl<T: SerialConnection, D: DisplayConnection> MemoryDevice for MemoryControlle
     fn read(&self, address: u16) -> u8 {
         match address as usize {
             ALWAYS_RETURNS_FF_ADDRESS => 0xFF,
-            _ => self.memory[address as usize],
+            _ => self.memory.data[address as usize],
         }
         // if (address == 0xff01) || (address == 0xff02) {
         //     println!("Read value {}({:#04x}) from {:#06x}", value, value, address);
@@ -142,33 +157,28 @@ impl<T: SerialConnection, D: DisplayConnection> MemoryDevice for MemoryControlle
         //     value, value, address
         // );
         if self.test_mode {
-            self.memory[address as usize] = value;
+            self.memory.data[address as usize] = value;
         }
-        let write_timer_result = self.write_timer(address, value);
+        let write_timer_result = self.timer.write(&mut self.memory, address, value);
         if write_timer_result.is_some() {
             return;
         }
-        let write_serial_result = self.write_serial(address, value);
+        let write_serial_result = self.serial.write(&mut self.memory, address, value);
         if write_serial_result.is_some() {
             return;
         }
-        let write_cartridge_result = self.write_cartridge(address, value);
+        let write_cartridge_result = self.cartridge.write(&mut self.memory, address, value);
         if write_cartridge_result.is_some() {
             return;
         }
-        let write_video_result = self.write_video(address, value);
+        let write_video_result = self.graphics.write(&mut self.memory, address, value);
         if write_video_result.is_some() {
             return;
         }
 
-        self.memory[address as usize] = value;
+        self.memory.data[address as usize] = value;
     }
 }
-
-/// Address for the interrupt enable register.
-pub const INTERRUPT_ENABLE_ADDRESS: u16 = 0xFFFF;
-/// Address for the interrupt flags register.
-pub const INTERRUPT_FLAG_ADDRESS: u16 = 0xFF0F;
 
 /// The trait for things that can be accessed via memory
 pub trait MemoryDevice {

@@ -9,6 +9,7 @@ use crate::{
         cartridge::Cartridge, serial::serial_connection::LineBasedConnection, MemoryController,
     },
 };
+#[cfg(test)]
 use std::cell::RefCell;
 
 #[cfg(test)]

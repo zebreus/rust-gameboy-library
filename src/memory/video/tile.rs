@@ -1,6 +1,6 @@
-use crate::memory::{serial::serial_connection::SerialConnection, MemoryController};
+use crate::memory::Memory;
 
-use super::{display_connection::DisplayConnection, lcd_control::TileDataArea};
+use super::lcd_control::TileDataArea;
 use std::ops::Range;
 
 /// Represents a Tile.
@@ -86,10 +86,10 @@ mod tests {
     }
 }
 
-impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
+impl Memory {
     /// Get tile data for an area
     pub fn get_tile_data(&self, area: &TileDataArea) -> Vec<TileData> {
-        let video_ram = &self.memory[area.get_memory_area()];
+        let video_ram = &self.data[area.get_memory_area()];
         let mut chunks = video_ram
             .chunks_exact(16)
             .map(|chunk| TileData::from(chunk.try_into().unwrap()))

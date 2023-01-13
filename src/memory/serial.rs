@@ -1,13 +1,12 @@
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
-use crate::cpu::{interrupt_controller::InterruptController, Interrupt};
+use crate::cpu::Interrupt;
 
 use self::serial_connection::SerialConnection;
 
 use super::{
     memory_addresses::{SERIAL_CONTROL_ADDRESS, SERIAL_DATA_ADDRESS},
-    video::display_connection::DisplayConnection,
-    MemoryController,
+    Memory,
 };
 
 /// Contains traits for serial connections and some implementations
@@ -51,63 +50,57 @@ impl<T: SerialConnection> Serial<T> {
             cycles_until_next_bit: CYCLES_PER_BIT,
         }
     }
-}
-
-impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
     /// Process writes to the memory
-    pub fn write_serial(&mut self, address: u16, value: u8) -> Option<()> {
-        let serial = &mut self.serial;
+    pub fn write(&mut self, memory: &mut Memory, address: u16, value: u8) -> Option<()> {
         match address as usize {
             SERIAL_DATA_ADDRESS => None,
             SERIAL_CONTROL_ADDRESS => {
                 let transfer_in_progress_bit = (value & 0b10000000) >> 7;
                 let clock_source_bit = value & 0b00000001;
-                serial.clock_source = clock_source_bit
+                self.clock_source = clock_source_bit
                     .try_into()
                     .expect("Clock source bit should always be in range");
-                serial.transaction_state = transfer_in_progress_bit
+                self.transaction_state = transfer_in_progress_bit
                     .try_into()
                     .expect("Transfer in progress bit should always be in range");
-                self.memory[SERIAL_CONTROL_ADDRESS] = value;
+                memory.data[SERIAL_CONTROL_ADDRESS] = value;
                 Some(())
             }
             _ => None,
         }
     }
     /// Should be called on every cycle
-    pub fn cycle_serial(&mut self) {
-        let serial = &mut self.serial;
-        if !(serial.clock_source == ClockType::Internal
-            && serial.transaction_state == TransactionState::InProgress)
+    pub fn cycle(&mut self, memory: &mut Memory) {
+        if !(self.clock_source == ClockType::Internal
+            && self.transaction_state == TransactionState::InProgress)
         {
             return;
         }
 
-        serial.cycles_until_next_bit -= 1;
-        if serial.cycles_until_next_bit != 0 {
+        self.cycles_until_next_bit -= 1;
+        if self.cycles_until_next_bit != 0 {
             return;
         }
 
-        serial.cycles_until_next_bit = CYCLES_PER_BIT;
+        self.cycles_until_next_bit = CYCLES_PER_BIT;
 
-        let send_bit = (self.memory[SERIAL_DATA_ADDRESS] & 0b10000000) == 0b10000000;
+        let send_bit = (memory.data[SERIAL_DATA_ADDRESS] & 0b10000000) == 0b10000000;
         let received_bit = self
-            .serial
             .connection
             .as_mut()
             .map(|connection| connection.exchange_bit(send_bit))
             .unwrap_or(true);
-        self.memory[SERIAL_DATA_ADDRESS] =
-            (self.memory[SERIAL_DATA_ADDRESS] << 1) | (if received_bit { 1 } else { 0 });
+        memory.data[SERIAL_DATA_ADDRESS] =
+            (memory.data[SERIAL_DATA_ADDRESS] << 1) | (if received_bit { 1 } else { 0 });
 
-        self.serial.transferred_bits += 1;
-        if self.serial.transferred_bits < 8 {
+        self.transferred_bits += 1;
+        if self.transferred_bits < 8 {
             return;
         }
 
-        self.memory[SERIAL_CONTROL_ADDRESS] = self.memory[SERIAL_CONTROL_ADDRESS] & 0b01111111;
-        self.serial.transaction_state = TransactionState::Nothing;
-        self.write_interrupt_flag(Interrupt::Serial, true);
-        self.serial.transferred_bits = 0;
+        memory.data[SERIAL_CONTROL_ADDRESS] = memory.data[SERIAL_CONTROL_ADDRESS] & 0b01111111;
+        self.transaction_state = TransactionState::Nothing;
+        memory.write_interrupt_flag(Interrupt::Serial, true);
+        self.transferred_bits = 0;
     }
 }

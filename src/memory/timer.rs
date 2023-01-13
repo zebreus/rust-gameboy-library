@@ -1,14 +1,12 @@
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
-use crate::cpu::{interrupt_controller::InterruptController, Interrupt};
+use crate::cpu::Interrupt;
 
 use super::{
     memory_addresses::{
         TIMER_CONTROL_ADDRESS, TIMER_COUNTER_ADDRESS, TIMER_DIVIDER_ADDRESS, TIMER_MODULO_ADDRESS,
     },
-    serial::serial_connection::SerialConnection,
-    video::display_connection::DisplayConnection,
-    MemoryController,
+    Memory,
 };
 
 #[derive(TryFromPrimitive, Debug, IntoPrimitive)]
@@ -60,51 +58,47 @@ impl Timer {
         let is_enabled = (value & 0b00000100) == 0b00000100;
         self.enabled = is_enabled;
     }
-}
 
-impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
     /// Process writes to the memory
-    pub fn write_timer(&mut self, address: u16, value: u8) -> Option<()> {
-        let timer = &mut self.timer;
+    pub fn write(&mut self, memory: &mut Memory, address: u16, value: u8) -> Option<()> {
         match address as usize {
             TIMER_DIVIDER_ADDRESS => {
-                self.memory[TIMER_DIVIDER_ADDRESS] = 0;
+                memory.data[TIMER_DIVIDER_ADDRESS] = 0;
                 Some(())
             }
             TIMER_COUNTER_ADDRESS => {
-                self.memory[TIMER_COUNTER_ADDRESS] = value;
-                timer.tima = value;
+                memory.data[TIMER_COUNTER_ADDRESS] = value;
+                self.tima = value;
                 Some(())
             }
             TIMER_MODULO_ADDRESS => {
-                self.memory[TIMER_MODULO_ADDRESS] = value;
+                memory.data[TIMER_MODULO_ADDRESS] = value;
                 Some(())
             }
             TIMER_CONTROL_ADDRESS => {
-                timer.configure_from_control_register_value(value);
-                self.memory[TIMER_CONTROL_ADDRESS] = value;
+                self.configure_from_control_register_value(value);
+                memory.data[TIMER_CONTROL_ADDRESS] = value;
                 Some(())
             }
             _ => None,
         }
     }
     /// Should be called on every cycle
-    pub fn cycle_timer(&mut self) {
-        let timer = &mut self.timer;
-        timer.counter = timer.counter.wrapping_add(1);
-        if timer.counter % 64 == 0 {
-            self.memory[TIMER_DIVIDER_ADDRESS] = self.memory[TIMER_DIVIDER_ADDRESS].wrapping_add(1);
+    pub fn cycle(&mut self, memory: &mut Memory) {
+        self.counter = self.counter.wrapping_add(1);
+        if self.counter % 64 == 0 {
+            memory.data[TIMER_DIVIDER_ADDRESS] = memory.data[TIMER_DIVIDER_ADDRESS].wrapping_add(1);
         }
 
-        if timer.enabled && (timer.counter % timer.input_clock.divider() == 0) {
+        if self.enabled && (self.counter % self.input_clock.divider() == 0) {
             let (new_timer_counter, overflow) =
-                self.memory[TIMER_COUNTER_ADDRESS].overflowing_add(1);
-            self.memory[TIMER_COUNTER_ADDRESS] = new_timer_counter;
+                memory.data[TIMER_COUNTER_ADDRESS].overflowing_add(1);
+            memory.data[TIMER_COUNTER_ADDRESS] = new_timer_counter;
             if overflow {
-                self.memory[TIMER_COUNTER_ADDRESS] = self.memory[TIMER_MODULO_ADDRESS];
-                self.write_interrupt_flag(Interrupt::Timer, true);
+                memory.data[TIMER_COUNTER_ADDRESS] = memory.data[TIMER_MODULO_ADDRESS];
+                memory.write_interrupt_flag(Interrupt::Timer, true);
             }
-            self.timer.tima = self.memory[TIMER_COUNTER_ADDRESS];
+            self.tima = memory.data[TIMER_COUNTER_ADDRESS];
         }
     }
 }

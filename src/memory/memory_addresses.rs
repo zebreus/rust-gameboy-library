@@ -113,3 +113,8 @@ pub const SECOND_OBJECT_PALETTE_ADDRESS: usize = 0xFF49;
 ///
 /// Apparently there are tests in the mooneye test suite that verify the correct values for all IO registers.
 pub const ALWAYS_RETURNS_FF_ADDRESS: usize = 0xFF4D;
+
+/// Address for the interrupt flags register.
+pub const INTERRUPT_FLAG_ADDRESS: usize = 0xFF0F;
+/// Address for the interrupt enable register.
+pub const INTERRUPT_ENABLE_ADDRESS: usize = 0xFFFF;

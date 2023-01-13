@@ -1,20 +1,15 @@
 use std::{cmp::max, fs, mem::take};
 
-use crate::memory::{
-    memory_addresses::{
-        CARTRIDGE_CHECKSUM_LSB_ADDRESS, CARTRIDGE_CHECKSUM_MSB_ADDRESS, CARTRIDGE_HEADER_RANGE,
-        CARTRIDGE_TYPE_ADDRESS, DESTINATION_COUNTRY_ADDRESS, FIRST_ROM_BANK,
-        HEADER_CHECKSUM_ADDRESS, RAM_SIZE_ADDRESS, ROM_BANK_SIZE, ROM_SIZE_ADDRESS,
-        ROM_VERSION_ADDRESS, SECOND_ROM_BANK, TITLE_RANGE,
-    },
-    MemoryController,
+use crate::memory::memory_addresses::{
+    CARTRIDGE_CHECKSUM_LSB_ADDRESS, CARTRIDGE_CHECKSUM_MSB_ADDRESS, CARTRIDGE_HEADER_RANGE,
+    CARTRIDGE_TYPE_ADDRESS, DESTINATION_COUNTRY_ADDRESS, FIRST_ROM_BANK, HEADER_CHECKSUM_ADDRESS,
+    RAM_SIZE_ADDRESS, ROM_BANK_SIZE, ROM_SIZE_ADDRESS, ROM_VERSION_ADDRESS, SECOND_ROM_BANK,
+    TITLE_RANGE,
 };
 
 use self::{cartridge_type::CartridgeType, destination::Destination};
 
-use super::{
-    serial::serial_connection::SerialConnection, video::display_connection::DisplayConnection,
-};
+use super::Memory;
 
 /// Contains information about cartridge types
 pub mod cartridge_type;
@@ -135,11 +130,11 @@ impl Cartridge {
         Ok(())
     }
     /// Put the cartridge ROM into memory
-    pub fn place_into_memory(&self, memory: &mut [u8; 65536]) {
-        memory[FIRST_ROM_BANK].copy_from_slice(&self.rom[FIRST_ROM_BANK]);
-        memory[SECOND_ROM_BANK].copy_from_slice(&self.rom[SECOND_ROM_BANK]);
+    pub fn place_into_memory(&self, memory: &mut Memory) {
+        memory.data[FIRST_ROM_BANK].copy_from_slice(&self.rom[FIRST_ROM_BANK]);
+        memory.data[SECOND_ROM_BANK].copy_from_slice(&self.rom[SECOND_ROM_BANK]);
     }
-    fn load_second_rom_bank(&self, memory: &mut [u8; 65536]) {
+    fn load_second_rom_bank(&self, memory: &mut Memory) {
         let selected_rom_bank = if self.advanced_banking_enabled {
             self.current_second_rom_bank
         } else {
@@ -150,14 +145,12 @@ impl Cartridge {
             .chunks_exact(ROM_BANK_SIZE)
             .nth(selected_rom_bank as usize)
             .expect("Tried to load a nonexisting ROM bank");
-        memory[SECOND_ROM_BANK].copy_from_slice(rom_bank_chunk)
+        memory.data[SECOND_ROM_BANK].copy_from_slice(rom_bank_chunk)
     }
-}
 
-impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
     /// Process writes to the memory
-    pub fn write_cartridge(&mut self, address: u16, value: u8) -> Option<()> {
-        match self.cartridge.cartridge_type {
+    pub fn write(&mut self, memory: &mut Memory, address: u16, value: u8) -> Option<()> {
+        match self.cartridge_type {
             CartridgeType::RomRam | CartridgeType::RomRamBattery | CartridgeType::RomOnly => {}
             CartridgeType::Mbc1 | CartridgeType::Mbc1Ram | CartridgeType::Mbc1RamBattery => {
                 // const RAM_ENABLE: RangeInclusive<u16> = 0x0000..=0x1FFF;
@@ -167,27 +160,27 @@ impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
                 match address {
                     0x0000..=0x1FFF => {
                         let enable_external_ram = (value & 0b1111) == 0xA;
-                        self.cartridge.external_ram_enabled = enable_external_ram
+                        self.external_ram_enabled = enable_external_ram
                     }
                     0x2000..=0x3FFF => {
                         let new_rom_bank = max(value & 0b11111, 1)
-                            | (self.cartridge.current_second_rom_bank as u8 & 0b1100000);
-                        self.cartridge.current_second_rom_bank = new_rom_bank;
-                        self.cartridge.load_second_rom_bank(&mut self.memory);
+                            | (self.current_second_rom_bank as u8 & 0b1100000);
+                        self.current_second_rom_bank = new_rom_bank;
+                        self.load_second_rom_bank(memory);
                     }
                     0x4000..=0x5FFF => {
-                        let new_rom_bank = (value & 0b01100000)
-                            | (self.cartridge.current_second_rom_bank & 0b1111);
-                        self.cartridge.current_second_rom_bank = new_rom_bank;
-                        self.cartridge.load_second_rom_bank(&mut self.memory);
+                        let new_rom_bank =
+                            (value & 0b01100000) | (self.current_second_rom_bank & 0b1111);
+                        self.current_second_rom_bank = new_rom_bank;
+                        self.load_second_rom_bank(memory);
                     }
                     0x6000..=0x7FFF => {
-                        self.cartridge.advanced_banking_enabled = value % 2 != 0;
-                        self.cartridge.load_second_rom_bank(&mut self.memory);
+                        self.advanced_banking_enabled = value % 2 != 0;
+                        self.load_second_rom_bank(memory);
                     }
                     0xA000..=0xBFFF => {
-                        if self.cartridge.external_ram_enabled {
-                            self.memory[address as usize] = value;
+                        if self.external_ram_enabled {
+                            memory.data[address as usize] = value;
                         }
                         return Some(());
                     }

@@ -1,7 +1,4 @@
-use crate::{
-    cpu::{interrupt_controller::InterruptController, Interrupt},
-    memory::{serial::serial_connection::SerialConnection, MemoryController},
-};
+use crate::cpu::Interrupt;
 
 use self::{
     display_connection::DisplayConnection,
@@ -11,10 +8,13 @@ use self::{
     palette::Palette,
 };
 
-use super::memory_addresses::{
-    BACKGROUND_PALETTE_ADDRESS, CURRENT_LINE_ADDRESS, FIRST_OBJECT_PALETTE_ADDRESS,
-    INITIATE_OBJECT_ATTRIBUTE_MEMORY_TRANSFER_ADDRESS, INTERRUPT_LINE_ADDRESS, LCD_CONTROL_ADDRESS,
-    LCD_STATUS_ADDRESS, SECOND_OBJECT_PALETTE_ADDRESS,
+use super::{
+    memory_addresses::{
+        BACKGROUND_PALETTE_ADDRESS, CURRENT_LINE_ADDRESS, FIRST_OBJECT_PALETTE_ADDRESS,
+        INITIATE_OBJECT_ATTRIBUTE_MEMORY_TRANSFER_ADDRESS, INTERRUPT_LINE_ADDRESS,
+        LCD_CONTROL_ADDRESS, LCD_STATUS_ADDRESS, SECOND_OBJECT_PALETTE_ADDRESS,
+    },
+    Memory,
 };
 
 /// Logic related to tiles
@@ -110,132 +110,132 @@ impl<T: DisplayConnection> Video<T> {
         }
         self.current_lcd_status.ppu_mode = PpuMode::Oam;
     }
-}
 
-impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
-    /// Process writes to the memory
-    pub fn write_video(&mut self, address: u16, value: u8) -> Option<()> {
+    /// Handle writes to the video memory
+    ///
+    /// Returns [Ok] if the write was handled
+    pub fn write(&mut self, memory: &mut Memory, address: u16, value: u8) -> Option<()> {
         match address as usize {
             LCD_CONTROL_ADDRESS => {
-                self.graphics.current_lcd_control = value.into();
-                self.memory[LCD_CONTROL_ADDRESS] = value;
+                self.current_lcd_control = value.into();
+                memory.data[LCD_CONTROL_ADDRESS] = value;
                 return Some(());
             }
             LCD_STATUS_ADDRESS => {
-                let old_value = self.memory[LCD_STATUS_ADDRESS];
+                let old_value = memory.data[LCD_STATUS_ADDRESS];
                 let new_value = (value & 0b11111000) | (old_value & 0b00000111);
-                self.graphics.current_lcd_status = new_value.into();
-                self.memory[LCD_STATUS_ADDRESS] = new_value;
+                self.current_lcd_status = new_value.into();
+                memory.data[LCD_STATUS_ADDRESS] = new_value;
                 return Some(());
             }
             CURRENT_LINE_ADDRESS => Some(()),
             INTERRUPT_LINE_ADDRESS => {
-                self.memory[INTERRUPT_LINE_ADDRESS] = value;
+                memory.data[INTERRUPT_LINE_ADDRESS] = value;
                 Some(())
             }
             BACKGROUND_PALETTE_ADDRESS => {
-                self.graphics.background_palette = Palette::from_background_register(value);
-                self.memory[BACKGROUND_PALETTE_ADDRESS] = value;
+                self.background_palette = Palette::from_background_register(value);
+                memory.data[BACKGROUND_PALETTE_ADDRESS] = value;
                 return Some(());
             }
             FIRST_OBJECT_PALETTE_ADDRESS => {
-                self.graphics.first_object_palette = Palette::from_object_register(value);
-                self.memory[FIRST_OBJECT_PALETTE_ADDRESS] = value;
+                self.first_object_palette = Palette::from_object_register(value);
+                memory.data[FIRST_OBJECT_PALETTE_ADDRESS] = value;
                 return Some(());
             }
             SECOND_OBJECT_PALETTE_ADDRESS => {
-                self.graphics.second_object_palette = Palette::from_object_register(value);
-                self.memory[SECOND_OBJECT_PALETTE_ADDRESS] = value;
+                self.second_object_palette = Palette::from_object_register(value);
+                memory.data[SECOND_OBJECT_PALETTE_ADDRESS] = value;
                 return Some(());
             }
             INITIATE_OBJECT_ATTRIBUTE_MEMORY_TRANSFER_ADDRESS => {
-                self.graphics.current_transfer = Some(ObjectAttributeMemoryTransfer {
+                self.current_transfer = Some(ObjectAttributeMemoryTransfer {
                     current_source_address: u16::from_be_bytes([value, 0]) as usize,
                     current_target_address: 0xFF00,
                 });
-                self.memory[SECOND_OBJECT_PALETTE_ADDRESS] = value;
+                memory.data[SECOND_OBJECT_PALETTE_ADDRESS] = value;
                 return Some(());
             }
             _ => None,
         }
     }
     /// Will be called on every cycle
-    pub fn cycle_video(&mut self) {
+    pub fn cycle(&mut self, memory: &mut Memory) {
         const CYCLES_PER_LINE: usize = 114;
 
-        match &mut self.graphics.current_transfer {
+        match &mut self.current_transfer {
             Some(transfer) => {
-                self.memory[transfer.current_target_address] =
-                    self.memory[transfer.current_source_address];
+                memory.data[transfer.current_target_address] =
+                    memory.data[transfer.current_source_address];
                 transfer.current_source_address += 1;
                 transfer.current_target_address += 1;
                 if transfer.current_target_address > 0xFF9F {
-                    self.graphics.current_transfer = None;
+                    self.current_transfer = None;
                 }
             }
             None => {}
         }
 
-        if !self.graphics.current_lcd_control.lcd_ppu_enable {
+        if !self.current_lcd_control.lcd_ppu_enable {
             return;
         }
 
-        self.graphics.cycles_on_current_line += 1;
+        self.cycles_on_current_line += 1;
 
-        match self.graphics.current_lcd_status.ppu_mode {
+        match self.current_lcd_status.ppu_mode {
             PpuMode::Oam => {
-                if self.graphics.cycles_on_current_line == 1 {
-                    self.graphics.current_objects =
-                        self.get_relevant_object_attributes(self.graphics.current_line);
+                if self.cycles_on_current_line == 1 {
+                    self.current_objects =
+                        memory.get_relevant_object_attributes(self, self.current_line);
                 }
 
-                if self.graphics.cycles_on_current_line >= 20 {
-                    self.graphics.current_lcd_status.ppu_mode = PpuMode::TransferringData;
-                    self.memory[LCD_STATUS_ADDRESS] = (&self.graphics.current_lcd_status).into();
+                if self.cycles_on_current_line >= 20 {
+                    self.current_lcd_status.ppu_mode = PpuMode::TransferringData;
+                    memory.data[LCD_STATUS_ADDRESS] = (&self.current_lcd_status).into();
                 }
             }
             PpuMode::TransferringData => {
-                if self.graphics.cycles_on_current_line == 21 {
-                    self.render_line();
+                if self.cycles_on_current_line == 21 {
+                    self.render_line(memory);
                 }
-                if self.graphics.cycles_on_current_line >= 70 {
-                    self.graphics.current_lcd_status.ppu_mode = PpuMode::HBlank;
-                    self.memory[LCD_STATUS_ADDRESS] = (&self.graphics.current_lcd_status).into();
+                if self.cycles_on_current_line >= 70 {
+                    self.current_lcd_status.ppu_mode = PpuMode::HBlank;
+                    memory.data[LCD_STATUS_ADDRESS] = (&self.current_lcd_status).into();
                 }
             }
             PpuMode::HBlank => {
-                if self.graphics.cycles_on_current_line >= CYCLES_PER_LINE {
-                    self.graphics.advance_to_next_line();
-                    self.memory[LCD_STATUS_ADDRESS] = (&self.graphics.current_lcd_status).into();
-                    self.memory[CURRENT_LINE_ADDRESS] = self.graphics.current_line;
+                if self.cycles_on_current_line >= CYCLES_PER_LINE {
+                    self.advance_to_next_line();
+                    memory.data[LCD_STATUS_ADDRESS] = (&self.current_lcd_status).into();
+                    memory.data[CURRENT_LINE_ADDRESS] = self.current_line;
                 }
             }
             PpuMode::VBlank => {
-                if self.graphics.current_line == 144 && self.graphics.cycles_on_current_line == 1 {
-                    self.graphics.display_connection.finish_frame();
-                    self.write_interrupt_flag(Interrupt::VBlank, true);
+                if self.current_line == 144 && self.cycles_on_current_line == 1 {
+                    self.display_connection.finish_frame();
+                    memory.write_interrupt_flag(Interrupt::VBlank, true);
                 }
-                if self.graphics.cycles_on_current_line >= CYCLES_PER_LINE {
-                    self.graphics.advance_to_next_line();
-                    self.memory[LCD_STATUS_ADDRESS] = (&self.graphics.current_lcd_status).into();
-                    self.memory[CURRENT_LINE_ADDRESS] = self.graphics.current_line;
+                if self.cycles_on_current_line >= CYCLES_PER_LINE {
+                    self.advance_to_next_line();
+                    memory.data[LCD_STATUS_ADDRESS] = (&self.current_lcd_status).into();
+                    memory.data[CURRENT_LINE_ADDRESS] = self.current_line;
                 }
             }
         }
     }
 
     /// Render the current line into the video connection.
-    pub fn render_line(&mut self) {
+    pub fn render_line(&mut self, memory: &mut Memory) {
         // let background_tilemap =
-        //     self.get_tile_map(&self.graphics.current_lcd_control.background_tilemap);
-        let window_tilemap = self.get_tile_map(&self.graphics.current_lcd_control.window_tilemap);
+        //     self.get_tile_map(&self.current_lcd_control.background_tilemap);
+        let window_tilemap = memory.get_tile_map(&self.current_lcd_control.window_tilemap);
         let window_background_tile_data =
-            self.get_tile_data(&self.graphics.current_lcd_control.window_bg_tile_data);
+            memory.get_tile_data(&self.current_lcd_control.window_bg_tile_data);
         // let object_tile_data = self.get_tile_data(&TileDataArea::First);
-        // let window_palette = &self.graphics.background_palette;
-        let background_palette = &self.graphics.background_palette;
+        // let window_palette = &self.background_palette;
+        let background_palette = &self.background_palette;
 
-        let line = self.graphics.current_line;
+        let line = self.current_line;
 
         // let relevant_window_tiles = window_tilemap.get_tiles_for_line(line);
         let relevant_background_tiles = window_tilemap.get_tiles_for_line(line);
@@ -257,9 +257,7 @@ impl<T: SerialConnection, D: DisplayConnection> MemoryController<T, D> {
                 if *pixel != 0 {
                     let _x = 8;
                 }
-                self.graphics
-                    .display_connection
-                    .set_pixel(x, line as usize, color)
+                self.display_connection.set_pixel(x, line as usize, color)
             }
         }
     }
