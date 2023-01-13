@@ -6,7 +6,7 @@
   </a>
 </p>
 
-A gameboy emulation library
+A gameboy emulation library written in rust.
 
 ## Blog posts and other light resources
 
